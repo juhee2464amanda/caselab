@@ -28,7 +28,7 @@
     .gnb-logo { font-family: 'Playfair Display', serif; font-style: italic; font-size: 28px; font-weight: 700; letter-spacing: -0.01em; outline: none; }
     .gnb-logo:focus { border-bottom: 2px solid var(--blue); }
     [contenteditable]:focus { outline: none; box-shadow: inset 0 -2px 0 var(--blue); }
-    .gnb-sub-msg { font-size: 12px; font-weight: 500; color: var(--gray-400); border-left: 1px solid var(--gray-200); padding-left: 12px; display: none; letter-spacing: -0.01em; }
+    .gnb-sub-msg { font-size: 12px; font-weight: 500; color: var(--gray-400); border-left: 1px solid var(--gray-200); padding-left: 12px; margin-top: 8px; display: none; letter-spacing: -0.01em; }
     @media (min-width: 960px) { .gnb-sub-msg { display: block; } }
     .gnb-right { display: flex; align-items: center; gap: 6px; }
     .gnb-nav { display: none; gap: 22px; font-size: 15px; font-weight: 500; color: var(--gray-600); margin-right: 16px; }
@@ -38,15 +38,18 @@
     .gnb-dropdown { position: static; }
     .gnb-dropdown-trigger { display: inline-flex; align-items: center; }
     .mega-menu { display: none; position: absolute; left: 0; right: 0; top: 56px; background: #fff; border-bottom: 1px solid var(--gray-200); box-shadow: 0 8px 24px rgba(0,0,0,.06); z-index: 110; padding-top: 0; }
-    .mega-menu::before { content: ''; position: absolute; top: -16px; left: 0; right: 0; height: 16px; }
+    .mega-menu::before { content: ''; position: absolute; top: -24px; left: 0; right: 0; height: 24px; }
     .mega-inner { max-width: 1100px; margin: 0 auto; padding: 24px; display: flex; gap: 12px; justify-content: center; }
-    .mega-card { display: flex; align-items: center; gap: 14px; padding: 16px 20px; border: 1px solid var(--gray-200); border-radius: 12px; flex: 1; max-width: 280px; transition: all .15s; }
+    .mega-card { display: flex; align-items: center; gap: 14px; padding: 16px 20px; border: 1px solid var(--gray-200); border-radius: 12px; flex: 1; max-width: 240px; transition: all .15s; }
     .mega-card:hover { border-color: var(--blue); box-shadow: 0 2px 12px rgba(49,130,246,.08); }
     .mega-card-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
     .mega-card-body { min-width: 0; }
     .mega-card-title { font-size: 14px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 2px; }
     .mega-card-desc { font-size: 12px; color: var(--gray-500); }
-    .gnb-dropdown:hover .mega-menu { display: block; }
+    .mega-card-soon { opacity: 0.7; cursor: default; }
+    .mega-card-soon:hover { border-color: var(--gray-200); box-shadow: none; transform: none; }
+    .mega-card-soon .mega-card-desc { color: var(--gray-400); font-weight: 600; }
+    .mega-menu.show { display: block; }
     .gnb-sub { font-size: 14px; font-weight: 600; color: #fff; background: var(--blue); padding: 7px 16px; border-radius: 8px; transition: background .15s; }
     .gnb-sub:hover { background: #1b6ef2; }
     .gnb-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--gray-600); transition: background .15s; }
@@ -115,8 +118,13 @@
     .tab.on { color: #fff; background: var(--ink); border-color: var(--ink); }
 
     /* ── article list ── */
-    .a-item { display: block; padding: 18px 0; border-bottom: 1px solid var(--gray-200); }
+    .a-item { display: flex; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--gray-200); align-items: flex-start; }
     .a-item:hover .a-title { color: var(--blue); }
+    .a-thumb { width: 80px; height: 80px; border-radius: 10px; overflow: hidden; flex-shrink: 0; background: var(--gray-100); }
+    @media (max-width: 767px) { .a-thumb { width: 60px; height: 60px; border-radius: 8px; } }
+    .a-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .2s ease; }
+    .a-item:hover .a-thumb img { transform: scale(1.04); }
+    .a-body { flex: 1; min-width: 0; }
     .a-head { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
     .a-cat { font-size: 11px; font-weight: 700; color: var(--blue); background: var(--blue-bg); padding: 2px 7px; border-radius: 4px; }
     .a-title { font-size: 16px; font-weight: 700; line-height: 1.4; letter-spacing: -0.02em; margin-bottom: 4px; transition: color .12s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -135,6 +143,10 @@
     .series-body { padding: 16px 16px 18px; }
     .series-name { font-size: 17px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 5px; }
     .series-desc { font-size: 13px; color: var(--gray-600); line-height: 1.45; }
+    .series-featured { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--gray-100); display: flex; align-items: center; gap: 6px; min-width: 0; }
+    .series-featured-label { font-size: 11px; font-weight: 700; color: var(--blue); white-space: nowrap; flex-shrink: 0; letter-spacing: -0.01em; }
+    .series-featured-title { font-size: 13px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; letter-spacing: -0.01em; }
+    .series-fresh { margin-top: 6px; font-size: 11px; color: var(--gray-500); letter-spacing: -0.01em; }
 
     /* ── series preview (최근 올라온 것들) ── */
     .preview-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 16px; }
@@ -194,6 +206,19 @@
     .footer-links { display: flex; gap: 16px; font-size: 13px; color: var(--gray-500); }
     .footer-links a:hover { color: var(--gray-800); }
 
+    /* ── ebook 무료 배포 배너 (홈 삽입) ── */
+    .free-banner { background: linear-gradient(135deg, #1e3a5f, #2563eb); color: #fff; }
+    .free-banner-inner { max-width: 1100px; margin: 0 auto; padding: 28px 24px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+    .free-tag { display: inline-block; font-size: 11px; font-weight: 700; background: rgba(255,255,255,.2); padding: 4px 12px; border-radius: 20px; margin-bottom: 8px; backdrop-filter: blur(4px); }
+    .free-banner-text h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 4px; }
+    @media (min-width: 768px) { .free-banner-text h2 { font-size: 26px; } }
+    .free-banner-text p { font-size: 14px; color: rgba(255,255,255,.7); }
+    .free-banner-cta { display: inline-flex; padding: 12px 28px; font-size: 15px; font-weight: 700; color: var(--ink); background: #fff; border-radius: 10px; transition: background .15s; white-space: nowrap; flex-shrink: 0; letter-spacing: -0.02em; }
+    .free-banner-cta:hover { background: var(--gray-100); }
+
+    /* ── sec-title 부제 (출처 검증된 큐레이션 등) ── */
+    .sec-sub { font-size: 13px; font-weight: 500; color: var(--gray-500); margin-left: 8px; letter-spacing: -0.01em; }
+
     /* ── subscribe modal ── */
     .modal-dim { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,.45); justify-content: center; align-items: center; padding: 24px; }
     .modal-dim.open { display: flex; }
@@ -227,40 +252,47 @@
     <div class="gnb-inner">
       <div style="display:flex;align-items:center;gap:12px">
         <a href="#" class="gnb-logo" contenteditable="true" spellcheck="false">Caselab</a>
-        <span class="gnb-sub-msg">내 일에 AI를 어떻게 쓸지, 실험하며 찾아가는 공간</span>
+        <span class="gnb-sub-msg">일잘러의 검증된 AI 큐레이션</span>
       </div>
       <div class="gnb-right">
         <nav class="gnb-nav">
-          <a href="cases.html">AI 실전케이스</a>
-          <a href="trends.html">AI 트렌드</a>
           <div class="gnb-dropdown">
-            <a href="#" class="gnb-dropdown-trigger">자료실 <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style="margin-left:2px;vertical-align:middle"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-            <div class="mega-menu">
+            <a href="trends.html" class="gnb-dropdown-trigger">AI 자료실 <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style="margin-left:2px;vertical-align:middle"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            <div class="mega-menu" id="aiLibMega">
               <div class="mega-inner">
-                <a href="tools.html" class="mega-card">
-                  <div class="mega-card-icon" style="background:linear-gradient(135deg,#e0e7ff,#f5f3ff)">🔧</div>
+                <a href="trends.html" class="mega-card">
+                  <div class="mega-card-icon" style="background:linear-gradient(135deg,#f3f4f6,#fafafa);color:var(--gray-800)"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
                   <div class="mega-card-body">
-                    <div class="mega-card-title">쓸만한 AI 도구</div>
-                    <div class="mega-card-desc">이 일엔 이런 도구가 있더라</div>
+                    <div class="mega-card-title">AI 트렌드</div>
+                    <div class="mega-card-desc">요즘 떠오르는 AI 트렌드</div>
                   </div>
                 </a>
-                <a href="prompts.html" class="mega-card">
-                  <div class="mega-card-icon" style="background:linear-gradient(135deg,#d1fae5,#ecfdf5)">📋</div>
+                <a href="tools.html" class="mega-card">
+                  <div class="mega-card-icon" style="background:linear-gradient(135deg,#f3f4f6,#fafafa);color:var(--gray-800)"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg></div>
                   <div class="mega-card-body">
-                    <div class="mega-card-title">바로 쓰는 프롬프트</div>
-                    <div class="mega-card-desc">복사해서 바로 쓰세요</div>
+                    <div class="mega-card-title">쓸만한 AI 도구</div>
+                    <div class="mega-card-desc">써보고 골라낸 것만</div>
                   </div>
                 </a>
                 <a href="guides.html" class="mega-card">
-                  <div class="mega-card-icon" style="background:linear-gradient(135deg,#dbeafe,#eff6ff)">📘</div>
+                  <div class="mega-card-icon" style="background:linear-gradient(135deg,#f3f4f6,#fafafa);color:var(--gray-800)"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
                   <div class="mega-card-body">
                     <div class="mega-card-title">공식 가이드</div>
-                    <div class="mega-card-desc">OpenAI, Anthropic 공식 문서 핵심</div>
+                    <div class="mega-card-desc">OpenAI·Anthropic 공식 문서</div>
+                  </div>
+                </a>
+                <a href="#" class="mega-card mega-card-soon" onclick="return false;">
+                  <div class="mega-card-icon" style="background:linear-gradient(135deg,#f3f4f6,#fafafa);color:var(--gray-500)"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg></div>
+                  <div class="mega-card-body">
+                    <div class="mega-card-title">Caselab 도구</div>
+                    <div class="mega-card-desc">곧 공개합니다</div>
                   </div>
                 </a>
               </div>
             </div>
           </div>
+          <a href="cases.html">AI 실전케이스</a>
+          <a href="prompts.html">바로 쓰는 프롬프트</a>
           <a href="ebook.html">ebook</a>
         </nav>
         <button class="gnb-sub" onclick="document.getElementById('subModal').classList.add('open')">구독하기</button>
@@ -367,24 +399,36 @@
           </div>
           <div id="articleList">
             <a href="content.html" class="a-item" data-cat="기획">
-              <div class="a-head"><span class="a-cat">기획</span></div>
-              <h3 class="a-title keepall" data-content-id="case-01" data-field="title">기획서 첫 페이지가 안 풀릴 때— '의도' 던지는 5단계</h3>
-              <p class="a-desc keepall" data-content-id="case-01" data-field="subtitle">빈 입력칸 앞에서 막막한 이유는 AI가 부족해서가 아니라 의도가 흐려서다.</p>
+              <div class="a-thumb"><img src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=200&q=80" alt="" /></div>
+              <div class="a-body">
+                <div class="a-head"><span class="a-cat">기획</span></div>
+                <h3 class="a-title keepall" data-content-id="case-01" data-field="title">기획서 첫 페이지가 안 풀릴 때— '의도' 던지는 5단계</h3>
+                <p class="a-desc keepall" data-content-id="case-01" data-field="subtitle">빈 입력칸 앞에서 막막한 이유는 AI가 부족해서가 아니라 의도가 흐려서다.</p>
+              </div>
             </a>
             <a href="#" class="a-item" data-cat="마케팅">
-              <div class="a-head"><span class="a-cat">마케팅</span></div>
-              <h3 class="a-title keepall">경쟁사 분석, AI가 표면만 긁고 끝나는 이유</h3>
-              <p class="a-desc keepall">"경쟁사 5곳 분석해줘"는 거의 모두 실패한다.</p>
+              <div class="a-thumb"><img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=200&q=80" alt="" /></div>
+              <div class="a-body">
+                <div class="a-head"><span class="a-cat">마케팅</span></div>
+                <h3 class="a-title keepall">경쟁사 분석, AI가 표면만 긁고 끝나는 이유</h3>
+                <p class="a-desc keepall">"경쟁사 5곳 분석해줘"는 거의 모두 실패한다.</p>
+              </div>
             </a>
             <a href="#" class="a-item" data-cat="영업">
-              <div class="a-head"><span class="a-cat">영업</span></div>
-              <h3 class="a-title keepall">윗사람 톤에 안 맞는 결과물— AI에게 다시 시키는 3단계</h3>
-              <p class="a-desc keepall">"이거 윗분이 안 좋아할 거 같은데"의 95%는 톤 문제다.</p>
+              <div class="a-thumb"><img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=200&q=80" alt="" /></div>
+              <div class="a-body">
+                <div class="a-head"><span class="a-cat">영업</span></div>
+                <h3 class="a-title keepall">윗사람 톤에 안 맞는 결과물— AI에게 다시 시키는 3단계</h3>
+                <p class="a-desc keepall">"이거 윗분이 안 좋아할 거 같은데"의 95%는 톤 문제다.</p>
+              </div>
             </a>
             <a href="#" class="a-item" data-cat="1인사업">
-              <div class="a-head"><span class="a-cat">1인사업</span></div>
-              <h3 class="a-title keepall">고객 인터뷰 정리— AI에게 시킬 것·시키지 말 것</h3>
-              <p class="a-desc keepall">인터뷰 녹취 20시간을 AI에 통째로 던지면 다 비슷한 요약이 나온다.</p>
+              <div class="a-thumb"><img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=200&q=80" alt="" /></div>
+              <div class="a-body">
+                <div class="a-head"><span class="a-cat">1인사업</span></div>
+                <h3 class="a-title keepall">고객 인터뷰 정리— AI에게 시킬 것·시키지 말 것</h3>
+                <p class="a-desc keepall">인터뷰 녹취 20시간을 AI에 통째로 던지면 다 비슷한 요약이 나온다.</p>
+              </div>
             </a>
           </div>
         </div>
@@ -400,124 +444,91 @@
               <a href="#" class="pop-item"><span class="pop-rank">5</span><div><div class="pop-title keepall">Claude 메모리 기능, 실제로 일에 쓸만한가</div><div class="pop-meta">AI 트렌드</div></div></a>
             </div>
           </div>
-          <div class="side-sec">
-            <div class="side-ebook">
-              <div class="ebook-label">free ebook</div>
-              <div class="ebook-title keepall">AI, 다들 쓰는데 나만 못 쓰는 것 같다면 — 1주 실험 노트</div>
-              <div class="ebook-desc keepall">기획·마케팅·영업에서 직접 써본 AI 워크플로우 12개.</div>
-              <a href="ebook.html" class="ebook-cta">자세히 보기 →</a>
-            </div>
-          </div>
         </aside>
       </div>
     </div>
   </section>
 
-  <!-- ===== 자료실 (흰색 배경) ===== -->
+  <!-- ===== 일잘러 자료실 (카드 4개 한 줄) ===== -->
   <section class="band">
     <div class="layout">
       <div class="sec-head" style="padding-top:0">
-        <h2 class="sec-title">일잘러 자료실</h2>
+        <h2 class="sec-title">일잘러의 AI 자료실<span class="sec-sub">출처 검증된 큐레이션</span></h2>
       </div>
       <div class="series-grid">
-        <a href="#" class="series-card">
-          <div class="series-thumb">
-            <img src="https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=400&q=80" alt="" />
-            <span class="series-badge">4개</span>
-          </div>
-          <div class="series-body">
-            <h3 class="series-name">AI 트렌드</h3>
-            <p class="series-desc keepall">새로 나온 것, 실무자 눈으로 정리</p>
-          </div>
-        </a>
-        <a href="#" class="series-card">
+        <a href="tools.html" class="series-card" data-auto-fill="tools">
           <div class="series-thumb">
             <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&q=80" alt="" />
-            <span class="series-badge">4개</span>
+            <span class="series-badge">9개</span>
           </div>
           <div class="series-body">
             <h3 class="series-name">쓸만한 AI 도구</h3>
-            <p class="series-desc keepall">이 일엔 이런 도구가 있더라</p>
+            <p class="series-desc keepall">실무자가 검증한 도구만 골라 정리</p>
+            <div class="series-featured">
+              <span class="series-featured-label">최근 추가</span>
+              <span class="series-featured-title" data-fill="title">Snipit</span>
+            </div>
+            <div class="series-fresh" data-fill="fresh">9개 · 오늘 업데이트</div>
           </div>
         </a>
-        <a href="#" class="series-card">
+        <a href="prompts.html" class="series-card" data-auto-fill="prompts">
           <div class="series-thumb">
             <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&q=80" alt="" />
-            <span class="series-badge">4개</span>
+            <span class="series-badge">5개</span>
           </div>
           <div class="series-body">
             <h3 class="series-name">바로 쓰는 프롬프트</h3>
-            <p class="series-desc keepall">복사해서 바로 쓰세요</p>
+            <p class="series-desc keepall">출처가 명시된 복사용 템플릿</p>
+            <div class="series-featured">
+              <span class="series-featured-label">최근 추가</span>
+              <span class="series-featured-title" data-fill="title">기획서 첫 페이지— 전제를 찾아주는 프롬프트</span>
+            </div>
+            <div class="series-fresh" data-fill="fresh">5개 · 오늘 업데이트</div>
           </div>
         </a>
-        <a href="#" class="series-card">
+        <a href="guides.html" class="series-card" data-auto-fill="guides">
           <div class="series-thumb">
-            <img src="https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?w=400&q=80" alt="" />
-            <span class="series-badge">6개</span>
+            <img src="../assets/thumbs/official-guides.png" alt="OpenAI · Anthropic · Google 공식 가이드" />
+            <span class="series-badge">19개</span>
           </div>
           <div class="series-body">
             <h3 class="series-name">공식 가이드</h3>
-            <p class="series-desc keepall">OpenAI, Anthropic 공식 문서 핵심 정리</p>
+            <p class="series-desc keepall">OpenAI·Anthropic 공식 문서 핵심</p>
+            <div class="series-featured">
+              <span class="series-featured-label">최근 추가</span>
+              <span class="series-featured-title" data-fill="title">Anthropic 프롬프트 엔지니어링 가이드</span>
+            </div>
+            <div class="series-fresh" data-fill="fresh">19개 · 오늘 업데이트</div>
           </div>
         </a>
-        <a href="#" class="series-card">
+        <a href="trends.html" class="series-card" data-auto-fill="trends">
           <div class="series-thumb">
-            <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400&q=80" alt="" />
-            <span class="series-badge">1개</span>
+            <img src="https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=400&q=80" alt="" />
+            <span class="series-badge">6개</span>
           </div>
           <div class="series-body">
-            <h3 class="series-name">ebook</h3>
-            <p class="series-desc keepall">실무 케이스를 묶은 무료 전자책</p>
+            <h3 class="series-name">AI 트렌드</h3>
+            <p class="series-desc keepall">요즘 떠오르는 AI 트렌드 정리</p>
+            <div class="series-featured">
+              <span class="series-featured-label">최근 추가</span>
+              <span class="series-featured-title" data-fill="title">Claude 메모리 기능, 실제로 일에 쓸만한가— 1주일 실험</span>
+            </div>
+            <div class="series-fresh" data-fill="fresh">6개 · 오늘 업데이트</div>
           </div>
         </a>
       </div>
+    </div>
+  </section>
 
-      <!-- 자료실 콘텐츠 미리보기 -->
-      <div class="sec-head" style="padding-top:32px">
-        <h2 class="sec-title">최근 올라온 것들</h2>
+  <!-- ===== ebook 무료 배포 배너 ===== -->
+  <section class="free-banner">
+    <div class="free-banner-inner">
+      <div class="free-banner-text">
+        <span class="free-tag">무료 배포 중</span>
+        <h2 class="keepall">AI, 누구나 쉽게 시작할 수 있도록</h2>
+        <p class="keepall">첫 번째 ebook을 무료로 드립니다. 다운로드 후 바로 읽어보세요.</p>
       </div>
-      <div class="preview-grid">
-        <a href="#" class="preview-card">
-          <div class="preview-thumb">
-            <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&q=80" alt="" />
-            <span class="preview-series">AI 트렌드</span>
-          </div>
-          <div class="preview-body">
-            <h3 class="preview-title keepall">Claude 메모리 기능, 실제로 일에 쓸만한가</h3>
-            <p class="preview-meta">읽는데 5분</p>
-          </div>
-        </a>
-        <a href="#" class="preview-card">
-          <div class="preview-thumb">
-            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&q=80" alt="" />
-            <span class="preview-series">쓸만한 AI 도구</span>
-          </div>
-          <div class="preview-body">
-            <h3 class="preview-title keepall">v0 — 프롬프트로 UI를 바로 만드는 도구</h3>
-            <p class="preview-meta">읽는데 3분</p>
-          </div>
-        </a>
-        <a href="#" class="preview-card">
-          <div class="preview-thumb">
-            <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&q=80" alt="" />
-            <span class="preview-series">바로 쓰는 프롬프트</span>
-          </div>
-          <div class="preview-body">
-            <h3 class="preview-title keepall">기획서 전제를 찾아주는 프롬프트</h3>
-            <p class="preview-meta">바로 복사</p>
-          </div>
-        </a>
-        <a href="#" class="preview-card">
-          <div class="preview-thumb">
-            <img src="https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=400&q=80" alt="" />
-            <span class="preview-series">AI 트렌드</span>
-          </div>
-          <div class="preview-body">
-            <h3 class="preview-title keepall">GPT-5 발표, 실무에서 바뀌는 건 딱 두 가지</h3>
-            <p class="preview-meta">읽는데 4분</p>
-          </div>
-        </a>
-      </div>
+      <a href="ebook-free.html" class="free-banner-cta">무료로 받기 →</a>
     </div>
   </section>
 
@@ -566,16 +577,6 @@
         <input class="form-input" id="sub-name" type="text" placeholder="ex) 김케랩" autocomplete="name" />
         <label class="form-label" for="sub-email">이메일</label>
         <input class="form-input" id="sub-email" type="email" placeholder="ex) you@company.com" autocomplete="email" />
-        <label class="form-label" for="sub-category">받고 싶은 소식</label>
-        <select class="form-select" id="sub-category" onchange="this.classList.toggle('selected', this.value !== '')">
-          <option value="">카테고리를 선택해 주세요.</option>
-          <option value="all">전체</option>
-          <option value="plan">기획</option>
-          <option value="marketing">마케팅</option>
-          <option value="sales">영업</option>
-          <option value="solo">1인사업</option>
-          <option value="trend">AI 트렌드</option>
-        </select>
         <div class="form-check">
           <input type="checkbox" id="sub-agree" />
           <label for="sub-agree">(필수) 뉴스레터 수신을 위한 <a href="#">개인정보 수집 및 이용</a>에 동의합니다</label>
@@ -606,6 +607,20 @@
         document.querySelectorAll('#articleList .a-item').forEach(function(item) {
           item.style.display = (cat === 'all' || item.getAttribute('data-cat') === cat) ? '' : 'none';
         });
+      });
+    });
+
+    // GNB Dropdown — hover persistence (250ms delay)
+    document.querySelectorAll('.gnb-dropdown').forEach(function(dd) {
+      var menu = dd.querySelector('.mega-menu');
+      if (!menu) return;
+      var timer;
+      dd.addEventListener('mouseenter', function() {
+        clearTimeout(timer);
+        menu.classList.add('show');
+      });
+      dd.addEventListener('mouseleave', function() {
+        timer = setTimeout(function() { menu.classList.remove('show'); }, 250);
       });
     });
 
@@ -656,6 +671,7 @@
   </script>
   <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
   <script src="../js/content-sync.js"></script>
+  <script src="../js/content-data.js"></script>
 
 
 </body>

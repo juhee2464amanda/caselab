@@ -7,8 +7,8 @@
 // 3. Authentication > Providers에서 Google, Kakao 활성화
 // ============================================
 
-const SUPABASE_URL = 'https://YOUR_PROJECT.supabase.co';
-const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
+const SUPABASE_URL = 'https://iejulonzmpjduzjdmxng.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImllanVsb256bXBqZHV6amRteG5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNzk2MDgsImV4cCI6MjA5NTk1NTYwOH0.OiAoAXCBmQ7olG_N0KHEjQ0mB1Re8CSqPWEiC5tcVB4';
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 

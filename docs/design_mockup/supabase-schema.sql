@@ -8,7 +8,8 @@ create table public.profiles (
   id uuid references auth.users on delete cascade primary key,
   name text,
   email text,
-  job text,                          -- 기획/마케팅/영업/1인사업/기타
+  job_type text,                     -- 직장인 / 자영업자 / 프리랜서 / 학생
+  job text,                          -- 기획/마케팅/영업/디자인/개발/기타
   avatar_url text,
   role text default 'user',          -- user | admin
   status text default 'active',      -- active | suspended
@@ -16,6 +17,9 @@ create table public.profiles (
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+
+-- 기존 테이블에서 job_type 컬럼 추가하려면:
+-- alter table public.profiles add column if not exists job_type text;
 
 alter table public.profiles enable row level security;
 
