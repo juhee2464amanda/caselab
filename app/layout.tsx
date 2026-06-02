@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import './globals.css';
 import { GA4Provider } from '@/components/analytics/GA4Provider';
 import { CookieConsent } from '@/components/analytics/CookieConsent';
+import { UtmCapture } from '@/components/analytics/UtmCapture';
 
 export const metadata: Metadata = {
   title: {
@@ -28,8 +30,10 @@ export default function RootLayout({
         {children}
         <Suspense fallback={null}>
           <GA4Provider />
+          <UtmCapture />
         </Suspense>
         <CookieConsent />
+        <SpeedInsights />
       </body>
     </html>
   );
