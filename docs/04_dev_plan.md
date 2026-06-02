@@ -550,6 +550,7 @@ caselab/
 - 2026-06-02: Resend → Gmail SMTP로 교체 (전자책 1건이라도 발송되도록). 인스타 `@caselab_ai_` 핸들 확정 + 사이트 노출
 - 2026-06-02: **Gmail SMTP → Brevo로 재전환**. 사유: 약관(개인 Gmail 자동 발송 회색지대) + 딜리버러빌리티(Gmail은 자기 도메인 DKIM 못 박음). Brevo 단일 발신자 인증으로 caselab.kr@gmail.com 발신 유지, 일 300건/월 9k 무료, Edge Function 아키텍처 유지(denomailer → Brevo HTTP API fetch)
 - 2026-06-02: **자료실(`/admin/tools`) CRUD 우선 진행 결정** — §18.7 참조
+- 2026-06-02: **Admin 영역 모바일 일괄 적용** — §18.8 참조 (AdminSidebar 드로어 + 8개 페이지 패딩·테이블 overflow + 폼 헤더 wrap)
 
 ### 18.6 다른 세션에서 컨텍스트 파악 시 우선순위
 
@@ -573,3 +574,17 @@ caselab/
 - `app/api/revalidate/route.ts` (수정) — `kind: 'tool'` 분기 추가
 
 **미포함**: 사용자 패널 슬라이드(`/admin/users`), 댓글 모더레이션 풀세트, ISR 결과 가시화 등 §12의 나머지는 출시 후 진행.
+
+### 18.8 Admin 영역 모바일 일괄 적용
+
+**결정 일자**: 2026-06-02
+
+**배경**: §7 발행 게이트 수동 검사·§14 페르소나 검증·runbook Day 11에 "모바일 1회 직접 확인" 명시되어 있으나, admin 영역은 사이드바(`w-56` 고정) + 페이지 패딩(`p-8` 고정) + 테이블(`overflow-x-auto` 없음) 패턴이 일괄적으로 모바일 미대응. 자료실 CRUD 추가하면서 동일 패턴이 새 코드에도 들어가는 문제 발견.
+
+**결정**: Admin 영역 모바일 대응 일괄 적용.
+- `components/admin/AdminSidebar.tsx` — 데스크탑(`hidden lg:block`) + 모바일 햄버거 상단 바 + 슬라이드 드로어 분기
+- `app/admin/layout.tsx` — `flex` → `lg:flex`로 변경
+- `app/admin/{page,comments,users,opinions,analytics,topics,ebooks,tools}/page.tsx` — `p-8` → `p-4 sm:p-8`, 테이블 `overflow-x-auto` + `min-w-[640~720px]`, 헤더 `flex-col sm:flex-row`
+- `components/admin/{TrackForm,ToolForm}.tsx` — 동일 패턴 적용
+
+**미포함**: 모바일 전용 UI/UX 재설계(컬럼 우선순위 조정, 행 액션 메뉴 등)는 출시 후 데이터 보고 점진 개선.

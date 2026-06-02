@@ -2,7 +2,7 @@ import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase
 import { formatDate } from '@/lib/utils';
 
 export default async function AdminUsers() {
-  if (!isSupabaseConfigured()) return <div className="p-8 text-sm">Supabase 연결 필요</div>;
+  if (!isSupabaseConfigured()) return <div className="p-4 sm:p-8 text-sm">Supabase 연결 필요</div>;
   const supabase = await createSupabaseServerClient();
   const { data: users } = await supabase
     .from('profiles')
@@ -11,10 +11,10 @@ export default async function AdminUsers() {
     .limit(200);
 
   return (
-    <div className="p-8">
-      <h1 className="font-serif text-2xl font-semibold mb-6">사용자</h1>
+    <div className="p-4 sm:p-8">
+      <h1 className="font-serif text-xl sm:text-2xl font-semibold mb-6">사용자</h1>
       <div className="card overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[720px] text-sm">
           <thead className="bg-muted text-left text-xs uppercase tracking-wider text-ink/50">
             <tr>
               <th className="px-4 py-3">이름</th>

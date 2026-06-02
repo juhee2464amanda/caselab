@@ -136,12 +136,12 @@ export function ToolForm({ initial }: Props) {
   }
 
   return (
-    <div className="p-8">
-      <header className="mb-6 flex items-center justify-between">
-        <h1 className="font-serif text-2xl font-semibold">
+    <div className="p-4 sm:p-8">
+      <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="font-serif text-xl sm:text-2xl font-semibold">
           {initial?.id ? '자료 편집' : '새 자료'}
         </h1>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {initial?.id && initial.status !== 'archived' && (
             <Button variant="outline" onClick={() => save('archived')} disabled={pending}>
               <Archive className="h-4 w-4" /> 보관

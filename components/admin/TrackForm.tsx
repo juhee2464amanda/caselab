@@ -172,12 +172,12 @@ export function TrackForm({ initial }: Props) {
   }
 
   return (
-    <div className="p-8">
-      <header className="mb-6 flex items-center justify-between">
-        <h1 className="font-serif text-2xl font-semibold">
+    <div className="p-4 sm:p-8">
+      <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="font-serif text-xl sm:text-2xl font-semibold">
           {initial?.id ? '콘텐츠 편집' : '새 콘텐츠'}
         </h1>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={() => save('draft')} disabled={pending}>
             <Save className="h-4 w-4" /> 초안 저장
           </Button>

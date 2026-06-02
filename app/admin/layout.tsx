@@ -4,7 +4,7 @@ export default function AdminLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="flex bg-muted/30 min-h-screen">
+    <div className="lg:flex bg-muted/30 min-h-screen">
       <AdminSidebar />
       <div className="flex-1 min-w-0">{children}</div>
     </div>

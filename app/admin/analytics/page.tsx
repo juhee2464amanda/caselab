@@ -1,7 +1,7 @@
 import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
 
 export default async function AdminAnalytics() {
-  if (!isSupabaseConfigured()) return <div className="p-8 text-sm">Supabase 연결 필요</div>;
+  if (!isSupabaseConfigured()) return <div className="p-4 sm:p-8 text-sm">Supabase 연결 필요</div>;
   const supabase = await createSupabaseServerClient();
   const { data: stats } = await supabase.from('admin_stats').select('*').maybeSingle();
   const { data: contentStats } = await supabase
@@ -22,8 +22,8 @@ export default async function AdminAnalytics() {
   ];
 
   return (
-    <div className="p-8">
-      <h1 className="font-serif text-2xl font-semibold mb-6">분석</h1>
+    <div className="p-4 sm:p-8">
+      <h1 className="font-serif text-xl sm:text-2xl font-semibold mb-6">분석</h1>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         {cards.map((c) => (
           <div key={c.label} className="card p-4">
@@ -34,8 +34,8 @@ export default async function AdminAnalytics() {
       </div>
       <section>
         <h2 className="font-semibold mb-3">콘텐츠별 메트릭 (TOP 20)</h2>
-        <div className="card overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="card overflow-x-auto">
+          <table className="w-full min-w-[640px] text-sm">
             <thead className="bg-muted text-left text-xs uppercase tracking-wider text-ink/50">
               <tr>
                 <th className="px-4 py-3">제목</th>

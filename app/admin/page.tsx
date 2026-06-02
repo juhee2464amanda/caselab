@@ -10,7 +10,7 @@ export default async function AdminContents({
 }) {
   const sp = await searchParams;
   if (!isSupabaseConfigured()) {
-    return <div className="p-8 text-sm text-ink/60">Supabase 연결 후 사용할 수 있어요.</div>;
+    return <div className="p-4 sm:p-8 text-sm text-ink/60">Supabase 연결 후 사용할 수 있어요.</div>;
   }
   const supabase = await createSupabaseServerClient();
   let q = supabase
@@ -22,20 +22,20 @@ export default async function AdminContents({
   const { data: items } = await q;
 
   return (
-    <div className="p-8">
-      <header className="flex items-center justify-between mb-6">
-        <h1 className="font-serif text-2xl font-semibold">콘텐츠</h1>
-        <Link href="/admin/contents/new"><Button variant="accent">새 콘텐츠</Button></Link>
+    <div className="p-4 sm:p-8">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+        <h1 className="font-serif text-xl sm:text-2xl font-semibold">콘텐츠</h1>
+        <Link href="/admin/contents/new" className="self-start sm:self-auto"><Button variant="accent">새 콘텐츠</Button></Link>
       </header>
 
-      <div className="mb-4 flex gap-2 text-sm">
+      <div className="mb-4 flex flex-wrap gap-2 text-sm">
         <Link href="/admin" className={`chip ${!sp.status && 'chip-active'}`}>전체</Link>
         <Link href="/admin?status=published" className={`chip ${sp.status === 'published' && 'chip-active'}`}>발행</Link>
         <Link href="/admin?status=draft" className={`chip ${sp.status === 'draft' && 'chip-active'}`}>초안</Link>
       </div>
 
-      <div className="card overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="card overflow-x-auto">
+        <table className="w-full min-w-[640px] text-sm">
           <thead className="bg-muted text-left text-xs uppercase tracking-wider text-ink/50">
             <tr>
               <th className="px-4 py-3 w-20">트랙</th>

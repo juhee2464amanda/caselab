@@ -13,17 +13,17 @@ export default async function AdminTools() {
     .order('updated_at', { ascending: false });
 
   return (
-    <div className="p-8">
-      <header className="mb-6 flex items-center justify-between">
-        <h1 className="font-serif text-2xl font-semibold">자료실 (tools/prompts/guides/맥락 카드)</h1>
-        <Button asChild variant="accent">
+    <div className="p-4 sm:p-8">
+      <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="font-serif text-xl sm:text-2xl font-semibold">자료실 (tools/prompts/guides/맥락 카드)</h1>
+        <Button asChild variant="accent" className="self-start sm:self-auto">
           <Link href="/admin/tools/new">
             <Plus className="h-4 w-4" /> 새 자료
           </Link>
         </Button>
       </header>
-      <div className="card overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="card overflow-x-auto">
+        <table className="w-full min-w-[640px] text-sm">
           <thead className="bg-muted text-left text-xs uppercase tracking-wider text-ink/50">
             <tr>
               <th className="px-4 py-3">이름</th>
