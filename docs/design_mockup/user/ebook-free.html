@@ -97,14 +97,23 @@
     .btn-sub:hover{border-color:var(--gray-400)}
     .pi-notice{font-size:12px;color:var(--gray-400);text-align:center}
 
-    /* Tabs */
-    .detail-section{max-width:1100px;margin:0 auto;padding:0 24px 80px}
-    .detail-tabs{display:flex;gap:0;border-bottom:2px solid var(--gray-200);margin-bottom:32px;margin-top:32px}
-    .detail-tab{padding:14px 24px;font-size:15px;font-weight:600;color:var(--gray-500);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .12s;cursor:pointer}
-    .detail-tab:hover{color:var(--gray-800)}
-    .detail-tab.on{color:var(--blue);border-bottom-color:var(--blue)}
+    /* Detail layout — sequential 섹션 + sticky scroll-spy nav */
+    .detail-section{max-width:1100px;margin:0 auto;padding:0 24px 64px}
+    .detail-nav{position:sticky;top:56px;z-index:50;background:#fff;border-bottom:1px solid var(--gray-200);margin-top:32px;display:flex;gap:0;overflow-x:auto}
+    .detail-nav::-webkit-scrollbar{display:none}
+    .detail-nav-link{padding:14px 22px;font-size:14.5px;font-weight:600;color:var(--gray-500);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .12s;cursor:pointer;white-space:nowrap}
+    .detail-nav-link:hover{color:var(--gray-800)}
+    .detail-nav-link.active{color:var(--ink);border-bottom-color:var(--ink)}
+    .detail-block{padding:40px 0;border-bottom:1px solid var(--gray-200);scroll-margin-top:120px}
+    .detail-block:last-of-type{border-bottom:none}
+    .detail-block-title{font-size:20px;font-weight:800;letter-spacing:-0.025em;margin-bottom:16px;color:var(--ink)}
 
-    .tab-panel{display:none}.tab-panel.on{display:block}
+    /* 책 상세 이미지 — ecommerce 풀폭 단일 긴 이미지 */
+    .book-detail-img{position:relative;width:100%;border:1px solid var(--gray-200);border-radius:12px;overflow:hidden;background:#fff}
+    .book-detail-img img{width:100%;height:auto;display:block}
+    /* 이미지 안 "무료로 받기 →" 버튼 위 오버레이 클릭 영역 */
+    .book-detail-img .cta-overlay{position:absolute;left:42%;right:42%;top:96.5%;bottom:1.2%;cursor:pointer;border-radius:10px;transition:background .15s,outline-color .15s;outline:2px solid transparent}
+    .book-detail-img .cta-overlay:hover{background:rgba(255,255,255,.08);outline-color:rgba(255,255,255,.35)}
 
     /* TOC */
     .toc-list{list-style:none;counter-reset:toc}
@@ -128,17 +137,59 @@
     .bar-count{width:24px;color:var(--gray-400);font-size:12px}
 
     .review-item{padding:20px 0;border-bottom:1px solid var(--gray-200)}
+    .review-item:last-of-type{border-bottom:none}
     .ri-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
     .ri-avatar{width:32px;height:32px;border-radius:50%;background:var(--gray-100);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--gray-500)}
     .ri-name{font-size:14px;font-weight:600}
     .ri-date{font-size:12px;color:var(--gray-400);margin-left:auto}
     .ri-stars{color:var(--yellow);font-size:14px;margin-bottom:6px}
     .ri-text{font-size:14px;color:var(--gray-800);line-height:1.6}
+
+    /* 평가 입력 form */
+    .review-form{padding:20px 22px;background:#fff;border:1px solid var(--gray-200);border-radius:12px;margin-bottom:20px}
+    .review-form-title{font-size:14px;font-weight:800;margin-bottom:10px;letter-spacing:-0.02em}
+    .rating-input{display:inline-flex;gap:2px;margin-bottom:12px;user-select:none}
+    .rating-input .star{font-size:24px;color:var(--gray-300);cursor:pointer;transition:color .12s;line-height:1}
+    .rating-input .star.filled,.rating-input .star.preview{color:var(--yellow)}
+    .review-input{width:100%;padding:12px 14px;font-size:14px;font-family:inherit;border:1px solid var(--gray-200);border-radius:10px;outline:none;resize:vertical;min-height:80px;background:#fff;letter-spacing:-0.01em;color:var(--ink)}
+    .review-input:focus{border-color:var(--ink)}
+    .review-input::placeholder{color:var(--gray-400)}
+    .review-form-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;gap:12px;flex-wrap:wrap}
+    .review-form-hint{font-size:12px;color:var(--gray-500)}
+    .review-submit{padding:9px 18px;font-size:13px;font-weight:700;color:#fff;background:var(--ink);border-radius:8px;cursor:pointer;transition:background .12s;border:none}
+    .review-submit:hover{background:#000}
+    .review-submit:disabled{background:var(--gray-300);cursor:not-allowed}
+
+    /* 하단 CTA 박스 */
+    .cta-bottom{text-align:center;padding:44px 24px;background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 50%,#2563eb 100%);border-radius:16px;color:#fff;margin:32px 0 16px}
+    .cta-bottom h3{font-size:24px;font-weight:800;letter-spacing:-0.025em;margin-bottom:8px;line-height:1.3}
+    .cta-bottom p{font-size:14px;color:rgba(255,255,255,.78);margin-bottom:22px;line-height:1.6}
+    .cta-bottom .cta-btn{display:inline-block;padding:14px 32px;background:#fff;color:var(--ink);border-radius:10px;font-weight:700;font-size:15px;letter-spacing:-0.02em;transition:background .15s}
+    .cta-bottom .cta-btn:hover{background:var(--gray-100)}
+
+    /* Footer */
+    .footer{padding:28px 0;border-top:1px solid var(--gray-200);margin-top:8px}
+    .footer-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--gray-500)}
+    @media(min-width:768px){.footer-inner{flex-direction:row;justify-content:space-between;align-items:center}}
+    .footer-txt strong{color:var(--ink);font-weight:700;font-family:'Playfair Display',serif;font-style:italic}
+    .footer-links{display:flex;gap:16px}
+    .footer-links a:hover{color:var(--gray-800)}
+
+    /* Share section */
+    .share-section{text-align:center;padding:32px 0 8px;border-top:1px solid var(--gray-200);margin-top:8px}
+    .share-text{font-size:15px;font-weight:600;color:var(--gray-800);margin-bottom:16px}
+    .share-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+    .share-btn{display:flex;align-items:center;gap:6px;padding:10px 18px;font-size:13px;font-weight:600;border:1px solid var(--gray-200);border-radius:10px;color:var(--gray-600);transition:all .12s;background:#fff;cursor:pointer}
+    .share-btn:hover{border-color:var(--gray-400);color:var(--ink);background:var(--bg-sub)}
+    .share-btn svg{width:16px;height:16px}
+    .share-btn.kakao{color:#191919;border-color:#FEE500;background:#FEE500}
+    .share-btn.kakao:hover{background:#fdd835}
+    .share-btn.copied{color:#fff;background:var(--ink);border-color:var(--ink)}
   </style>
 <script>document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.gnb-dropdown').forEach(function(dd){var menu=dd.querySelector('.mega-menu');if(!menu)return;var timer;dd.addEventListener('mouseenter',function(){clearTimeout(timer);menu.classList.add('show');});dd.addEventListener('mouseleave',function(){timer=setTimeout(function(){menu.classList.remove('show');},250);});});});</script></head>
 <body>
 
-  <header class="gnb"><div class="gnb-inner"><div style="display:flex;align-items:center;gap:12px"><a href="index.html" class="gnb-logo">Caselab</a><span class="gnb-sub-msg">검증된 AI 큐레이션</span></div><div class="gnb-right"><nav class="gnb-nav"><div class="gnb-dropdown"><a href="trends.html" class="gnb-dropdown-trigger">AI 자료실 <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style="margin-left:2px;vertical-align:middle"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div class="mega-menu"><div class="mega-inner"><a href="trends.html" class="mega-card"><div class="mega-card-icon" style="background:linear-gradient(135deg,#f3f4f6,#fafafa);color:var(--gray-800)"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div><div class="mega-card-body"><div class="mega-card-title">AI 트렌드</div><div class="mega-card-desc">요즘 떠오르는 AI 트렌드</div></div></a><a href="tools.html" class="mega-card"><div class="mega-card-icon" style="background:linear-gradient(135deg,#f3f4f6,#fafafa);color:var(--gray-800)"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg></div><div class="mega-card-body"><div class="mega-card-title">쓸만한 AI 도구</div><div class="mega-card-desc">써보고 골라낸 것만</div></div></a><a href="guides.html" class="mega-card"><div class="mega-card-icon" style="background:linear-gradient(135deg,#f3f4f6,#fafafa);color:var(--gray-800)"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div><div class="mega-card-body"><div class="mega-card-title">공식 가이드</div><div class="mega-card-desc">OpenAI·Anthropic 공식 문서</div></div></a><a href="#" class="mega-card mega-card-soon" onclick="return false;"><div class="mega-card-icon" style="background:linear-gradient(135deg,#f3f4f6,#fafafa);color:var(--gray-500)"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg></div><div class="mega-card-body"><div class="mega-card-title">Caselab 도구</div><div class="mega-card-desc">곧 공개합니다</div></div></a></div></div></div><a href="cases.html">AI 실전케이스</a><a href="prompts.html">바로 쓰는 프롬프트</a><a href="ebook.html" class="on">ebook</a></nav><button class="gnb-sub">구독하기</button><a href="login.html" class="gnb-icon" title="로그인"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a><a href="#" class="gnb-icon" title="검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></a></div></div></header>
+  <header class="gnb"><div class="gnb-inner"><div style="display:flex;align-items:center;gap:12px"><a href="index.html" class="gnb-logo">Caselab</a><span class="gnb-sub-msg">검증된 AI 큐레이션</span></div><div class="gnb-right"><nav class="gnb-nav"><div class="gnb-dropdown"><a href="trends.html" class="gnb-dropdown-trigger">AI 자료실 <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style="margin-left:2px;vertical-align:middle"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div class="mega-menu"><div class="mega-inner"><a href="trends.html" class="mega-card"><div class="mega-card-icon" style="background:linear-gradient(135deg,#f3f4f6,#fafafa);color:var(--gray-800)"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div><div class="mega-card-body"><div class="mega-card-title">AI 트렌드</div><div class="mega-card-desc">요즘 떠오르는 AI 트렌드</div></div></a><a href="tools.html" class="mega-card"><div class="mega-card-icon" style="background:linear-gradient(135deg,#f3f4f6,#fafafa);color:var(--gray-800)"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg></div><div class="mega-card-body"><div class="mega-card-title">쓸만한 AI 도구</div><div class="mega-card-desc">써보고 골라낸 것만</div></div></a><a href="guides.html" class="mega-card"><div class="mega-card-icon" style="background:linear-gradient(135deg,#f3f4f6,#fafafa);color:var(--gray-800)"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div><div class="mega-card-body"><div class="mega-card-title">공식 가이드</div><div class="mega-card-desc">OpenAI·Anthropic 공식 문서</div></div></a><a href="#" class="mega-card mega-card-soon" onclick="return false;"><div class="mega-card-icon" style="background:linear-gradient(135deg,#f3f4f6,#fafafa);color:var(--gray-500)"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg></div><div class="mega-card-body"><div class="mega-card-title">Caselab 도구</div><div class="mega-card-desc">곧 공개합니다</div></div></a></div></div></div><a href="cases.html">AI 실전케이스</a><a href="prompts.html">바로 쓰는 프롬프트</a><a href="ebook-free.html" class="on">ebook</a></nav><button class="gnb-sub">구독하기</button><a href="login.html" class="gnb-icon" title="로그인"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a><a href="#" class="gnb-icon" title="검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></a></div></div></header>
 
 
   <!-- Product top -->
@@ -195,35 +246,33 @@
     </div>
   </div>
 
-  <!-- Detail tabs -->
+  <!-- Detail sections — sticky scroll-spy nav + sequential blocks -->
   <div class="detail-section">
-    <div class="detail-tabs">
-      <div class="detail-tab on" data-tab="intro">책 소개</div>
-      <div class="detail-tab" data-tab="toc">목차</div>
-      <div class="detail-tab" data-tab="reviews">리뷰 <span style="color:var(--blue);font-weight:700">127</span></div>
-    </div>
 
-    <!-- 책 소개 -->
-    <div class="tab-panel on" id="tab-intro">
-      <h2 style="font-size:20px;font-weight:800;margin-bottom:16px">이런 분에게 추천합니다</h2>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:32px">
-        <div style="padding:16px;background:var(--bg-sub);border-radius:10px;font-size:14px" class="keepall">✓ 기획서 앞에서 빈 입력칸만 보면 머리가 하얘지는 분</div>
-        <div style="padding:16px;background:var(--bg-sub);border-radius:10px;font-size:14px" class="keepall">✓ AI에게 뭘 시켜야 할지 모르겠어서 "기획서 써줘" 한 줄로 끝나는 분</div>
-        <div style="padding:16px;background:var(--bg-sub);border-radius:10px;font-size:14px" class="keepall">✓ AI 결과물이 그럴듯한데 윗사람한테 가져가면 항상 막히는 분</div>
-        <div style="padding:16px;background:var(--bg-sub);border-radius:10px;font-size:14px" class="keepall">✓ AI 강의에 돈은 썼는데 실제 업무에 적용을 못 하고 있는 분</div>
+    <!-- 네비게이터 (sticky) -->
+    <nav class="detail-nav" aria-label="ebook 상세 섹션">
+      <a class="detail-nav-link active" data-target="intro" href="#intro">책 소개</a>
+      <a class="detail-nav-link" data-target="toc" href="#toc">목차</a>
+      <a class="detail-nav-link" data-target="images" href="#images">상세 이미지</a>
+      <a class="detail-nav-link" data-target="reviews" href="#reviews">리뷰 <span style="color:var(--gray-400);font-weight:600;margin-left:2px">127</span></a>
+    </nav>
+
+    <!-- 책 소개 (Yes24 식, 간단 텍스트) -->
+    <section class="detail-block" id="intro">
+      <h2 class="detail-block-title">책 소개</h2>
+      <p style="font-size:15.5px;color:var(--gray-800);line-height:1.75;margin-bottom:24px" class="keepall">기획·마케팅·영업 직무에서 1주 동안 직접 AI를 써본 기록입니다. 잘된 것도, 별로였던 것도 솔직하게 담았습니다. 프롬프트를 복사해서 바로 쓸 수 있고, 각 단계에서 "이러면 잘된 것, 이러면 별로인 것" 기준도 함께 제공합니다.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="padding:14px 16px;background:var(--bg-sub);border-radius:10px;font-size:13.5px;color:var(--gray-800)" class="keepall">✓ 기획서 앞에서 빈 입력칸만 보면 머리가 하얘지는 분</div>
+        <div style="padding:14px 16px;background:var(--bg-sub);border-radius:10px;font-size:13.5px;color:var(--gray-800)" class="keepall">✓ AI에게 뭘 시켜야 할지 모르겠어서 "기획서 써줘" 한 줄로 끝나는 분</div>
+        <div style="padding:14px 16px;background:var(--bg-sub);border-radius:10px;font-size:13.5px;color:var(--gray-800)" class="keepall">✓ AI 결과물이 그럴듯한데 윗사람한테 가져가면 항상 막히는 분</div>
+        <div style="padding:14px 16px;background:var(--bg-sub);border-radius:10px;font-size:13.5px;color:var(--gray-800)" class="keepall">✓ AI 강의에 돈은 썼는데 실제 업무에 적용을 못 하고 있는 분</div>
       </div>
+      <p style="font-size:13px;color:var(--gray-500);margin-top:18px;text-align:right" class="keepall">아래 상세 이미지에서 책 미리보기·핵심 가치·후기까지 한 번에 볼 수 있어요 ↓</p>
+    </section>
 
-      <h2 style="font-size:20px;font-weight:800;margin-bottom:12px">이 책에서 얻을 수 있는 것</h2>
-      <p style="font-size:15px;color:var(--gray-600);line-height:1.7;margin-bottom:32px" class="keepall">기획·마케팅·영업 직무에서 1주 동안 직접 AI를 써본 기록입니다. 잘된 것도, 별로였던 것도 솔직하게 담았습니다. 프롬프트를 복사해서 바로 쓸 수 있고, 각 단계에서 "이러면 잘된 것, 이러면 별로인 것" 기준도 함께 제공합니다.</p>
-
-      <div style="padding:20px;background:var(--blue-bg);border-radius:12px;border-left:3px solid var(--blue);margin-bottom:32px">
-        <div style="font-size:14px;font-weight:700;color:var(--blue);margin-bottom:6px">다른 곳에서는 유료인 콘텐츠를 무료로 드리는 이유</div>
-        <p style="font-size:14px;color:var(--gray-800);line-height:1.6" class="keepall">AI를 일에 쓰고 싶은데 시작이 막막한 분들이 너무 많아서요. 이 한 권으로 "아, 이렇게 하면 되는구나" 감을 잡으시면, 그때부터 Caselab의 다른 콘텐츠도 도움이 될 거예요.</p>
-      </div>
-    </div>
-
-    <!-- 목차 -->
-    <div class="tab-panel" id="tab-toc">
+    <!-- 목차 (텍스트 분리) -->
+    <section class="detail-block" id="toc">
+      <h2 class="detail-block-title">목차</h2>
       <ol class="toc-list">
         <li class="toc-item"><span class="toc-num"></span><div><h4>빈 입력칸 앞에서 머리가 하얘질 때</h4><p>AI를 켜기 전에 종이에 한 문단을 먼저 쓰는 이유</p></div></li>
         <li class="toc-item"><span class="toc-num"></span><div><h4>기획서 — '의도' 던지는 5단계</h4><p>문제정의 → 가설 → 검증방법 → 실행안 → 측정</p></div></li>
@@ -233,10 +282,21 @@
         <li class="toc-item"><span class="toc-num"></span><div><h4>AI가 정당화만 할 때 — 반박시키는 4가지 지시법</h4><p>약점 찾기, 반대 입장, 역사적 실패, 숨은 가정</p></div></li>
         <li class="toc-item"><span class="toc-num"></span><div><h4>프롬프트 모음 — 복사해서 바로 쓰기</h4><p>직무별 정리 + 상황 설명 + 예상 결과</p></div></li>
       </ol>
-    </div>
+    </section>
+
+    <!-- 상세 이미지 (ecommerce 풀폭 단일 이미지 자리, admin 등록) -->
+    <section class="detail-block" id="images">
+      <h2 class="detail-block-title">상세 이미지</h2>
+      <div class="book-detail-img">
+        <img src="../assets/images/ebook/free-ebook-detail.jpg" alt="AI, 다들 쓰는데 나만 못 쓰는 것 같다면 — 책 상세 미리보기" />
+        <a href="#" class="cta-overlay" onclick="requireLogin('order.html?ebook=free');return false" aria-label="무료로 받기"></a>
+      </div>
+    </section>
 
     <!-- 리뷰 -->
-    <div class="tab-panel" id="tab-reviews">
+    <section class="detail-block" id="reviews">
+      <h2 class="detail-block-title">리뷰 <span style="color:var(--gray-400);font-weight:600;margin-left:4px;font-size:15px">127개</span></h2>
+
       <div class="review-summary">
         <div class="review-big">
           <div class="big-score">4.8</div>
@@ -252,41 +312,141 @@
         </div>
       </div>
 
-      <div class="review-item">
-        <div class="ri-header"><div class="ri-avatar">김</div><div class="ri-name">김기획</div><span class="ri-date">2026.05.25</span></div>
-        <div class="ri-stars">★★★★★</div>
-        <p class="ri-text keepall">기획서 쓸 때마다 AI한테 "기획서 써줘"만 하다가 포기했는데, 이 책 읽고 나서 첫 문단을 사람이 먼저 써야 한다는 걸 깨달았어요. Step 1 프롬프트 복사해서 바로 써봤는데 진짜 달라졌습니다.</p>
+      <!-- 평가 입력 form -->
+      <div class="review-form">
+        <div class="review-form-title">이 책 어떠셨나요?</div>
+        <div class="rating-input" id="ratingInput" role="radiogroup" aria-label="별점">
+          <span class="star" data-value="1">★</span>
+          <span class="star" data-value="2">★</span>
+          <span class="star" data-value="3">★</span>
+          <span class="star" data-value="4">★</span>
+          <span class="star" data-value="5">★</span>
+        </div>
+        <textarea class="review-input" id="reviewInput" placeholder="이 책에서 가장 도움이 된 부분, 아쉬웠던 점을 자유롭게 적어주세요."></textarea>
+        <div class="review-form-footer">
+          <span class="review-form-hint">로그인 후 평가를 남길 수 있습니다.</span>
+          <button class="review-submit" id="reviewSubmit" type="button" disabled>등록</button>
+        </div>
       </div>
-      <div class="review-item">
-        <div class="ri-header"><div class="ri-avatar">이</div><div class="ri-name">이마케터</div><span class="ri-date">2026.05.22</span></div>
-        <div class="ri-stars">★★★★★</div>
-        <p class="ri-text keepall">무료라서 기대 안 했는데 오히려 유료 강의보다 나았어요. "별로였던 것" 섹션이 제일 도움됐습니다. 다른 사람도 똑같이 실패한다는 게 위안이 되면서도 배울 게 많았어요.</p>
+
+      <div style="text-align:center;padding:24px 0 8px;font-size:13px;color:var(--gray-500)">
+        다른 분들의 자세한 후기는 <a href="#images" class="detail-nav-link" style="display:inline;padding:0;border:none;font-weight:700;color:var(--ink);text-decoration:underline;text-underline-offset:3px">상세 이미지</a> 안에서 확인할 수 있어요.
       </div>
-      <div class="review-item">
-        <div class="ri-header"><div class="ri-avatar">최</div><div class="ri-name">최영업</div><span class="ri-date">2026.05.20</span></div>
-        <div class="ri-stars">★★★★☆</div>
-        <p class="ri-text keepall">영업팀장인데 AI 관련 글은 다 길어서 안 읽었거든요. 이건 진짜 짧고 바로 써먹을 수 있어서 좋았습니다. 다만 영업 파트가 좀 더 많았으면 하는 아쉬움.</p>
-      </div>
-      <div class="review-item">
-        <div class="ri-header"><div class="ri-avatar">박</div><div class="ri-name">박프리</div><span class="ri-date">2026.05.18</span></div>
-        <div class="ri-stars">★★★★★</div>
-        <p class="ri-text keepall">프리랜서로 클라이언트 5명 돌리는데, 맥락 카드 개념이 가장 유용했어요. 한 번 만들어두니까 매주 제안서 쓸 때 시간이 확 줄었습니다.</p>
+    </section>
+
+    <!-- 하단 CTA — 구독 유도 -->
+    <div class="cta-bottom">
+      <h3 class="keepall">새로운 무료 ebook과 검증된 컨텐츠를</h3>
+      <p class="keepall">가장 먼저 받아보세요. Caselab 뉴스레터를 구독하시면 신규 자료를 메일로 보내드려요.</p>
+      <a href="#" class="cta-btn" onclick="if(window.openSubscribeModal)openSubscribeModal();return false">구독하기 →</a>
+    </div>
+
+    <!-- Share -->
+    <div class="share-section">
+      <div class="share-text keepall">이 책이 도움이 됐다면 공유해주세요</div>
+      <div class="share-btns">
+        <button class="share-btn kakao" type="button" onclick="shareKakao()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.477 3 2 6.463 2 10.691c0 2.726 1.8 5.117 4.51 6.473-.145.522-.935 3.367-.968 3.578 0 0-.02.166.088.229.108.063.235.03.235.03.31-.044 3.588-2.342 4.157-2.741.64.09 1.3.14 1.978.14 5.523 0 10-3.463 10-7.709C22 6.463 17.523 3 12 3"/></svg>
+          카카오톡
+        </button>
+        <button class="share-btn" type="button" onclick="shareTwitter()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          X
+        </button>
+        <button class="share-btn" type="button" id="copyLinkBtn" onclick="copyLink()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          링크 복사
+        </button>
       </div>
     </div>
   </div>
 
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-txt keepall"><strong>Caselab</strong> — 내 일에 AI를 어떻게 쓸지, 실험하며 찾아가는 공간.</div>
+      <nav class="footer-links">
+        <a href="ebook-free.html">ebook</a>
+        <a href="#">개인정보 처리방침</a>
+        <span style="color:var(--gray-400)">© 2026</span>
+      </nav>
+    </div>
+  </footer>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabase-config.js"></script>
   <script>
-    // Tabs
-    document.querySelectorAll('.detail-tab').forEach(function(tab){
-      tab.addEventListener('click',function(){
-        document.querySelectorAll('.detail-tab').forEach(function(t){t.classList.remove('on')});
-        document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('on')});
-        this.classList.add('on');
-        document.getElementById('tab-'+this.dataset.tab).classList.add('on');
+    // Detail nav — smooth scroll + scroll-spy
+    (function(){
+      var links = document.querySelectorAll('.detail-nav-link');
+      var sections = ['intro','toc','images','reviews'].map(function(id){return document.getElementById(id)}).filter(Boolean);
+      links.forEach(function(link){
+        link.addEventListener('click', function(e){
+          e.preventDefault();
+          var id = this.getAttribute('data-target');
+          var target = document.getElementById(id);
+          if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+        });
       });
-    });
+      function onScroll(){
+        var scrollPos = window.scrollY + 130;
+        var current = sections[0] ? sections[0].id : '';
+        sections.forEach(function(sec){
+          if(sec.offsetTop <= scrollPos) current = sec.id;
+        });
+        links.forEach(function(link){
+          link.classList.toggle('active', link.getAttribute('data-target') === current);
+        });
+      }
+      window.addEventListener('scroll', onScroll, {passive:true});
+    })();
+
+    // 별점 입력
+    (function(){
+      var rating = 0;
+      var stars = document.querySelectorAll('#ratingInput .star');
+      var submit = document.getElementById('reviewSubmit');
+      function paint(n, klass){
+        stars.forEach(function(s, i){ s.classList.toggle(klass, i < n); });
+      }
+      stars.forEach(function(s){
+        s.addEventListener('mouseenter', function(){ paint(+this.dataset.value, 'preview'); });
+        s.addEventListener('mouseleave', function(){ stars.forEach(function(x){x.classList.remove('preview')}); });
+        s.addEventListener('click', function(){
+          rating = +this.dataset.value;
+          paint(rating, 'filled');
+          if(submit) submit.disabled = false;
+        });
+      });
+    })();
+
+    // Share
+    function shareKakao(){
+      var url = window.location.href;
+      if(navigator.share){ navigator.share({title:document.title, url:url}); }
+      else { window.open('https://story.kakao.com/share?url='+encodeURIComponent(url), '_blank', 'width=600,height=400'); }
+    }
+    function shareTwitter(){
+      var url = window.location.href;
+      var text = (document.querySelector('h1')||{}).textContent || document.title;
+      window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(text)+'&url='+encodeURIComponent(url), '_blank', 'width=600,height=400');
+    }
+    function copyLink(){
+      var url = window.location.href;
+      var btn = document.getElementById('copyLinkBtn');
+      var done = function(){
+        btn.classList.add('copied');
+        var orig = btn.innerHTML;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><polyline points="20 6 9 17 4 12"/></svg> 복사됨';
+        setTimeout(function(){ btn.classList.remove('copied'); btn.innerHTML = orig; }, 1800);
+      };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(url).then(done);
+      } else {
+        var ta = document.createElement('textarea'); ta.value = url; document.body.appendChild(ta);
+        ta.select(); try{document.execCommand('copy')}catch(_){} document.body.removeChild(ta); done();
+      }
+    }
 
     // Login required
     async function requireLogin(url){
