@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI, 다들 쓰는데 나만 못 쓰는 것 같다면 — Caselab ebook</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--bg:#fff;--bg-sub:#f7f7f7;--ink:#191f28;--gray-800:#333d4b;--gray-600:#6b7684;--gray-500:#8b95a1;--gray-400:#b0b8c1;--gray-300:#d1d6db;--gray-200:#e5e8eb;--gray-100:#f2f4f6;--blue:#3182f6;--blue-bg:#ebf4ff;--green:#03b26c;--yellow:#f59e0b}
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{font-size:16px;-webkit-font-smoothing:antialiased}
+    body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;letter-spacing:-0.02em}
+    .keepall{word-break:keep-all;overflow-wrap:break-word}
+    a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer;border:none;background:none}
+
+    .gnb{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--gray-200)}
+    .gnb-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .gnb-logo{font-family:'Playfair Display',serif;font-style:italic;font-size:28px;font-weight:700}
+    .gnb-back{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:var(--gray-600)}
+    .gnb-back:hover{color:var(--ink)}
+    .gnb-back svg{width:16px;height:16px}
+
+    /* Product top */
+    .product-top{max-width:1100px;margin:0 auto;padding:40px 24px;display:flex;flex-direction:column;gap:32px}
+    @media(min-width:768px){.product-top{flex-direction:row;gap:48px;padding:48px 24px}}
+
+    /* 3D Book (larger) */
+    .book-display{display:flex;justify-content:center;align-items:center;background:var(--bg-sub);border-radius:16px;padding:48px 32px;flex-shrink:0}
+    @media(min-width:768px){.book-display{width:360px}}
+    .book-3d{width:200px;height:280px;transform-style:preserve-3d;transform:perspective(1000px) rotateY(-12deg);transition:transform .4s}
+    .book-3d:hover{transform:perspective(1000px) rotateY(-4deg)}
+    .book-cover{width:100%;height:100%;border-radius:2px 10px 10px 2px;display:flex;flex-direction:column;position:relative;overflow:hidden;box-shadow:10px 10px 24px rgba(0,0,0,.25),2px 0 4px rgba(0,0,0,.1)}
+    .book-cover::after{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(to right,rgba(255,255,255,.1),transparent)}
+    .cover-top{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px 20px;text-align:center;position:relative;z-index:1}
+    .cover-top .cover-eyebrow{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;opacity:.6;margin-bottom:10px}
+    .cover-top .cover-main-title{font-size:22px;font-weight:900;line-height:1.2;letter-spacing:-0.03em;margin-bottom:8px}
+    .cover-top .cover-sub-title{font-size:12px;font-weight:600;opacity:.7}
+    .cover-bottom{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
+    .cover-author{font-size:10px;font-weight:600;opacity:.5}
+    .cover-logo{font-family:'Playfair Display',serif;font-style:italic;font-size:12px;font-weight:700;opacity:.5}
+    .cover-line{position:absolute;bottom:52px;left:20px;right:20px;height:1px;background:rgba(255,255,255,.15)}
+
+    /* Product info (right) */
+    .product-info{flex:1}
+    .pi-badge{display:inline-block;font-size:12px;font-weight:700;color:var(--green);background:#e8f8f0;padding:4px 12px;border-radius:6px;margin-bottom:12px}
+    .pi-title{font-size:26px;font-weight:800;letter-spacing:-0.03em;margin-bottom:8px;line-height:1.3}
+    @media(min-width:768px){.pi-title{font-size:30px}}
+    .pi-sub{font-size:15px;color:var(--gray-600);margin-bottom:16px}
+
+    /* Rating */
+    .rating{display:flex;align-items:center;gap:8px;margin-bottom:20px}
+    .stars{color:var(--yellow);font-size:18px;letter-spacing:2px}
+    .rating-score{font-size:16px;font-weight:800}
+    .rating-count{font-size:13px;color:var(--gray-500)}
+
+    /* Meta info */
+    .pi-meta{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:14px;margin-bottom:24px;padding:16px 0;border-top:1px solid var(--gray-200);border-bottom:1px solid var(--gray-200)}
+    .pi-meta dt{color:var(--gray-500);font-weight:500}
+    .pi-meta dd{font-weight:600}
+
+    /* Price */
+    .pi-price{margin-bottom:24px}
+    .pi-price .price-label{font-size:13px;color:var(--gray-500);margin-bottom:4px}
+    .pi-price .price-value{font-size:28px;font-weight:800;color:var(--blue)}
+
+    /* CTA buttons */
+    .pi-cta{display:flex;gap:10px;margin-bottom:16px}
+    .btn-main{flex:1;padding:16px;font-size:16px;font-weight:700;color:#fff;background:var(--blue);border-radius:10px;text-align:center;transition:background .15s;letter-spacing:-0.02em}
+    .btn-main:hover{background:#1b6ef2}
+    .btn-sub{padding:16px 20px;font-size:16px;font-weight:700;color:var(--gray-600);border:1px solid var(--gray-200);border-radius:10px;transition:all .12s}
+    .btn-sub:hover{border-color:var(--gray-400)}
+    .pi-notice{font-size:12px;color:var(--gray-400);text-align:center}
+
+    /* Tabs */
+    .detail-section{max-width:1100px;margin:0 auto;padding:0 24px 80px}
+    .detail-tabs{display:flex;gap:0;border-bottom:2px solid var(--gray-200);margin-bottom:32px;margin-top:32px}
+    .detail-tab{padding:14px 24px;font-size:15px;font-weight:600;color:var(--gray-500);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .12s;cursor:pointer}
+    .detail-tab:hover{color:var(--gray-800)}
+    .detail-tab.on{color:var(--blue);border-bottom-color:var(--blue)}
+
+    .tab-panel{display:none}.tab-panel.on{display:block}
+
+    /* TOC */
+    .toc-list{list-style:none;counter-reset:toc}
+    .toc-item{counter-increment:toc;display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--gray-200)}
+    .toc-num{font-size:16px;font-weight:800;color:var(--gray-200);min-width:28px}
+    .toc-num::before{content:counter(toc,decimal-leading-zero)}
+    .toc-item h4{font-size:15px;font-weight:700;letter-spacing:-0.02em;margin-bottom:2px}
+    .toc-item p{font-size:13px;color:var(--gray-600)}
+
+    /* Reviews */
+    .review-summary{display:flex;gap:32px;align-items:center;padding:24px;background:var(--bg-sub);border-radius:12px;margin-bottom:24px}
+    .review-big{text-align:center}
+    .review-big .big-score{font-size:40px;font-weight:800}
+    .review-big .big-stars{color:var(--yellow);font-size:20px;margin-top:4px}
+    .review-big .big-count{font-size:13px;color:var(--gray-500);margin-top:4px}
+    .review-bars{flex:1}
+    .bar-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:13px}
+    .bar-label{width:20px;text-align:right;color:var(--gray-500);font-weight:600}
+    .bar-track{flex:1;height:8px;background:var(--gray-200);border-radius:4px;overflow:hidden}
+    .bar-fill{height:100%;background:var(--yellow);border-radius:4px}
+    .bar-count{width:24px;color:var(--gray-400);font-size:12px}
+
+    .review-item{padding:20px 0;border-bottom:1px solid var(--gray-200)}
+    .ri-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+    .ri-avatar{width:32px;height:32px;border-radius:50%;background:var(--gray-100);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--gray-500)}
+    .ri-name{font-size:14px;font-weight:600}
+    .ri-date{font-size:12px;color:var(--gray-400);margin-left:auto}
+    .ri-stars{color:var(--yellow);font-size:14px;margin-bottom:6px}
+    .ri-text{font-size:14px;color:var(--gray-800);line-height:1.6}
+  </style>
+</head>
+<body>
+
+  <header class="gnb">
+    <div class="gnb-inner">
+      <div style="display:flex;align-items:center;gap:12px">
+        <a href="ebook.html" class="gnb-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></a>
+        <a href="index.html" class="gnb-logo">Caselab</a>
+      </div>
+      <a href="ebook.html" class="gnb-back">ebook 목록 →</a>
+    </div>
+  </header>
+
+  <!-- Product top -->
+  <div class="product-top">
+
+    <!-- 3D Book -->
+    <div class="book-display">
+      <div class="book-3d">
+        <div class="book-cover" style="background:linear-gradient(160deg,#0f172a 0%,#1e3a5f 40%,#2563eb 100%);color:#fff">
+          <div class="cover-top">
+            <div class="cover-eyebrow">Caselab ebook</div>
+            <div class="cover-main-title">AI,<br>다들 쓰는데<br>나만 못 쓰는 것<br>같다면</div>
+            <div class="cover-sub-title">1주 실험 노트</div>
+          </div>
+          <div class="cover-line"></div>
+          <div class="cover-bottom">
+            <span class="cover-author">워크플로우 12개 수록</span>
+            <span class="cover-logo">Caselab</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="product-info">
+      <span class="pi-badge">무료 배포</span>
+      <h1 class="pi-title keepall">AI, 다들 쓰는데 나만 못 쓰는 것 같다면</h1>
+      <p class="pi-sub keepall">1주 실험 노트 — 기획·마케팅·영업에서 직접 써본 AI 워크플로우 12개</p>
+
+      <div class="rating">
+        <span class="stars">★★★★★</span>
+        <span class="rating-score">4.8</span>
+        <span class="rating-count">(127개 리뷰)</span>
+      </div>
+
+      <dl class="pi-meta">
+        <dt>저자</dt><dd>Caselab</dd>
+        <dt>포맷</dt><dd>PDF + 전자책 뷰어</dd>
+        <dt>분량</dt><dd>45분 분량 (약 80페이지)</dd>
+        <dt>직무</dt><dd>기획 · 마케팅 · 영업</dd>
+        <dt>업데이트</dt><dd>2026년 5월</dd>
+      </dl>
+
+      <div class="pi-price">
+        <div class="price-label">가격</div>
+        <div class="price-value">무료</div>
+      </div>
+
+      <div class="pi-cta">
+        <a href="#" class="btn-main" onclick="requireLogin('ebook-detail.html');return false">무료로 받기</a>
+        <button class="btn-sub" type="button">♡</button>
+      </div>
+      <div class="pi-notice">로그인 후 마이페이지에서 PDF 다운로드 및 뷰어로 읽을 수 있습니다.</div>
+    </div>
+  </div>
+
+  <!-- Detail tabs -->
+  <div class="detail-section">
+    <div class="detail-tabs">
+      <div class="detail-tab on" data-tab="intro">책 소개</div>
+      <div class="detail-tab" data-tab="toc">목차</div>
+      <div class="detail-tab" data-tab="reviews">리뷰 <span style="color:var(--blue);font-weight:700">127</span></div>
+    </div>
+
+    <!-- 책 소개 -->
+    <div class="tab-panel on" id="tab-intro">
+      <h2 style="font-size:20px;font-weight:800;margin-bottom:16px">이런 분에게 추천합니다</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:32px">
+        <div style="padding:16px;background:var(--bg-sub);border-radius:10px;font-size:14px" class="keepall">✓ 기획서 앞에서 빈 입력칸만 보면 머리가 하얘지는 분</div>
+        <div style="padding:16px;background:var(--bg-sub);border-radius:10px;font-size:14px" class="keepall">✓ AI에게 뭘 시켜야 할지 모르겠어서 "기획서 써줘" 한 줄로 끝나는 분</div>
+        <div style="padding:16px;background:var(--bg-sub);border-radius:10px;font-size:14px" class="keepall">✓ AI 결과물이 그럴듯한데 윗사람한테 가져가면 항상 막히는 분</div>
+        <div style="padding:16px;background:var(--bg-sub);border-radius:10px;font-size:14px" class="keepall">✓ AI 강의에 돈은 썼는데 실제 업무에 적용을 못 하고 있는 분</div>
+      </div>
+
+      <h2 style="font-size:20px;font-weight:800;margin-bottom:12px">이 책에서 얻을 수 있는 것</h2>
+      <p style="font-size:15px;color:var(--gray-600);line-height:1.7;margin-bottom:32px" class="keepall">기획·마케팅·영업 직무에서 1주 동안 직접 AI를 써본 기록입니다. 잘된 것도, 별로였던 것도 솔직하게 담았습니다. 프롬프트를 복사해서 바로 쓸 수 있고, 각 단계에서 "이러면 잘된 것, 이러면 별로인 것" 기준도 함께 제공합니다.</p>
+
+      <div style="padding:20px;background:var(--blue-bg);border-radius:12px;border-left:3px solid var(--blue);margin-bottom:32px">
+        <div style="font-size:14px;font-weight:700;color:var(--blue);margin-bottom:6px">다른 곳에서는 유료인 콘텐츠를 무료로 드리는 이유</div>
+        <p style="font-size:14px;color:var(--gray-800);line-height:1.6" class="keepall">AI를 일에 쓰고 싶은데 시작이 막막한 분들이 너무 많아서요. 이 한 권으로 "아, 이렇게 하면 되는구나" 감을 잡으시면, 그때부터 Caselab의 다른 콘텐츠도 도움이 될 거예요.</p>
+      </div>
+    </div>
+
+    <!-- 목차 -->
+    <div class="tab-panel" id="tab-toc">
+      <ol class="toc-list">
+        <li class="toc-item"><span class="toc-num"></span><div><h4>빈 입력칸 앞에서 머리가 하얘질 때</h4><p>AI를 켜기 전에 종이에 한 문단을 먼저 쓰는 이유</p></div></li>
+        <li class="toc-item"><span class="toc-num"></span><div><h4>기획서 — '의도' 던지는 5단계</h4><p>문제정의 → 가설 → 검증방법 → 실행안 → 측정</p></div></li>
+        <li class="toc-item"><span class="toc-num"></span><div><h4>경쟁사 분석 — AI가 표면만 긁는 이유</h4><p>"경쟁사 5곳 분석해줘"가 실패하는 구조</p></div></li>
+        <li class="toc-item"><span class="toc-num"></span><div><h4>영업 보고서 — 윗사람 톤에 맞추기</h4><p>"본인 것으로 만드는 4단계" 체크리스트</p></div></li>
+        <li class="toc-item"><span class="toc-num"></span><div><h4>고객 인터뷰 정리 — 시킬 것과 시키지 말 것</h4><p>녹취 20시간을 통째로 던지면 다 비슷해지는 이유</p></div></li>
+        <li class="toc-item"><span class="toc-num"></span><div><h4>AI가 정당화만 할 때 — 반박시키는 4가지 지시법</h4><p>약점 찾기, 반대 입장, 역사적 실패, 숨은 가정</p></div></li>
+        <li class="toc-item"><span class="toc-num"></span><div><h4>프롬프트 모음 — 복사해서 바로 쓰기</h4><p>직무별 정리 + 상황 설명 + 예상 결과</p></div></li>
+      </ol>
+    </div>
+
+    <!-- 리뷰 -->
+    <div class="tab-panel" id="tab-reviews">
+      <div class="review-summary">
+        <div class="review-big">
+          <div class="big-score">4.8</div>
+          <div class="big-stars">★★★★★</div>
+          <div class="big-count">127개 리뷰</div>
+        </div>
+        <div class="review-bars">
+          <div class="bar-row"><span class="bar-label">5</span><div class="bar-track"><div class="bar-fill" style="width:78%"></div></div><span class="bar-count">99</span></div>
+          <div class="bar-row"><span class="bar-label">4</span><div class="bar-track"><div class="bar-fill" style="width:15%"></div></div><span class="bar-count">19</span></div>
+          <div class="bar-row"><span class="bar-label">3</span><div class="bar-track"><div class="bar-fill" style="width:5%"></div></div><span class="bar-count">6</span></div>
+          <div class="bar-row"><span class="bar-label">2</span><div class="bar-track"><div class="bar-fill" style="width:2%"></div></div><span class="bar-count">2</span></div>
+          <div class="bar-row"><span class="bar-label">1</span><div class="bar-track"><div class="bar-fill" style="width:1%"></div></div><span class="bar-count">1</span></div>
+        </div>
+      </div>
+
+      <div class="review-item">
+        <div class="ri-header"><div class="ri-avatar">김</div><div class="ri-name">김기획</div><span class="ri-date">2026.05.25</span></div>
+        <div class="ri-stars">★★★★★</div>
+        <p class="ri-text keepall">기획서 쓸 때마다 AI한테 "기획서 써줘"만 하다가 포기했는데, 이 책 읽고 나서 첫 문단을 사람이 먼저 써야 한다는 걸 깨달았어요. Step 1 프롬프트 복사해서 바로 써봤는데 진짜 달라졌습니다.</p>
+      </div>
+      <div class="review-item">
+        <div class="ri-header"><div class="ri-avatar">이</div><div class="ri-name">이마케터</div><span class="ri-date">2026.05.22</span></div>
+        <div class="ri-stars">★★★★★</div>
+        <p class="ri-text keepall">무료라서 기대 안 했는데 오히려 유료 강의보다 나았어요. "별로였던 것" 섹션이 제일 도움됐습니다. 다른 사람도 똑같이 실패한다는 게 위안이 되면서도 배울 게 많았어요.</p>
+      </div>
+      <div class="review-item">
+        <div class="ri-header"><div class="ri-avatar">최</div><div class="ri-name">최영업</div><span class="ri-date">2026.05.20</span></div>
+        <div class="ri-stars">★★★★☆</div>
+        <p class="ri-text keepall">영업팀장인데 AI 관련 글은 다 길어서 안 읽었거든요. 이건 진짜 짧고 바로 써먹을 수 있어서 좋았습니다. 다만 영업 파트가 좀 더 많았으면 하는 아쉬움.</p>
+      </div>
+      <div class="review-item">
+        <div class="ri-header"><div class="ri-avatar">박</div><div class="ri-name">박프리</div><span class="ri-date">2026.05.18</span></div>
+        <div class="ri-stars">★★★★★</div>
+        <p class="ri-text keepall">프리랜서로 클라이언트 5명 돌리는데, 맥락 카드 개념이 가장 유용했어요. 한 번 만들어두니까 매주 제안서 쓸 때 시간이 확 줄었습니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-config.js"></script>
+  <script>
+    // Tabs
+    document.querySelectorAll('.detail-tab').forEach(function(tab){
+      tab.addEventListener('click',function(){
+        document.querySelectorAll('.detail-tab').forEach(function(t){t.classList.remove('on')});
+        document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('on')});
+        this.classList.add('on');
+        document.getElementById('tab-'+this.dataset.tab).classList.add('on');
+      });
+    });
+
+    // Login required
+    async function requireLogin(url){
+      try{var u=await getCurrentUser();if(u){window.location.href=url;return}}catch(e){}
+      localStorage.setItem('caselab_redirect',url);
+      window.location.href='login.html';
+    }
+  </script>
+</body>
+</html>

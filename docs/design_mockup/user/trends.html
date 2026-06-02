@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 트렌드 — 케이스랩</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--bg:#fff;--bg-sub:#f7f7f7;--ink:#191f28;--gray-800:#333d4b;--gray-600:#6b7684;--gray-500:#8b95a1;--gray-400:#b0b8c1;--gray-300:#d1d6db;--gray-200:#e5e8eb;--gray-100:#f2f4f6;--blue:#3182f6;--blue-bg:#ebf4ff}
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{font-size:16px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+    body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;letter-spacing:-0.02em}
+    .keepall{word-break:keep-all;overflow-wrap:break-word}
+    a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer;border:none;background:none}
+
+    /* GNB */
+    .gnb{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--gray-200)}
+    .gnb-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .gnb-logo{font-family:'Playfair Display',serif;font-style:italic;font-size:28px;font-weight:700;letter-spacing:-0.01em}
+    
+    .gnb-right{display:flex;align-items:center;gap:6px}
+    .gnb-nav{display:none;gap:22px;font-size:15px;font-weight:500;color:var(--gray-600);margin-right:16px}
+    .gnb-nav a:hover{color:var(--ink)}.gnb-nav a.on{color:var(--ink);font-weight:700}
+    @media(min-width:768px){.gnb-nav{display:flex}}
+    .gnb-dropdown{position:static}
+    .gnb-dropdown-trigger{display:inline-flex;align-items:center}
+    .mega-menu{display:none;position:absolute;left:0;right:0;top:56px;background:#fff;border-bottom:1px solid var(--gray-200);box-shadow:0 8px 24px rgba(0,0,0,.06);z-index:110}
+    .mega-menu::before{content:'';position:absolute;top:-16px;left:0;right:0;height:16px}
+    .mega-inner{max-width:1100px;margin:0 auto;padding:24px;display:flex;gap:12px;justify-content:center}
+    .mega-card{display:flex;align-items:center;gap:14px;padding:16px 20px;border:1px solid var(--gray-200);border-radius:12px;flex:1;max-width:280px;transition:all .15s}
+    .mega-card:hover{border-color:var(--blue);box-shadow:0 2px 12px rgba(49,130,246,.08)}
+    .mega-card-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+    .mega-card-body{min-width:0}
+    .mega-card-title{font-size:14px;font-weight:700;letter-spacing:-0.02em;margin-bottom:2px}
+    .mega-card-desc{font-size:12px;color:var(--gray-500)}
+    .gnb-dropdown:hover .mega-menu{display:block}
+    .gnb-sub{font-size:14px;font-weight:600;color:#fff;background:var(--blue);padding:7px 16px;border-radius:8px}
+    .gnb-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:var(--gray-600);transition:background .15s}
+    .gnb-icon:hover{background:var(--gray-100)}
+    .gnb-icon svg{width:20px;height:20px}
+
+    /* Hero */
+    .cat-hero{background:#f7f7f7;padding:48px 0 40px;border-bottom:1px solid var(--gray-200)}
+    @media(min-width:768px){.cat-hero{background:#f7f7f7;padding:64px 0 48px}}
+    .cat-hero-inner{max-width:1100px;margin:0 auto;padding:0 24px}
+    .cat-hero h1{font-size:32px;font-weight:800;letter-spacing:-0.03em;margin-bottom:10px}
+    @media(min-width:768px){.cat-hero h1{font-size:40px}}
+    .cat-hero p{font-size:16px;color:var(--gray-600);max-width:480px}
+
+    /* Page */
+    .page{max-width:1100px;margin:0 auto;padding:40px 24px 80px}
+
+    /* Article list */
+    .article{display:flex;gap:20px;padding:24px 0;border-bottom:1px solid var(--gray-200);align-items:flex-start}
+    .article:first-child{padding-top:0}
+    .article:hover .art-title{color:var(--blue)}
+    .art-body{flex:1;min-width:0}
+    .art-num{font-size:12px;font-weight:800;color:var(--gray-400);margin-bottom:6px}
+    .art-title{font-size:18px;font-weight:700;line-height:1.4;letter-spacing:-0.02em;margin-bottom:6px;transition:color .12s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    @media(min-width:768px){.art-title{font-size:20px}}
+    .art-desc{font-size:14px;color:var(--gray-600);line-height:1.55;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .art-meta{font-size:13px;color:var(--gray-500)}
+    .art-date{font-size:12px;color:var(--gray-400);margin-bottom:4px}
+
+    /* Date filter */
+    .filter-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:24px}
+    .filter-select{padding:8px 28px 8px 12px;font-size:13px;font-family:inherit;border:1px solid var(--gray-200);border-radius:8px;outline:none;color:var(--gray-600);appearance:none;background:#fff url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23b0b8c1' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 10px center;cursor:pointer}
+    .filter-select:focus{border-color:var(--blue)}
+    .period-btn{padding:7px 14px;font-size:13px;font-weight:500;color:var(--gray-500);border:1px solid var(--gray-200);border-radius:8px;transition:all .12s}
+    .period-btn:hover{color:var(--gray-800);border-color:var(--gray-400)}
+    .period-btn.on{color:#fff;background:var(--ink);border-color:var(--ink)}
+    .art-tags{display:flex;gap:6px;margin-bottom:8px}
+    .art-tag{font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:2px 8px;border-radius:4px}
+    .art-thumb{width:180px;height:120px;border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--gray-100)}
+    @media(max-width:640px){.art-thumb{width:110px;height:76px;border-radius:8px}}
+    .art-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  </style>
+</head>
+<body>
+
+  <!-- GNB -->
+  <header class="gnb">
+    <div class="gnb-inner">
+      <a href="index.html" class="gnb-logo">Caselab</a>
+      <div class="gnb-right">
+        <nav class="gnb-nav">
+          <a href="cases.html">AI 실전케이스</a>
+          <a href="trends.html" class="on">AI 트렌드</a>
+          <div class="gnb-dropdown">
+            <a href="#" class="gnb-dropdown-trigger">자료실 <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style="margin-left:2px;vertical-align:middle"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            <div class="mega-menu">
+              <div class="mega-inner">
+                <a href="tools.html" class="mega-card"><div class="mega-card-icon" style="background:linear-gradient(135deg,#e0e7ff,#f5f3ff)">🔧</div><div class="mega-card-body"><div class="mega-card-title">쓸만한 AI 도구</div><div class="mega-card-desc">이 일엔 이런 도구가 있더라</div></div></a>
+                <a href="prompts.html" class="mega-card"><div class="mega-card-icon" style="background:linear-gradient(135deg,#d1fae5,#ecfdf5)">📋</div><div class="mega-card-body"><div class="mega-card-title">바로 쓰는 프롬프트</div><div class="mega-card-desc">복사해서 바로 쓰세요</div></div></a>
+                <a href="guides.html" class="mega-card"><div class="mega-card-icon" style="background:linear-gradient(135deg,#dbeafe,#eff6ff)">📘</div><div class="mega-card-body"><div class="mega-card-title">공식 가이드</div><div class="mega-card-desc">OpenAI, Anthropic 공식 문서 핵심</div></div></a>
+              </div>
+            </div>
+          </div>
+          <a href="ebook.html">ebook</a>
+        </nav>
+        <button class="gnb-sub">구독하기</button>
+        <a href="login.html" class="gnb-icon" title="로그인"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a>
+        <a href="#" class="gnb-icon" title="검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <div class="cat-hero">
+    <div class="cat-hero-inner">
+      <h1>AI 트렌드</h1>
+      <p class="keepall">새로 나온 것, 써봐야 아는 것들만.</p>
+    </div>
+  </div>
+
+  <!-- List -->
+  <div class="page">
+
+    <!-- Date filter -->
+    <div class="filter-bar">
+      <select class="filter-select" id="yearMonth">
+        <option value="all">전체 기간</option>
+        <option value="2026-05">2026년 5월</option>
+        <option value="2026-04">2026년 4월</option>
+        <option value="2026-03">2026년 3월</option>
+      </select>
+      <button class="period-btn on" data-period="all">전체</button>
+      <button class="period-btn" data-period="1">최근 1개월</button>
+      <button class="period-btn" data-period="3">최근 3개월</button>
+      <button class="period-btn" data-period="6">최근 6개월</button>
+    </div>
+
+    <a href="#" class="article">
+      <div class="art-body">
+        <div class="art-date">2026.05.21</div>
+        <div class="art-num">#21</div>
+        <h2 class="art-title keepall">Claude 메모리 기능, 실제로 일에 쓸만한가— 1주일 실험</h2>
+        <p class="art-desc keepall">"내가 누구인지 기억"한다는 약속이 실제 업무 흐름에서 무엇을 바꾸는가. 매일 다른 톤으로 글을 쓰는 입장에서 1주 켜봤다.</p>
+        <div class="art-meta">읽는데 5분</div>
+      </div>
+      <div class="art-thumb">
+        <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&q=80" alt="" />
+      </div>
+    </a>
+
+    <a href="#" class="article">
+      <div class="art-body">
+        <div class="art-date">2026.05.14</div>
+        <div class="art-num">#20</div>
+        <h2 class="art-title keepall">Sora vs Veo, 한국어 자막 영상 만들기 실험</h2>
+        <p class="art-desc keepall">둘 다 "쉽다"고 말하는데, 실제로 시도하면 어디서 막히고 어디서 빠른가. 같은 스크립트 8편 비교.</p>
+        <div class="art-meta">읽는데 6분</div>
+      </div>
+      <div class="art-thumb">
+        <img src="https://images.unsplash.com/photo-1536240478700-b869070f9279?w=400&q=80" alt="" />
+      </div>
+    </a>
+
+    <a href="#" class="article">
+      <div class="art-body">
+        <div class="art-date">2026.05.07</div>
+        <div class="art-num">#19</div>
+        <h2 class="art-title keepall">GPT-5 발표, 실무에서 바뀌는 건 딱 두 가지</h2>
+        <p class="art-desc keepall">스펙 나열 말고, 기획자·마케터 입장에서 당장 달라지는 것만 정리. 나머지는 아직 안 바뀜.</p>
+        <div class="art-meta">읽는데 4분</div>
+      </div>
+      <div class="art-thumb">
+        <img src="https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=400&q=80" alt="" />
+      </div>
+    </a>
+
+    <a href="#" class="article">
+      <div class="art-body">
+        <div class="art-date">2026.04.30</div>
+        <div class="art-num">#18</div>
+        <h2 class="art-title keepall">Notion AI vs Notion + Claude, 어떤 조합이 빠른가</h2>
+        <p class="art-desc keepall">같은 작업을 두 방식으로 돌려봤다. 속도·정확도·편의성 비교. 결론은 작업 유형에 따라 다름.</p>
+        <div class="art-meta">읽는데 5분</div>
+      </div>
+      <div class="art-thumb">
+        <img src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=400&q=80" alt="" />
+      </div>
+    </a>
+
+    <a href="#" class="article">
+      <div class="art-body">
+        <div class="art-date">2026.04.23</div>
+        <div class="art-num">#17</div>
+        <h2 class="art-title keepall">Perplexity 무료 vs Pro— 실무 리서치에서 차이가 나는 순간</h2>
+        <p class="art-desc keepall">무료로 충분한 경우와 Pro가 필요한 경우를 실제 업무 시나리오 5개로 비교.</p>
+        <div class="art-meta">읽는데 4분</div>
+      </div>
+      <div class="art-thumb">
+        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&q=80" alt="" />
+      </div>
+    </a>
+
+    <a href="#" class="article">
+      <div class="art-body">
+        <div class="art-date">2026.04.16</div>
+        <div class="art-num">#16</div>
+        <h2 class="art-title keepall">Claude 4.5 Sonnet, 기존 모델과 뭐가 달라졌나</h2>
+        <p class="art-desc keepall">같은 프롬프트를 3.5 Sonnet → 4.5 Sonnet으로 돌렸을 때 달라진 점. 기획서·보고서 기준.</p>
+        <div class="art-meta">읽는데 5분</div>
+      </div>
+      <div class="art-thumb">
+        <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=400&q=80" alt="" />
+      </div>
+    </a>
+
+  </div>
+
+  <script>
+    // Period buttons
+    document.querySelectorAll('.period-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        document.querySelectorAll('.period-btn').forEach(function(b){b.classList.remove('on')});
+        this.classList.add('on');
+        document.getElementById('yearMonth').value = 'all';
+      });
+    });
+    // Year-month select resets period buttons
+    document.getElementById('yearMonth').addEventListener('change', function(){
+      document.querySelectorAll('.period-btn').forEach(function(b){b.classList.remove('on')});
+    });
+  </script>
+</body>
+</html>

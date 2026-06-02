@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>공식 가이드 — 케이스랩</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--bg:#fff;--bg-sub:#f7f7f7;--ink:#191f28;--gray-800:#333d4b;--gray-600:#6b7684;--gray-500:#8b95a1;--gray-400:#b0b8c1;--gray-300:#d1d6db;--gray-200:#e5e8eb;--gray-100:#f2f4f6;--blue:#3182f6;--blue-bg:#ebf4ff;--green:#047857;--green-bg:#d1fae5;--gh:#24292e}
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{font-size:16px;-webkit-font-smoothing:antialiased}
+    body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;letter-spacing:-0.02em}
+    .keepall{word-break:keep-all;overflow-wrap:break-word}
+    a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer;border:none;background:none}
+
+    .gnb{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--gray-200)}
+    .gnb-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .gnb-logo{font-family:'Playfair Display',serif;font-style:italic;font-size:28px;font-weight:700;letter-spacing:-0.01em}
+
+    .gnb-right{display:flex;align-items:center;gap:6px}
+    .gnb-nav{display:none;gap:22px;font-size:15px;font-weight:500;color:var(--gray-600);margin-right:16px}
+    .gnb-nav a:hover{color:var(--ink)}.gnb-nav a.on{color:var(--ink);font-weight:700}
+    @media(min-width:768px){.gnb-nav{display:flex}}
+    .gnb-dropdown{position:static}
+    .gnb-dropdown-trigger{display:inline-flex;align-items:center}
+    .mega-menu{display:none;position:absolute;left:0;right:0;top:56px;background:#fff;border-bottom:1px solid var(--gray-200);box-shadow:0 8px 24px rgba(0,0,0,.06);z-index:110}
+    .mega-menu::before{content:'';position:absolute;top:-16px;left:0;right:0;height:16px}
+    .mega-inner{max-width:1100px;margin:0 auto;padding:24px;display:flex;gap:12px;justify-content:center}
+    .mega-card{display:flex;align-items:center;gap:14px;padding:16px 20px;border:1px solid var(--gray-200);border-radius:12px;flex:1;max-width:280px;transition:all .15s}
+    .mega-card:hover{border-color:var(--blue);box-shadow:0 2px 12px rgba(49,130,246,.08)}
+    .mega-card-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+    .mega-card-body{min-width:0}
+    .mega-card-title{font-size:14px;font-weight:700;letter-spacing:-0.02em;margin-bottom:2px}
+    .mega-card-desc{font-size:12px;color:var(--gray-500)}
+    .gnb-dropdown:hover .mega-menu{display:block}
+    .gnb-sub{font-size:14px;font-weight:600;color:#fff;background:var(--blue);padding:7px 16px;border-radius:8px}
+    .gnb-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:var(--gray-600);transition:background .15s}
+    .gnb-icon:hover{background:var(--gray-100)}
+    .gnb-icon svg{width:20px;height:20px}
+
+    .hero{background:#f7f7f7;padding:48px 0 40px;border-bottom:1px solid var(--gray-200)}
+    @media(min-width:768px){.hero{background:#f7f7f7;padding:64px 0 48px}}
+    .hero-inner{max-width:1100px;margin:0 auto;padding:0 24px}
+    .hero h1{font-size:32px;font-weight:800;letter-spacing:-0.03em;margin-bottom:10px}
+    @media(min-width:768px){.hero h1{font-size:40px}}
+    .hero p{font-size:16px;color:var(--gray-600);max-width:520px}
+
+    .page{max-width:1100px;margin:0 auto;padding:0 24px 80px}
+
+    .filter-tabs{display:flex;gap:6px;overflow-x:auto;position:sticky;top:56px;background:#fff;padding:18px 0;z-index:50;border-bottom:1px solid var(--gray-200);margin-bottom:32px}
+    .filter-tabs::-webkit-scrollbar{display:none}
+    .ftab{padding:7px 16px;font-size:14px;font-weight:500;color:var(--gray-500);border:1px solid var(--gray-200);border-radius:20px;white-space:nowrap;transition:all .12s}
+    .ftab:hover{color:var(--gray-800);border-color:var(--gray-400)}
+    .ftab.on{color:#fff;background:var(--ink);border-color:var(--ink)}
+    .ftab-count{font-size:12px;color:inherit;opacity:.6;margin-left:4px}
+
+    .guide-section{margin-bottom:48px;scroll-margin-top:140px}
+    .guide-section-head{display:flex;align-items:baseline;gap:10px;margin-bottom:8px}
+    .guide-section-icon{font-size:20px}
+    .guide-section-title{font-size:20px;font-weight:800;letter-spacing:-0.025em}
+    .guide-section-count{font-size:13px;color:var(--gray-400);font-weight:500}
+    .guide-section-desc{font-size:14px;color:var(--gray-600);margin-bottom:18px;max-width:600px;line-height:1.6}
+
+    .guide-grid{display:grid;grid-template-columns:1fr;gap:16px}
+    @media(min-width:640px){.guide-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(min-width:900px){.guide-grid{grid-template-columns:repeat(3,1fr)}}
+
+    .guide-card{display:block;border:1px solid var(--gray-200);border-radius:10px;overflow:hidden;transition:border-color .15s,box-shadow .15s,transform .15s;background:#fff}
+    .guide-card:hover{border-color:var(--blue);box-shadow:0 4px 14px rgba(49,130,246,.06);transform:translateY(-1px)}
+    .guide-thumb{height:80px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:0 14px}
+    .guide-thumb .logo-text{font-size:13px;font-weight:700;letter-spacing:-0.02em;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+    .guide-thumb .logo-text svg{flex-shrink:0;width:14px!important;height:14px!important}
+    .guide-thumb .logo-text > span:first-child{font-size:16px!important}
+    .guide-body{padding:12px 14px 14px}
+    .guide-source{font-size:9.5px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:2px 6px;border-radius:3px;display:inline-block;margin-bottom:6px;letter-spacing:0.02em}
+    .guide-source.github{color:#fff;background:var(--gh)}
+    .guide-source.course{color:var(--green);background:var(--green-bg)}
+    .guide-title{font-size:13.5px;font-weight:700;letter-spacing:-0.02em;margin-bottom:4px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .guide-desc{font-size:12px;color:var(--gray-600);line-height:1.5;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .guide-highlights{display:none}
+    .guide-link{font-size:11px;font-weight:600;color:var(--blue);display:inline-flex;align-items:center;gap:3px}
+  </style>
+</head>
+<body>
+
+  <header class="gnb">
+    <div class="gnb-inner">
+      <a href="index.html" class="gnb-logo">Caselab</a>
+      <div class="gnb-right">
+        <nav class="gnb-nav">
+          <a href="cases.html">실전 케이스</a>
+          <a href="trends.html">AI 트렌드</a>
+          <div class="gnb-dropdown">
+            <a href="#" class="gnb-dropdown-trigger on">자료실 <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style="margin-left:2px;vertical-align:middle"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            <div class="mega-menu">
+              <div class="mega-inner">
+                <a href="tools.html" class="mega-card"><div class="mega-card-icon" style="background:linear-gradient(135deg,#e0e7ff,#f5f3ff)">🔧</div><div class="mega-card-body"><div class="mega-card-title">도구 모음</div><div class="mega-card-desc">이 일엔 이런 도구가 있더라</div></div></a>
+                <a href="prompts.html" class="mega-card"><div class="mega-card-icon" style="background:linear-gradient(135deg,#d1fae5,#ecfdf5)">📋</div><div class="mega-card-body"><div class="mega-card-title">프롬프트 & 템플릿</div><div class="mega-card-desc">복사해서 바로 쓰세요</div></div></a>
+                <a href="guides.html" class="mega-card" style="border-color:var(--blue)"><div class="mega-card-icon" style="background:linear-gradient(135deg,#dbeafe,#eff6ff)">📘</div><div class="mega-card-body"><div class="mega-card-title">공식 가이드</div><div class="mega-card-desc">OpenAI, Anthropic 공식 문서 핵심</div></div></a>
+              </div>
+            </div>
+          </div>
+          <a href="ebook.html">ebook</a>
+        </nav>
+        <button class="gnb-sub">구독하기</button>
+        <a href="login.html" class="gnb-icon" title="로그인"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a>
+        <a href="#" class="gnb-icon" title="검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></a>
+      </div>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="hero-inner">
+      <h1>공식 가이드</h1>
+      <p class="keepall">OpenAI, Anthropic, Google 공식 문서와 업계가 신뢰하는 GitHub 자료들을 카테고리별로 정리했습니다.</p>
+    </div>
+  </div>
+
+  <div class="page">
+
+    <div class="filter-tabs" id="filterTabs">
+      <button class="ftab on" data-cat="all">전체<span class="ftab-count">19</span></button>
+      <button class="ftab" data-cat="prompt">프롬프트 작성법<span class="ftab-count">4</span></button>
+      <button class="ftab" data-cat="cases">활용 사례<span class="ftab-count">3</span></button>
+      <button class="ftab" data-cat="education">교육 · 튜토리얼<span class="ftab-count">4</span></button>
+      <button class="ftab" data-cat="skills">Skills · Cookbook<span class="ftab-count">4</span></button>
+      <button class="ftab" data-cat="agents">에이전트 · 자동화<span class="ftab-count">4</span></button>
+    </div>
+
+    <section class="guide-section" data-cat="prompt" id="sec-prompt">
+      <div class="guide-section-head">
+        
+        <h2 class="guide-section-title">프롬프트 작성법</h2>
+        <span class="guide-section-count">4</span>
+      </div>
+      <p class="guide-section-desc keepall">Anthropic·OpenAI·Google이 직접 쓴 프롬프트 엔지니어링 공식 가이드. 어떤 모델을 쓰든 기본기는 여기서.</p>
+
+      <div class="guide-grid">
+
+        <a href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview" target="_blank" rel="noopener" class="guide-card" data-cat="prompt">
+          <div class="guide-thumb" style="background:#f5f5f0">
+            <span class="logo-text" style="color:#1a1a1a"><span style="color:#c9885c;font-size:24px">✳</span> Claude API Docs</span>
+          </div>
+          <div class="guide-body">
+            <span class="guide-source">공식 문서</span>
+            <h3 class="guide-title keepall">Anthropic 프롬프트 엔지니어링 가이드</h3>
+            <p class="guide-desc keepall">Claude를 잘 쓰기 위한 공식 가이드. 프롬프트 구조, 역할 지정, 체인 오브 소트까지.</p>
+            <ul class="guide-highlights">
+              <li>기획자가 볼 핵심: 구조화된 출력</li>
+              <li>마케터가 볼 핵심: 톤 지정</li>
+              <li>공통 필독: 긴 문서 처리</li>
+            </ul>
+            <span class="guide-link">docs.anthropic.com →</span>
+          </div>
+        </a>
+
+        <a href="https://platform.openai.com/docs/guides/prompt-engineering" target="_blank" rel="noopener" class="guide-card" data-cat="prompt">
+          <div class="guide-thumb" style="background:#fff">
+            <span class="logo-text" style="color:#000"><svg viewBox="0 0 24 24" fill="#000" style="width:22px;height:22px"><path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494z"/></svg> OpenAI Developers</span>
+          </div>
+          <div class="guide-body">
+            <span class="guide-source">공식 문서</span>
+            <h3 class="guide-title keepall">OpenAI 프롬프트 베스트 프랙티스</h3>
+            <p class="guide-desc keepall">GPT를 더 정확하게 쓰는 6가지 전략. 예시가 풍부해서 바로 따라할 수 있음.</p>
+            <ul class="guide-highlights">
+              <li>전략 1: 명확한 지시 작성하기</li>
+              <li>전략 3: 복잡한 작업 쪼개기</li>
+              <li>전략 6: 체계적으로 테스트하기</li>
+            </ul>
+            <span class="guide-link">platform.openai.com →</span>
+          </div>
+        </a>
+
+        <a href="https://ai.google.dev/gemini-api/docs/prompting-strategies" target="_blank" rel="noopener" class="guide-card" data-cat="prompt">
+          <div class="guide-thumb" style="background:#fff">
+            <span class="logo-text"><svg viewBox="0 0 24 24" style="width:20px;height:20px"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> <span style="color:#333">Google AI for Developers</span></span>
+          </div>
+          <div class="guide-body">
+            <span class="guide-source">공식 문서</span>
+            <h3 class="guide-title keepall">Google Gemini 프롬프트 디자인 전략</h3>
+            <p class="guide-desc keepall">Gemini 3 기준 프롬프트 설계 원칙. Few-shot·Chain-of-thought·시스템 인스트럭션 예시.</p>
+            <ul class="guide-highlights">
+              <li>Few-shot 프롬프팅 실전 예시</li>
+              <li>시스템 인스트럭션 활용법</li>
+              <li>멀티모달 프롬프트 가이드</li>
+            </ul>
+            <span class="guide-link">ai.google.dev →</span>
+          </div>
+        </a>
+
+        <a href="https://github.com/dair-ai/Prompt-Engineering-Guide" target="_blank" rel="noopener" class="guide-card" data-cat="prompt">
+          <div class="guide-thumb" style="background:#0d1117">
+            <span class="logo-text" style="color:#fff"><svg viewBox="0 0 24 24" fill="#fff" style="width:20px;height:20px"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.4 3-.405 1.02.005 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg> dair-ai / Prompt-Engineering-Guide <span class="thumb-star" style="font-size:10px;color:rgba(255,255,255,.4);font-weight:500;margin-left:4px">★ 75k</span></span>
+          </div>
+          <div class="guide-body">
+            <span class="guide-source github">GitHub · 커뮤니티</span>
+            <h3 class="guide-title keepall">Prompt Engineering Guide — 가장 종합적인 커뮤니티 가이드</h3>
+            <p class="guide-desc keepall">프롬프팅·컨텍스트 엔지니어링·RAG·AI 에이전트까지 다루는 75k stars의 종합 가이드. 13개 언어 번역.</p>
+            <ul class="guide-highlights">
+              <li>이론·논문·실습 노트북까지</li>
+              <li>RAG·에이전트 챕터 포함</li>
+              <li>13개 언어 번역본 제공</li>
+            </ul>
+            <span class="guide-link">github.com/dair-ai/Prompt-Engineering-Guide →</span>
+          </div>
+        </a>
+
+      </div>
+    </section>
+
+    <section class="guide-section" data-cat="cases" id="sec-cases">
+      <div class="guide-section-head">
+        
+        <h2 class="guide-section-title">활용 사례 (Best Cases)</h2>
+        <span class="guide-section-count">3</span>
+      </div>
+      <p class="guide-section-desc keepall">공식이 직접 큐레이션한 실제 도입·적용 사례. 어떤 회사가 AI로 무엇을 어떻게 풀고 있는지 본 다음 우리 일에 옮길 부분을 찾기 좋습니다.</p>
+
+      <div class="guide-grid">
+
+        <a href="https://claude.com/customers" target="_blank" rel="noopener" class="guide-card" data-cat="cases">
+          <div class="guide-thumb" style="background:#f5f5f0">
+            <span class="logo-text" style="color:#1a1a1a"><span style="color:#c9885c;font-size:24px">✳</span> Claude Customers</span>
+          </div>
+          <div class="guide-body">
+            <span class="guide-source">고객 사례</span>
+            <h3 class="guide-title keepall">Anthropic Customer Stories</h3>
+            <p class="guide-desc keepall">Notion, Slack, Figma, HubSpot 같은 회사가 Claude를 실제 업무에 어떻게 끼워 넣었는지. 산업·규모·제품별 필터 가능.</p>
+            <ul class="guide-highlights">
+              <li>Notion — 사내 검색·요약 자동화</li>
+              <li>Slack — 메시지 요약·검색</li>
+              <li>Figma — 디자인-텍스트 워크플로우</li>
+            </ul>
+            <span class="guide-link">claude.com/customers →</span>
+          </div>
+        </a>
+
+        <a href="https://openai.com/stories" target="_blank" rel="noopener" class="guide-card" data-cat="cases">
+          <div class="guide-thumb" style="background:#fff">
+            <span class="logo-text" style="color:#000"><svg viewBox="0 0 24 24" fill="#000" style="width:22px;height:22px"><path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494z"/></svg> OpenAI Stories</span>
+          </div>
+          <div class="guide-body">
+            <span class="guide-source">고객 사례</span>
+            <h3 class="guide-title keepall">OpenAI Customer Stories</h3>
+            <p class="guide-desc keepall">실제 운영 환경에서 GPT를 적용한 회사 사례 모음. 마케팅·세일즈·운영 자동화 적용 패턴을 훑기 좋음.</p>
+            <ul class="guide-highlights">
+              <li>고객 지원 자동화 사례</li>
+              <li>마케팅 카피·세일즈 이메일</li>
+              <li>내부 지식 검색</li>
+            </ul>
+            <span class="guide-link">openai.com/stories →</span>
+          </div>
+        </a>
+
+        <a href="https://hai.stanford.edu/ai-index" target="_blank" rel="noopener" class="guide-card" data-cat="cases">
+          <div class="guide-thumb" style="background:#8c1515">
+            <span class="logo-text" style="color:#fff;font-family:'Playfair Display',serif;font-style:italic">Stanford <span style="font-style:normal;font-family:'Pretendard',sans-serif;font-weight:500;opacity:.8">· HAI</span></span>
+          </div>
+          <div class="guide-body">
+            <span class="guide-source">산업 리포트</span>
+            <h3 class="guide-title keepall">Stanford AI Index — AI 산업 연례 데이터 리포트</h3>
+            <p class="guide-desc keepall">스탠퍼드 HAI가 매년 발표하는 AI 산업 전체 데이터. 투자·인력·모델 성능·정책까지. 가장 인용되는 공식 리포트.</p>
+            <ul class="guide-highlights">
+              <li>매년 업데이트 (현재 8판)</li>
+              <li>비즈니스·기술·정책 트렌드</li>
+              <li>한 챕터씩 PDF 다운로드 가능</li>
+            </ul>
+            <span class="guide-link">hai.stanford.edu/ai-index →</span>
+          </div>
+        </a>
+
+      </div>
+    </section>
+
+    <section class="guide-section" data-cat="education" id="sec-education">
+      <div class="guide-section-head">
+        
+        <h2 class="guide-section-title">교육 · 튜토리얼</h2>
+        <span class="guide-section-count">4</span>
+      </div>
+      <p class="guide-section-desc keepall">처음부터 차근차근 따라하며 익히는 무료 코스 모음. 영어이지만 실습이 많아 자막·번역과 함께 보면 됩니다.</p>
+
+      <div class="guide-grid">
+
+        <a href="https://github.com/anthropics/courses" target="_blank" rel="noopener" class="guide-card" data-cat="education">
+          <div class="guide-thumb" style="background:#0d1117">
+            <span class="logo-text" style="color:#fff"><svg viewBox="0 0 24 24" fill="#fff" style="width:20px;height:20px"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.4 3-.405 1.02.005 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg> anthropics/courses <span class="thumb-star" style="font-size:10px;color:rgba(255,255,255,.4);font-weight:500;margin-left:4px">★ 21.6k</span></span>
+          </div>
+          <div class="guide-body">
+            <span class="guide-source course">무료 코스</span>
+            <h3 class="guide-title keepall">Anthropic Courses — 공식 무료 코스 5종</h3>
+            <p class="guide-desc keepall">API 기초 · 프롬프트 엔지니어링 · 실전 프롬프팅 · 평가 · 도구 사용. Anthropic이 직접 만든 인터랙티브 튜토리얼.</p>
+            <ul class="guide-highlights">
+              <li>Prompt engineering interactive tutorial</li>
+              <li>Real world prompting</li>
+              <li>Tool use (도구 사용 챕터)</li>
+            </ul>
+            <span class="guide-link">github.com/anthropics/courses →</span>
+          </div>
+        </a>
+
+        <a href="https://www.deeplearning.ai/short-courses" target="_blank" rel="noopener" class="guide-card" data-cat="education">
+          <div class="guide-thumb" style="background:#0066cc">
+            <span class="logo-text" style="color:#fff">deeplearning.<span style="color:#fbbf24">AI</span></span>
+          </div>
+          <div class="guide-body">
+            <span class="guide-source course">무료 코스</span>
+            <h3 class="guide-title keepall">DeepLearning.AI Short Courses</h3>
+            <p class="guide-desc keepall">Andrew Ng가 만든 짧은 강의 모음. AI 프롬프팅, Agentic AI, RAG, LLM 앱 빌딩 등 98개 코스가 거의 다 무료.</p>
+            <ul class="guide-highlights">
+              <li>AI Prompting for Everyone (비개발자용)</li>
+              <li>Agentic AI 시리즈</li>
+              <li>Building with Llama 4</li>
+            </ul>
+            <span class="guide-link">deeplearning.ai/short-courses →</span>
+          </div>
+        </a>
+
+        <a href="https://github.com/microsoft/generative-ai-for-beginners" target="_blank" rel="noopener" class="guide-card" data-cat="education">
+          <div class="guide-thumb" style="background:#0d1117">
+            <span class="logo-text" style="color:#fff"><svg viewBox="0 0 24 24" fill="#fff" style="width:20px;height:20px"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.4 3-.405 1.02.005 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg> microsoft / gen-ai-for-beginners <span style="color:rgba(255,255,255,.4);font-size:11px;font-weight:500;margin-left:4px">★ 111k</span></span>
+          </div>
+          <div class="guide-body">
+            <span class="guide-source course">무료 코스</span>
+            <h3 class="guide-title keepall">Generative AI for Beginners — Microsoft 공식 21레슨</h3>
+            <p class="guide-desc keepall">Microsoft가 만든 생성형 AI 입문 코스. LLM, 프롬프트 엔지니어링, RAG, 에이전트, 파인튜닝까지 21레슨.</p>
+            <ul class="guide-highlights">
+              <li>LLM 기초부터 시작</li>
+              <li>RAG · 에이전트 챕터 포함</li>
+              <li>레슨마다 실습 노트북</li>
+            </ul>
+            <span class="guide-link">github.com/microsoft/generative-ai-for-beginners →</span>
+          </div>
+        </a>
+
+        <a href="https://huggingface.co/learn" target="_blank" rel="noopener" class="guide-card" data-cat="education">
+          <div class="guide-thumb" style="background:#fff7ed">
+            <span class="logo-text" style="color:#1a1a1a;font-size:15px"><span style="font-size:20px">🤗</span> Hugging Face Learn</span>
+          </div>
+          <div class="guide-body">
+            <span class="guide-source course">무료 코스</span>
+            <h3 class="guide-title keepall">Hugging Face Learn — LLM·에이전트·컨텍스트 등 12개 코스</h3>
+            <p class="guide-desc keepall">LLM 코스, AI 에이전트, 컨텍스트 엔지니어링, 디퓨전, 컴퓨터 비전 등 노트북 실습 중심 무료 코스 12개.</p>
+            <ul class="guide-highlights">
+              <li>LLM Course (transformers 기반)</li>
+              <li>Agents Course (Smol Agent 등)</li>
+              <li>Context Course (코드 에이전트)</li>
+            </ul>
+            <span class="guide-link">huggingface.co/learn →</span>
+          </div>
+        </a>
+
+      </div>
+    </section>
+
+    <section class="guide-section" data-cat="skills" id="sec-skills">
+      <div class="guide-section-head">
+        
+        <h2 class="guide-section-title">Skills · Cookbook</h2>
+        <span class="guide-section-count">4</span>
+      </div>
+      <p class="guide-section-desc keepall">바로 복사해서 쓸 수 있는 검증된 자산 모음. 공식 cookbook과 업계가 가장 많이 별표한 GitHub repo들.</p>
+
+      <div class="guide-grid">
+
+        <a href="https://github.com/anthropics/skills" target="_blank" rel="noopener" class="guide-card" data-cat="skills">
+          <div class="guide-thumb" style="background:#0d1117">
+            <span class="logo-text" style="color:#fff"><svg viewBox="0 0 24 24" fill="#fff" style="width:20px;height:20px"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.4 3-.405 1.02.005 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg> anthropics / skills</span>
+          </div>
+          <div class="guide-body">
+            <span class="guide-source github">GitHub · Anthropic 공식</span>
+            <h3 class="guide-title keepall">Anthropic Skills — Claude가 동적으로 불러 쓰는 스킬 모음</h3>
+            <p class="guide-desc keepall">Claude가 작업 도메인별로 동적으로 로드해서 쓰는 instruction·script·자원 묶음. 창작·기술·엔터프라이즈 워크플로우까지.</p>
+            <ul class="guide-highlights">
+              <li>스킬이 어떻게 정의되는지 실제 예시</li>
+              <li>내 업무용 스킬 직접 만들기</li>
+              <li>Claude API와 결합해 호출</li>
+            </ul>
+            <span class="guide-link">github.com/anthropics/skills →</span>
+          </div>
+        </a>
+
+        <a href="https://github.com/anthropics/anthropic-cookbook" target="_blank" rel="noopener" class="guide-card" data-cat="skills">
+          <div class="guide-thumb" style="background:#0d1117">
+            <span class="logo-text" style="color:#fff"><svg viewBox="0 0 24 24" fill="#fff" style="width:20px;height:20px"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.4 3-.405 1.02.005 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg> anthropics / anthropic-cookbook</span>
+          </div>
+          <div class="guide-body">
+            <span class="guide-source github">GitHub · Anthropic 공식</span>
+            <h3 class="guide-title keepall">Anthropic Cookbook — Claude 활용 레시피 모음</h3>
+            <p class="guide-desc keepall">분류·RAG·요약·도구 사용·멀티모달·프롬프트 캐싱·파인튜닝까지 실제로 동작하는 노트북·레시피 모음.</p>
+            <ul class="guide-highlights">
+              <li>RAG 구현 예제</li>
+              <li>긴 문서 요약 패턴</li>
+              <li>Tool use·Vision 레시피</li>
+            </ul>
+            <span class="guide-link">github.com/anthropics/anthropic-cookbook →</span>
+          </div>
+        </a>
+
+        <a href="https://cookbook.openai.com" target="_blank" rel="noopener" class="guide-card" data-cat="skills">
+          <div class="guide-thumb" style="background:#f7f7f7">
+            <span class="logo-text" style="color:#000"><svg viewBox="0 0 24 24" fill="#000" style="width:20px;height:20px"><path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073z"/></svg> OpenAI Cookbook</span>
+          </div>
+          <div class="guide-body">
+            <span class="guide-source">공식 문서</span>
+            <h3 class="guide-title keepall">OpenAI Cookbook — 실전 예제 모음</h3>
+            <p class="guide-desc keepall">실제 코드+프롬프트 예제 수백 개. 개발자가 아니어도 프롬프트 패턴을 배울 수 있음.</p>
+            <ul class="guide-highlights">
+              <li>텍스트 분류/추출 프롬프트 패턴</li>
+              <li>데이터 분석 자동화 예제</li>
+              <li>RAG (문서 기반 답변) 구현법</li>
+            </ul>
+            <span class="guide-link">cookbook.openai.com →</span>
+          </div>
+        </a>
+
+        <a href="https://github.com/f/awesome-chatgpt-prompts" target="_blank" rel="noopener" class="guide-card" data-cat="skills">
+          <div class="guide-thumb" style="background:#0d1117">
+            <span class="logo-text" style="color:#fff"><svg viewBox="0 0 24 24" fill="#fff" style="width:20px;height:20px"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.4 3-.405 1.02.005 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg> f / awesome-chatgpt-prompts <span style="color:rgba(255,255,255,.4);font-size:11px;font-weight:500;margin-left:4px">★ 163k</span></span>
+          </div>
+          <div class="guide-body">
+            <span class="guide-source github">GitHub · 커뮤니티</span>
+            <h3 class="guide-title keepall">awesome-chatgpt-prompts — 가장 큰 오픈소스 프롬프트 라이브러리</h3>
+            <p class="guide-desc keepall">"세계 최대 오픈소스 프롬프트 라이브러리." ChatGPT·Claude·Gemini 등 어떤 모델이든 통하는 검증된 프롬프트 수백 개.</p>
+            <ul class="guide-highlights">
+              <li>역할(Act as ~) 프롬프트 패턴</li>
+              <li>직무·도메인별 분류</li>
+              <li>커뮤니티 검증을 거친 항목</li>
+            </ul>
+            <span class="guide-link">github.com/f/awesome-chatgpt-prompts →</span>
+          </div>
+        </a>
+
+      </div>
+    </section>
+
+    <section class="guide-section" data-cat="agents" id="sec-agents">
+      <div class="guide-section-head">
+        
+        <h2 class="guide-section-title">에이전트 · 자동화</h2>
+        <span class="guide-section-count">4</span>
+      </div>
+      <p class="guide-section-desc keepall">AI에게 일을 시키는 구조와 환경. 단순 대화를 넘어 "에이전트"로 옮겨갈 때 보면 좋은 공식 자료들.</p>
+
+      <div class="guide-grid">
+
+        <a href="https://docs.anthropic.com/en/docs/claude-code/overview" target="_blank" rel="noopener" class="guide-card" data-cat="agents">
+          <div class="guide-thumb" style="background:#1a1a1a">
+            <span class="logo-text" style="color:#fff"><span style="color:#c9885c;font-size:24px">✳</span> Claude Code</span>
+          </div>
+          <div class="guide-body">
+            <span class="guide-source">공식 문서</span>
+            <h3 class="guide-title keepall">Claude Code 활용 가이드</h3>
+            <p class="guide-desc keepall">터미널에서 AI와 코딩하기. 비개발자도 자동화 스크립트 만들 때 유용한 부분 정리.</p>
+            <ul class="guide-highlights">
+              <li>기본 사용법과 명령어</li>
+              <li>파일 읽기/수정 워크플로우</li>
+              <li>CLAUDE.md로 프로젝트 맥락 설정</li>
+            </ul>
+            <span class="guide-link">docs.anthropic.com →</span>
+          </div>
+        </a>
+
+        <a href="https://docs.cursor.com" target="_blank" rel="noopener" class="guide-card" data-cat="agents">
+          <div class="guide-thumb" style="background:#1a1a1a">
+            <span class="logo-text" style="color:#fff">⚡ Cursor Docs</span>
+          </div>
+          <div class="guide-body">
+            <span class="guide-source">공식 문서</span>
+            <h3 class="guide-title keepall">Cursor 공식 문서 — AI 코딩 도구</h3>
+            <p class="guide-desc keepall">AI가 코드를 같이 짜주는 에디터. Tab 자동완성, Cmd+K 편집, Agent 모드 가이드.</p>
+            <ul class="guide-highlights">
+              <li>비개발자를 위한 시작 가이드</li>
+              <li>.cursorrules로 맥락 설정하기</li>
+              <li>자주 쓰는 명령어 치트시트</li>
+            </ul>
+            <span class="guide-link">docs.cursor.com →</span>
+          </div>
+        </a>
+
+        <a href="https://www.anthropic.com/research/building-effective-agents" target="_blank" rel="noopener" class="guide-card" data-cat="agents">
+          <div class="guide-thumb" style="background:#f5f5f0">
+            <span class="logo-text" style="color:#1a1a1a"><span style="color:#c9885c;font-size:24px">✳</span> Anthropic Research</span>
+          </div>
+          <div class="guide-body">
+            <span class="guide-source">연구 글</span>
+            <h3 class="guide-title keepall">Building Effective Agents — Anthropic 공식</h3>
+            <p class="guide-desc keepall">복잡한 프레임워크보다 단순·조합 가능한 패턴이 성공한다는 Anthropic의 실전 조언. 에이전트 vs 워크플로우 구분이 핵심.</p>
+            <ul class="guide-highlights">
+              <li>워크플로우 vs 자율 에이전트</li>
+              <li>단순한 조합 패턴 5가지</li>
+              <li>언제 에이전트가 필요한가</li>
+            </ul>
+            <span class="guide-link">anthropic.com/research →</span>
+          </div>
+        </a>
+
+        <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener" class="guide-card" data-cat="agents">
+          <div class="guide-thumb" style="background:#0a0a0a">
+            <span class="logo-text" style="color:#fff;font-size:15px"><span style="color:#5eead4;font-size:18px">⬡</span> Model Context Protocol</span>
+          </div>
+          <div class="guide-body">
+            <span class="guide-source">공식 표준</span>
+            <h3 class="guide-title keepall">MCP — AI 앱과 외부 시스템을 잇는 USB-C 표준</h3>
+            <p class="guide-desc keepall">Claude·ChatGPT·Cursor·VS Code가 모두 따르는 오픈 표준. 데이터·도구·워크플로우를 한 번 만들면 어디서든 연결.</p>
+            <ul class="guide-highlights">
+              <li>2024년 11월 Anthropic 발표</li>
+              <li>모든 주요 AI 클라이언트가 지원</li>
+              <li>비개발자용 MCP 앱 갤러리</li>
+            </ul>
+            <span class="guide-link">modelcontextprotocol.io →</span>
+          </div>
+        </a>
+
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    document.querySelectorAll('.ftab').forEach(function(tab){
+      tab.addEventListener('click', function(){
+        document.querySelectorAll('.ftab').forEach(function(t){ t.classList.remove('on'); });
+        this.classList.add('on');
+        var cat = this.dataset.cat;
+        document.querySelectorAll('.guide-section').forEach(function(s){
+          s.style.display = (cat === 'all' || s.dataset.cat === cat) ? '' : 'none';
+        });
+        if (cat !== 'all') {
+          var target = document.getElementById('sec-' + cat);
+          if (target) {
+            var top = target.getBoundingClientRect().top + window.scrollY - 140;
+            window.scrollTo({ top: top, behavior: 'smooth' });
+          }
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

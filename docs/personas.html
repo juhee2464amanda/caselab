@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>페르소나 5명 — 누가, 무엇이 막혔고, 우리가 무엇을 풀어야 하는가</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Apple SD Gothic Neo", "Pretendard", sans-serif; margin: 0; background: #fafaf7; color: #1a1a1a; line-height: 1.6; }
+  header { background: #1a1a1a; color: #f5f5f0; padding: 40px 32px; border-bottom: 4px solid #c9a961; }
+  header h1 { margin: 0 0 8px; font-size: 28px; font-weight: 600; letter-spacing: -0.3px; }
+  header .subtitle { color: #b3b0a5; font-size: 14px; max-width: 720px; }
+  header .meta { color: #888; font-size: 12px; margin-top: 14px; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 32px; }
+
+  section { margin-bottom: 56px; }
+  section h2 { font-size: 22px; font-weight: 600; margin: 0 0 6px; padding-bottom: 12px; border-bottom: 1px solid #d8d4c8; display: inline-block; }
+  section .section-desc { color: #777; font-size: 13px; margin-bottom: 24px; }
+
+  /* Hero — 5명 한 눈 */
+  .hero-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+  .hero-card { background: #fff; border: 1px solid #e8e6e0; border-radius: 8px; padding: 16px; text-align: center; transition: transform 0.15s, box-shadow 0.15s; cursor: pointer; }
+  .hero-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.06); }
+  .hero-card .badge { display: inline-block; width: 28px; height: 28px; border-radius: 14px; background: #c9a961; color: #fff; font-weight: 700; line-height: 28px; margin-bottom: 8px; font-size: 13px; }
+  .hero-card .name { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .hero-card .role { font-size: 11px; color: #888; margin-bottom: 8px; }
+  .hero-card .essence { font-size: 12px; color: #555; line-height: 1.5; }
+
+  /* 공통 페인 */
+  .common-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .common-card { background: #fff; border: 1px solid #e8e6e0; border-left: 4px solid #c9a961; border-radius: 6px; padding: 16px 18px; }
+  .common-card .label { font-size: 11px; color: #c9a961; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px; }
+  .common-card .title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .common-card .desc { font-size: 12px; color: #666; line-height: 1.55; }
+  .common-card .who { font-size: 11px; color: #999; margin-top: 8px; }
+
+  /* 페르소나 상세 카드 */
+  .persona-deep { background: #fff; border: 1px solid #e8e6e0; border-radius: 10px; padding: 28px 32px; margin-bottom: 24px; }
+  .persona-head { display: flex; align-items: center; gap: 16px; margin-bottom: 4px; }
+  .persona-head .num { width: 40px; height: 40px; border-radius: 20px; background: #1a1a1a; color: #f5f5f0; font-weight: 700; font-size: 18px; line-height: 40px; text-align: center; }
+  .persona-head h3 { margin: 0; font-size: 20px; font-weight: 600; }
+  .persona-head .age-job { color: #777; font-size: 13px; margin-left: 6px; font-weight: 400; }
+  .persona-essence { font-size: 14px; color: #555; font-style: italic; margin: 4px 0 24px 56px; padding-left: 14px; border-left: 3px solid #c9a961; line-height: 1.5; }
+  .persona-quad { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .quad-box { background: #fafaf7; border-radius: 8px; padding: 16px 18px; }
+  .quad-box h4 { margin: 0 0 10px; font-size: 12px; color: #c9a961; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+  .quad-box ul { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.7; color: #333; }
+  .quad-box .quote { background: #fff; border-left: 3px solid #c9a961; padding: 8px 12px; margin: 8px 0 4px; font-size: 12px; color: #555; font-style: italic; border-radius: 0 4px 4px 0; }
+  .quad-box .problem { background: #faf3df; border-radius: 6px; padding: 10px 12px; margin: 6px 0; font-size: 13px; color: #5a4515; font-weight: 500; line-height: 1.55; }
+  .quad-box .problem strong { color: #c9a961; }
+
+  /* 종합 매트릭스 */
+  table.matrix { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e8e6e0; border-radius: 8px; overflow: hidden; font-size: 13px; }
+  table.matrix th, table.matrix td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #f0ede5; vertical-align: top; }
+  table.matrix th { background: #1a1a1a; color: #f5f5f0; font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  table.matrix tr:last-child td { border-bottom: none; }
+  table.matrix tr:hover { background: #fafaf7; }
+  table.matrix .p-tag { display: inline-block; padding: 2px 7px; background: #faf3df; color: #8a6d1d; border-radius: 10px; font-size: 10px; font-weight: 600; margin-right: 4px; }
+
+  /* 콘텐츠 예시 */
+  .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .content-card { background: #fff; border: 1px solid #e8e6e0; border-radius: 8px; padding: 20px 22px; }
+  .content-card .priority { display: inline-block; padding: 3px 9px; background: #1a1a1a; color: #c9a961; border-radius: 12px; font-size: 11px; font-weight: 600; margin-bottom: 10px; }
+  .content-card .priority.gold { background: #c9a961; color: #fff; }
+  .content-card .title { font-size: 16px; font-weight: 600; line-height: 1.45; margin-bottom: 10px; color: #1a1a1a; }
+  .content-card .who { font-size: 12px; color: #777; margin-bottom: 12px; }
+  .content-card .who .p-tag { display: inline-block; padding: 2px 7px; background: #faf3df; color: #8a6d1d; border-radius: 10px; font-size: 10px; font-weight: 600; margin: 0 2px; }
+  .content-card .format { font-size: 12px; color: #555; line-height: 1.6; }
+  .content-card .format strong { color: #c9a961; }
+
+  /* MVP 차별화 */
+  .spec-list { background: #fff; border: 1px solid #e8e6e0; border-radius: 8px; padding: 24px 28px; }
+  .spec-item { display: flex; gap: 16px; padding: 14px 0; border-bottom: 1px dashed #f0ede5; }
+  .spec-item:last-child { border-bottom: none; }
+  .spec-item .n { flex-shrink: 0; width: 28px; height: 28px; border-radius: 14px; background: #c9a961; color: #fff; font-weight: 700; line-height: 28px; text-align: center; font-size: 13px; }
+  .spec-item .body { flex: 1; }
+  .spec-item .body .label { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .spec-item .body .desc { font-size: 13px; color: #666; line-height: 1.55; }
+
+  .footnote { color: #999; font-size: 12px; padding-top: 16px; border-top: 1px solid #e8e6e0; margin-top: 32px; }
+
+  @media (max-width: 800px) {
+    .hero-grid { grid-template-columns: repeat(2, 1fr); }
+    .persona-quad { grid-template-columns: 1fr; }
+    .content-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>페르소나 5명 — 누가, 무엇이 막혔고, 우리가 무엇을 풀어야 하는가</h1>
+  <div class="subtitle">데이터 1568건 인용 → 페르소나 5명 → 공통 페인 + 개별 페인 + 현재 행동 + 우리가 해결해야 할 문제 + 콘텐츠 예시까지. 콘텐츠 방향을 잡기 위한 작업 문서.</div>
+  <div class="meta">2026-05 · review.html(raw 데이터)의 자매 문서</div>
+</header>
+
+<div class="container">
+
+<!-- ============================== -->
+<!-- 1. Hero: 5명 한 눈에 -->
+<!-- ============================== -->
+<section>
+  <h2>1. 페르소나 5명 — 한 눈에</h2>
+  <div class="section-desc">직업·세그먼트는 v1 인터뷰 가이드 유지. 워딩과 행동은 실제 인용 1568건으로 재구성.</div>
+  <div class="hero-grid">
+    <div class="hero-card">
+      <div class="badge">A</div>
+      <div class="name">박지현</div>
+      <div class="role">32세 · 마케팅 기획자 5년차</div>
+      <div class="essence">다들 쓰는데 나만 못 쓰는 것 같은, 빈 페이지 앞에서 머리가 하얘지는 기획자</div>
+    </div>
+    <div class="hero-card">
+      <div class="badge">B</div>
+      <div class="name">이민준</div>
+      <div class="role">35세 · 대기업 전략팀 과장</div>
+      <div class="essence">AI가 검증이 아니라 정당화만 한다는 자각이 깊어진, 신뢰가 무너진 전략팀</div>
+    </div>
+    <div class="hero-card">
+      <div class="badge">C</div>
+      <div class="name">김소연</div>
+      <div class="role">29세 · 1인 창업 / 프리랜서</div>
+      <div class="essence">강의·자료에 데이고 의심하면서도 안 보면 뒤처질까 봐 또 결제하는 무한 루프</div>
+    </div>
+    <div class="hero-card">
+      <div class="badge">D</div>
+      <div class="name">최현수</div>
+      <div class="role">41세 · 영업팀장</div>
+      <div class="essence">결과물 톤이 윗사람한테 안 맞아 통과 안 되니까 결국 안 쓰게 된 영업팀장</div>
+    </div>
+    <div class="hero-card">
+      <div class="badge">E</div>
+      <div class="name">정다은</div>
+      <div class="role">27세 · 스타트업 마케터 2년차</div>
+      <div class="essence">단순한 건 잘 쓰는데 복잡한 업무로 가면 의도(intent)와 소원(wish) 구분에서 막힘</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== -->
+<!-- 2. 공통 페인 -->
+<!-- ============================== -->
+<section>
+  <h2>2. 5명이 공유하는 AI 어려움 — 공통 페인</h2>
+  <div class="section-desc">개별 페르소나의 직업·맥락은 다르지만 데이터에서 반복적으로 발견된 5가지 공통 신호.</div>
+  <div class="common-grid">
+    <div class="common-card">
+      <div class="label">공통 1</div>
+      <div class="title">"나만 못 쓰는 것 같다"</div>
+      <div class="desc">SNS·동료·강의에서 "잘 쓰는 사람"만 보임. 본인이 못 쓰는 게 능력 문제 같아 부끄러워서 못 묻고, 못 묻으니까 더 못 쓰는 자기의심 루프.</div>
+      <div class="who">▸ A, C가 특히 진함. B, D, E도 일정 부분 공유</div>
+    </div>
+    <div class="common-card">
+      <div class="label">공통 2</div>
+      <div class="title">결과물이 "그럴듯하지만 쓸 수 없다"</div>
+      <div class="desc">"세련된 포장지 속 평범한 기성품" / "어디서 본 듯한 표현" / "톤이 안 맞음" — 형식은 맞는데 내 맥락·우리 회사 색깔·우리 클라이언트가 0%.</div>
+      <div class="who">▸ B, D, E 공통 결정타. A·C도 자주 만남</div>
+    </div>
+    <div class="common-card">
+      <div class="label">공통 3</div>
+      <div class="title">AI가 시간을 더 잡아먹는다</div>
+      <div class="desc">5분 작업이 1시간으로. 협상하고 갈아엎고 다시 시키다 결국 직접 쓰는 게 빨랐다는 결론. 학습 곡선 비용을 못 견딤.</div>
+      <div class="who">▸ D 가장 진함. 모든 페르소나 공유</div>
+    </div>
+    <div class="common-card">
+      <div class="label">공통 4</div>
+      <div class="title">사회적 시선 — 들켜도 안 되고 비난도 받음</div>
+      <div class="desc">"AI 티 나면 끝" + "월급 날로 먹냐" 비난 + "다들 쓰는데 나만 못 한다" 부끄러움. 결과를 내 책임으로 만들지 못하면 사용 자체 회피.</div>
+      <div class="who">▸ D 결정타. A는 "들킬까봐" 못 묻는 형태로</div>
+    </div>
+    <div class="common-card">
+      <div class="label">공통 5</div>
+      <div class="title">강의·콘텐츠 자체에 대한 깊은 의심</div>
+      <div class="desc">"또 그 얘기" / "결제 마지막엔 500만원" / "광고만 보고 들어가면 실망". 신뢰 자산 매우 낮음. "잘된 사례만 자랑"은 즉시 거절.</div>
+      <div class="who">▸ C 결정타. 모든 페르소나가 어느 정도 공유</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== -->
+<!-- 3. 페르소나별 상세 -->
+<!-- ============================== -->
+<section>
+  <h2>3. 페르소나별 상세 — 누구 / 페인 / 행동 / 해결할 문제</h2>
+  <div class="section-desc">각 페르소나마다 4영역으로 정리. "해결할 문제"는 현재 행동(회피·우회·포기)에서 발견된 갭으로 도출.</div>
+
+  <!-- A -->
+  <div class="persona-deep">
+    <div class="persona-head"><div class="num">A</div><h3>박지현 <span class="age-job">(32세, 마케팅 기획자 5년차)</span></h3></div>
+    <div class="persona-essence">"빈 입력칸 앞에서 머리가 하얘진다 — 영상은 많이 저장했지만 내 상황에 어떻게 갖다 쓸지 모른다."</div>
+    <div class="persona-quad">
+      <div class="quad-box">
+        <h4>누구인지</h4>
+        <ul>
+          <li>중견기업 마케팅 기획팀 5년차</li>
+          <li>주 업무: 캠페인 기획서, 보고서, 시장조사 정리</li>
+          <li>인스타·노션에 AI 자료 200개+ 저장, 실제 적용 거의 0</li>
+          <li>회사에서 모르는 거 들킬까봐 못 물음</li>
+        </ul>
+      </div>
+      <div class="quad-box">
+        <h4>핵심 페인 (인용 기반)</h4>
+        <div class="quote">"다들 쓰는데 나만 못 쓰는 것 같다"</div>
+        <div class="quote">"AI에게 똑똑하게 말 걸기, 생각보다 어렵다"</div>
+        <div class="quote">"혼자 갈아엎고 있다. 나 자신을 객관적으로 보고 싶은데 혼자선 어렵다"</div>
+        <div class="quote">"빈 입력칸 보면 머리가 하얘져요"</div>
+      </div>
+      <div class="quad-box">
+        <h4>현재 행동 (어떻게 우회·회피하나)</h4>
+        <ul>
+          <li>인스타 영상 200개+ 저장 → 한 번도 안 꺼냄</li>
+          <li>"기획서 써줘" 한 줄 시도 → 결과 실망 → 닫음</li>
+          <li>구글 검색 + 선배 물어보기로 회귀</li>
+          <li>새 AI 영상 봐도 "내 상황엔 안 맞을 듯"으로 끝</li>
+        </ul>
+      </div>
+      <div class="quad-box">
+        <h4>우리가 해결해야 할 문제</h4>
+        <div class="problem"><strong>① 시작점 막힘 해소</strong> — 빈 입력칸 앞에서 첫 한 줄을 어떻게 쓰는지의 step-0 framework</div>
+        <div class="problem"><strong>② 저장된 자료를 자기 상황에 연결</strong> — "이 영상은 어떤 상황 / 어떤 직무 / 어떤 첫 30초"인지 명시 태깅</div>
+        <div class="problem"><strong>③ "나만 못 한다"는 외로움 해소</strong> — "다들도 똑같이 막혔다"는 동료 신호. 운영자가 같은 페르소나임을 명시</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="persona-deep">
+    <div class="persona-head"><div class="num">B</div><h3>이민준 <span class="age-job">(35세, 대기업 전략팀 과장)</span></h3></div>
+    <div class="persona-essence">"AI에 가설을 던지면 반박이 아니라 정당화가 돌아온다 — 신뢰가 무너졌다."</div>
+    <div class="persona-quad">
+      <div class="quad-box">
+        <h4>누구인지</h4>
+        <ul>
+          <li>대기업 전략팀 과장. 신사업 검토·경쟁사 분석·임원 보고서</li>
+          <li>ChatGPT Plus 구독, 주 2~3회 (감소 추세)</li>
+          <li>분석적 톤, 약간 냉소. 처음엔 좋았다가 점점 식음</li>
+          <li>보안 때문에 회사 정보 못 넣음</li>
+        </ul>
+      </div>
+      <div class="quad-box">
+        <h4>핵심 페인 (인용 기반)</h4>
+        <div class="quote">"내 의견을 검증하기보다는 정당화하는 역할을 한 셈이다"</div>
+        <div class="quote">"반박하면 맞아~~ 그러면서 말을 바꿔서 또 거기에 맞게 설명을 잘 해줘"</div>
+        <div class="quote">"세련된 포장지 속 평범한 기성품을 본 기분"</div>
+        <div class="quote">"GPT - 무슨 말이든 씨부림"</div>
+      </div>
+      <div class="quad-box">
+        <h4>현재 행동</h4>
+        <ul>
+          <li>영어 메일 다듬기·회의록 요약만 사용</li>
+          <li>보고서 초안은 거의 안 시킴. 시키면 90% 갈아엎음</li>
+          <li>노션 프롬프트 30개에서 멈춤 (새 시도 동력 없음)</li>
+          <li>컨설팅 출신 동료 어깨너머로 배움</li>
+        </ul>
+      </div>
+      <div class="quad-box">
+        <h4>우리가 해결해야 할 문제</h4>
+        <div class="problem"><strong>① AI 신뢰 영역 식별</strong> — 어디서 믿고 어디서 의심해야 하는지 메타 framework</div>
+        <div class="problem"><strong>② 정당화 깨기</strong> — 가설을 반박시키는 step별 지시법 ("이 의견의 약점 3개", "반대 입장에서 다시")</div>
+        <div class="problem"><strong>③ 실패 사례 라이브러리</strong> — "다른 사람의 실패 사례가 사실은 제일 빨리 배우게 됨" 본인 진술. 솔직한 별로였던 사례 ≥30%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C -->
+  <div class="persona-deep">
+    <div class="persona-head"><div class="num">C</div><h3>김소연 <span class="age-job">(29세, 퍼스널 브랜딩 프리랜서)</span></h3></div>
+    <div class="persona-essence">"AI 강의·자료에 데이고 → 의심 → 그래도 안 쓰면 뒤처질까 봐 → 또 결제 → 또 실망의 무한 루프."</div>
+    <div class="persona-quad">
+      <div class="quad-box">
+        <h4>누구인지</h4>
+        <ul>
+          <li>1인 퍼스널 브랜딩·카피라이팅 프리랜서</li>
+          <li>Claude/ChatGPT/Perplexity 모두 구독 (월 8만원 자비)</li>
+          <li>클라이언트 5명. 인스타·블로그·뉴스레터 다 굴림</li>
+          <li>강의 결제 절반 후회 경험</li>
+        </ul>
+      </div>
+      <div class="quad-box">
+        <h4>핵심 페인 (인용 기반)</h4>
+        <div class="quote">"AI 강의 단돈 3만원에 수강... 너무 실망스러운 결과물이라 제가 알아서 스토리를 짰어요"</div>
+        <div class="quote">"광고만 보고 들어가면 실망할 때 많죠. 그래서 저는 후기..."</div>
+        <div class="quote">"강의 마지막에는 500만원대를 부른다. 미쳤구나"</div>
+        <div class="quote">"솔깃했지만 결국 거절했다"</div>
+      </div>
+      <div class="quad-box">
+        <h4>현재 행동</h4>
+        <ul>
+          <li>유튜브 5분짜리 → 따라했는데 본인 상황 안 맞음</li>
+          <li>강의 결제 → 절반 후회 → 다음엔 의심부터</li>
+          <li>노션 프롬프트 100+ — 거의 안 꺼냄</li>
+          <li>제안서 AI로 90% → 클라이언트한테 들킨 후 직접</li>
+        </ul>
+      </div>
+      <div class="quad-box">
+        <h4>우리가 해결해야 할 문제</h4>
+        <div class="problem"><strong>① "광고 아님" 명시</strong> — 결제 요구 0, 본문 안 어디에도 유료 강의 링크 0이 신뢰 자산</div>
+        <div class="problem"><strong>② 솔직한 실패담 비중 ≥40%</strong> — "잘된 케이스만 자랑하는 콘텐츠는 이제 못 믿어요" 본인 진술</div>
+        <div class="problem"><strong>③ 클라이언트별 "맥락 카드" framework</strong> — 한 번 세팅하면 매번 재활용. 1인 사업가의 시간 효율</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- D -->
+  <div class="persona-deep">
+    <div class="persona-head"><div class="num">D</div><h3>최현수 <span class="age-job">(41세, 중소기업 영업팀장)</span></h3></div>
+    <div class="persona-essence">"한 번에 던지기 → 결과 일반론 → 윗사람 톤 안 맞음 → '역시 AI 안 됨' 결론 → 재시도 X"</div>
+    <div class="persona-quad">
+      <div class="quad-box">
+        <h4>누구인지</h4>
+        <ul>
+          <li>중소기업 영업팀장, 팀원 6명</li>
+          <li>주 업무: 영업 미팅, 제안서 주 2건, 주간 보고서</li>
+          <li>회사가 ChatGPT Team 도입했으나 교육 없음</li>
+          <li>유튜브 5분짜리만. 그 외 학습 시간 없음</li>
+        </ul>
+      </div>
+      <div class="quad-box">
+        <h4>핵심 페인 (인용 기반)</h4>
+        <div class="quote">"'보고서 써줘.' 그리고 실망합니다. 가장 자주 본 실패 패턴"</div>
+        <div class="quote">"팀장 보고용 — '별로네' '써먹을 게 별로 없네'"</div>
+        <div class="quote">"ChatGPT를 이용하더라도 시간이 만만치 않게 오래 걸렸어요"</div>
+        <div class="quote">"AI 티 나면 끝이에요. 윗사람 통과 안 됨"</div>
+      </div>
+      <div class="quad-box">
+        <h4>현재 행동</h4>
+        <ul>
+          <li>처음 한 번 시도 → 1시간 날림 → 그만둠</li>
+          <li>월 1~2회만 사용. 팀원 한 명이 옆에 있을 때만</li>
+          <li>유튜브 5분 영상 좋아요 → 다시 안 봄</li>
+          <li>"AI 안 써. 시간 없어. 윗분들 싫어해" 다른 팀장들도 동일</li>
+        </ul>
+      </div>
+      <div class="quad-box">
+        <h4>우리가 해결해야 할 문제</h4>
+        <div class="problem"><strong>① 진짜 5분 + 영업 직군 특화</strong> — 본인 spec: "글 길면 안 봐요. 우리 직군 진짜 케이스"</div>
+        <div class="problem"><strong>② "본인 것으로 만드는 4단계" 메타</strong> — 거래처 이름 + 실제 일 + 회사 톤 + 윗분 질문 대응</div>
+        <div class="problem"><strong>③ 단계 쪼개기 방법론</strong> — "단계 쪼개야 한다" 인식만 있고 "어떻게 쪼개야 하는지" 모름. 영업 framework로 직접 시연</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- E -->
+  <div class="persona-deep">
+    <div class="persona-head"><div class="num">E</div><h3>정다은 <span class="age-job">(27세, 스타트업 마케터 2년차)</span></h3></div>
+    <div class="persona-essence">"단순한 건 잘 쓰는데 복잡한 업무는 의도를 어떻게 전달할지 framework를 모른다."</div>
+    <div class="persona-quad">
+      <div class="quad-box">
+        <h4>누구인지</h4>
+        <ul>
+          <li>B2C 앱 스타트업 마케터 2년차</li>
+          <li>매일 사용. SNS 캡션·광고 카피 변형은 90% AI</li>
+          <li>ChatGPT Plus 자비 구독</li>
+          <li>회사 안에서 "AI 잘 쓰는 사람" 격차 인식 강함</li>
+        </ul>
+      </div>
+      <div class="quad-box">
+        <h4>핵심 페인 (인용 기반)</h4>
+        <div class="quote">"결과는 기술적으로는 맞았는데 감정적으로 톤이 안 맞았다"</div>
+        <div class="quote">"AI에게 소원이 아닌 의도를 말하세요"</div>
+        <div class="quote">"사실상 누가 AI를 잘 쓰는지 대결"</div>
+        <div class="quote">"표면적이고 핵심 플레이어를 다 놓쳤다. AI는 내부 정보가 없다"</div>
+      </div>
+      <div class="quad-box">
+        <h4>현재 행동</h4>
+        <ul>
+          <li>단순 카피·SNS는 90% AI 그대로</li>
+          <li>캠페인 콘셉트 / 경쟁사 분석은 직접</li>
+          <li>노션 프롬프트 70+ — 카피는 꺼내고 분석은 못 꺼냄</li>
+          <li>"잘 쓰는" 동료 워크플로 관찰만 함, 따라하진 못함</li>
+        </ul>
+      </div>
+      <div class="quad-box">
+        <h4>우리가 해결해야 할 문제</h4>
+        <div class="problem"><strong>① 단순 → 복잡 갭 브리지</strong> — 복잡 업무의 step별 의도 전달 framework</div>
+        <div class="problem"><strong>② 단계별 평가 기준</strong> — "이 결과면 잘됨, 이러면 별로" 명시. 본인이 자기 결과를 평가할 수 있게</div>
+        <div class="problem"><strong>③ "맥락 카드" + 직무 큐레이션</strong> — C와 공유. 마케팅·운영·분석 묶음 직무 태그</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== -->
+<!-- 4. 종합 매트릭스 -->
+<!-- ============================== -->
+<section>
+  <h2>4. 종합 매트릭스 — 한 표로</h2>
+  <div class="section-desc">5명을 같은 축으로 비교. 콘텐츠 spec 결정 시 직접 참조.</div>
+  <table class="matrix">
+    <thead>
+      <tr>
+        <th style="width:8%">페르소나</th>
+        <th style="width:22%">결정타 워딩</th>
+        <th style="width:22%">현재 회피·우회 방식</th>
+        <th style="width:22%">해결해야 할 핵심 1가지</th>
+        <th style="width:13%">시간 요구</th>
+        <th style="width:13%">신뢰 임계</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="p-tag">A</span> 박지현</td>
+        <td>"다들 쓰는데 나만 못 쓰는 것 같다 / 혼자선 어렵다"</td>
+        <td>인스타 저장 200개 → 한 번도 안 꺼냄. 빈칸 앞에서 머리 하얘짐</td>
+        <td>시작점의 첫 한 줄을 어떻게 쓰는지 step-0</td>
+        <td>영상 ≤5분, 글은 OK</td>
+        <td>"왜 이렇게" 미세 차이 설명</td>
+      </tr>
+      <tr>
+        <td><span class="p-tag">B</span> 이민준</td>
+        <td>"정당화한다 / 그럴듯한 기성품"</td>
+        <td>영어 메일·요약만 사용. 보고서는 90% 갈아엎고 결국 직접</td>
+        <td>AI 가설 반박시키는 framework + 신뢰 영역 식별</td>
+        <td>5~10분</td>
+        <td>실패 사례 ≥30%</td>
+      </tr>
+      <tr>
+        <td><span class="p-tag">C</span> 김소연</td>
+        <td>"또 결제 또 실망 / 솔깃했지만 거절"</td>
+        <td>강의 절반 후회. 노션 100+ 안 꺼냄. AI로 한 게 클라이언트한테 들킴</td>
+        <td>"광고 아님" 명시 + 실패담 ≥40% + 맥락 카드</td>
+        <td>5~10분</td>
+        <td>결제 요구 0 + 실패담</td>
+      </tr>
+      <tr>
+        <td><span class="p-tag">D</span> 최현수</td>
+        <td>"보고서 써줘 → 실망 / AI 티 나면 끝"</td>
+        <td>한 번 시도 1시간 날린 후 안 씀. 팀원에게만 가끔 물음</td>
+        <td>영업 5분 framework + "본인 것으로 만드는 4단계"</td>
+        <td>반드시 ≤5분</td>
+        <td>윗사람 통과 4단계 보장</td>
+      </tr>
+      <tr>
+        <td><span class="p-tag">E</span> 정다은</td>
+        <td>"단순한 건 잘 쓰는데 복잡한 건 / 의도 vs 소원"</td>
+        <td>카피는 90% AI 그대로. 캠페인·분석은 직접. 동료 관찰만</td>
+        <td>복잡 업무 step별 의도 전달 + 단계별 평가 기준</td>
+        <td>10~30분 OK</td>
+        <td>잘됨/별로 기준 명시</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================== -->
+<!-- 5. 콘텐츠 예시 후보 -->
+<!-- ============================== -->
+<section>
+  <h2>5. 콘텐츠 예시 후보 — 어떤 것부터 만들지 고민하기</h2>
+  <div class="section-desc">각 카드 = 콘텐츠 1편. 페르소나 어떤 사람이 누구를 커버하는지 / 어떤 형식인지 명시. 첫 콘텐츠 선택의 기준은 (1) 광범위 커버 (2) 형식 시연 가능성 (3) 운영자 본인 자신감.</div>
+  <div class="content-grid">
+
+    <div class="content-card">
+      <div class="priority gold">1순위 ⭐ 첫 콘텐츠 추천</div>
+      <div class="title">"빈 입력칸 앞에서 머리가 하얘질 때 — 같이 첫 한 줄 쓰는 5단계"</div>
+      <div class="who">커버: <span class="p-tag">A</span><span class="p-tag">B</span><span class="p-tag">C</span><span class="p-tag">D</span><span class="p-tag">E</span> 5명 모두</div>
+      <div class="format">
+        <strong>형식</strong>: 운영자 본인의 어제 막혔던 한 줄로 시작 → "이렇게 했더니" 5단계 시연 → 그 중 2단계는 "이래서 별로였음" 솔직 → 다음에 다르게 해볼 가설 → 같은 일 하시는 분들 의견 구함<br>
+        <strong>운영자 톤</strong>: "저도 그 인용 보고 저 같았어요. 그래서 같이 적어가는 노트예요."<br>
+        <strong>예상 시간</strong>: 읽는 데 5분 / 적용 5분
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="priority">2순위</div>
+      <div class="title">"AI가 정당화만 한다? 반박시키는 4가지 지시법"</div>
+      <div class="who">커버: <span class="p-tag">B</span><span class="p-tag">D</span></div>
+      <div class="format">
+        <strong>형식</strong>: 본인이 신사업 가설 시켰던 실패 사례 → 반박 안 시켰을 때 결과 vs 시켰을 때 결과 비교 → 4가지 지시법 (약점 3개·반대 입장·역사적 실패·숨은 가정)<br>
+        <strong>운영자 톤</strong>: "저도 이거 두 달 늦게 깨달았어요"<br>
+        <strong>예상 시간</strong>: 읽는 데 8분 / 적용 10분
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="priority">3순위</div>
+      <div class="title">"클라이언트 제안서 — 매번 새로 쓰지 말고 '맥락 카드' 만들기"</div>
+      <div class="who">커버: <span class="p-tag">C</span><span class="p-tag">D</span></div>
+      <div class="format">
+        <strong>형식</strong>: 본인 클라이언트 1개 가상 사례. 맥락 카드 한 장 만들고 → 그걸 AI에 던지고 → 결과 비교 (맥락 있을 때 vs 없을 때) → "이 카드를 어떻게 효율적으로 관리하는가"<br>
+        <strong>운영자 톤</strong>: "이 한 장 만드는 데 30분 걸리는데 이후 매주 1시간씩 아껴요"<br>
+        <strong>예상 시간</strong>: 읽는 데 10분 / 적용 30분 (한 번)
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="priority">4순위</div>
+      <div class="title">"영업 주간 보고서 5분 framework — 윗사람도 인정할 만한"</div>
+      <div class="who">커버: <span class="p-tag">D</span></div>
+      <div class="format">
+        <strong>형식</strong>: 영업팀장 가상 페르소나. "보고서 써줘" 결과 vs 5단계 후 결과 직접 비교. 끝에 "본인 것으로 만드는 4단계 체크리스트" 첨부 (거래처·실제일·회사톤·질문대응)<br>
+        <strong>운영자 톤</strong>: "저는 영업 출신은 아니지만 이 framework로 보고서 써봤더니..."<br>
+        <strong>예상 시간</strong>: 읽는 데 5분 / 적용 5분
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="priority">5순위</div>
+      <div class="title">"단순한 건 잘 쓰는데 복잡한 건 막힌다면 — 의도(intent) 전달 step별 framework"</div>
+      <div class="who">커버: <span class="p-tag">E</span><span class="p-tag">A</span></div>
+      <div class="format">
+        <strong>형식</strong>: "캠페인 콘셉트 잡아줘" 결과 vs step별 의도 전달 결과 비교. 단계마다 "이 단계에서 전달할 의도는 X" 라벨 + "이 결과면 잘됨, 이러면 별로" 기준 명시<br>
+        <strong>운영자 톤</strong>: "저도 단순 카피는 잘 됐는데 캠페인 들어가니 한참 막혔어요"<br>
+        <strong>예상 시간</strong>: 읽는 데 10분 / 적용 30분
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="priority">6순위</div>
+      <div class="title">"인스타 200개 저장 폴더 한 번에 정리하기 — 못 꺼내는 자료를 쓸 수 있는 자료로"</div>
+      <div class="who">커버: <span class="p-tag">A</span><span class="p-tag">C</span><span class="p-tag">E</span></div>
+      <div class="format">
+        <strong>형식</strong>: 본인 인스타 저장 폴더 실제 캡쳐 → "저도 안 꺼냈어요" 고백 → 자료를 "상황 / 직무 / 첫 30초" 3태그로 재분류하는 5분 framework<br>
+        <strong>운영자 톤</strong>: "이거 하면서 제 자료 80%가 못 쓰는 거였구나 깨달았어요"<br>
+        <strong>예상 시간</strong>: 읽는 데 7분 / 적용 30분
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== -->
+<!-- 6. 콘텐츠 spec -->
+<!-- ============================== -->
+<section>
+  <h2>6. 모든 콘텐츠가 지켜야 할 5가지 — MVP 콘텐츠 spec</h2>
+  <div class="section-desc">5명 페르소나가 데이터에서 요구한 공통 spec. 콘텐츠 1편당 5가지 모두 충족이 디폴트.</div>
+  <div class="spec-list">
+    <div class="spec-item">
+      <div class="n">1</div>
+      <div class="body">
+        <div class="label">시간 라벨 명시</div>
+        <div class="desc">읽는 데 N분 / 적용에 N분. 페르소나 D 결정타. ≤5분 라벨이 진입장벽 해소.</div>
+      </div>
+    </div>
+    <div class="spec-item">
+      <div class="n">2</div>
+      <div class="body">
+        <div class="label">직무 태그 명시</div>
+        <div class="desc">기획·마케팅·운영 / 영업 / 1인 사업 / 전략·분석 묶음. 페르소나 D "정확히 우리 직군" 요구.</div>
+      </div>
+    </div>
+    <div class="spec-item">
+      <div class="n">3</div>
+      <div class="body">
+        <div class="label">step별 "의도(intent)" 라벨</div>
+        <div class="desc">단계마다 "AI에게 전달할 의도는 X. 이게 빠지면 결과가 평범해진다" 명시. 페르소나 E 직접 진단.</div>
+      </div>
+    </div>
+    <div class="spec-item">
+      <div class="n">4</div>
+      <div class="body">
+        <div class="label">"별로였던 사례" ≥30% 분량</div>
+        <div class="desc">단순 자랑 콘텐츠는 즉시 거절. 페르소나 B/C 결정적 신뢰 자산.</div>
+      </div>
+    </div>
+    <div class="spec-item">
+      <div class="n">5</div>
+      <div class="body">
+        <div class="label">"본인 것으로 만드는 4단계" 메타 framework</div>
+        <div class="desc">거래처/현실 데이터/회사 톤/질문 대응. 페르소나 D Q22 직접 정의. AI 결과를 자기 책임화하는 메타.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="footnote">
+  데이터 출처: <code>raw_data/web_quotes_batch1~3.json</code> (68건) + <code>youtube_comments_20260518.json</code> (153건) + <code>naver_20260518.json</code> (1421건) → 정제 <code>normalized/pain_quotes_v2.csv</code> (1568건). 페르소나 매핑: <code>normalized/persona_quotes_v3.json</code>. 인용 전체 인터랙티브 뷰: <code>review.html</code>. 원 시뮬레이션 트랜스크립트: <code>fgd_transcripts/persona_A~E.md</code>, <code>persona_D_v2.md</code>.
+</div>
+
+</div>
+</body>
+</html>

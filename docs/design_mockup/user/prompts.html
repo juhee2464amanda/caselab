@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>바로 쓰는 프롬프트 — 케이스랩</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--bg:#fff;--bg-sub:#f7f7f7;--ink:#191f28;--gray-800:#333d4b;--gray-600:#6b7684;--gray-500:#8b95a1;--gray-400:#b0b8c1;--gray-300:#d1d6db;--gray-200:#e5e8eb;--gray-100:#f2f4f6;--blue:#3182f6;--blue-bg:#ebf4ff}
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{font-size:16px;-webkit-font-smoothing:antialiased}
+    body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;letter-spacing:-0.02em}
+    .keepall{word-break:keep-all;overflow-wrap:break-word}
+    a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer;border:none;background:none}
+
+    .gnb{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--gray-200)}
+    .gnb-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .gnb-logo{font-family:'Playfair Display',serif;font-style:italic;font-size:28px;font-weight:700;letter-spacing:-0.01em}
+    
+    .gnb-right{display:flex;align-items:center;gap:6px}
+    .gnb-nav{display:none;gap:22px;font-size:15px;font-weight:500;color:var(--gray-600);margin-right:16px}
+    .gnb-nav a:hover{color:var(--ink)}.gnb-nav a.on{color:var(--ink);font-weight:700}
+    @media(min-width:768px){.gnb-nav{display:flex}}
+    .gnb-dropdown{position:static}
+    .gnb-dropdown-trigger{display:inline-flex;align-items:center}
+    .mega-menu{display:none;position:absolute;left:0;right:0;top:56px;background:#fff;border-bottom:1px solid var(--gray-200);box-shadow:0 8px 24px rgba(0,0,0,.06);z-index:110}
+    .mega-menu::before{content:'';position:absolute;top:-16px;left:0;right:0;height:16px}
+    .mega-inner{max-width:1100px;margin:0 auto;padding:24px;display:flex;gap:12px;justify-content:center}
+    .mega-card{display:flex;align-items:center;gap:14px;padding:16px 20px;border:1px solid var(--gray-200);border-radius:12px;flex:1;max-width:280px;transition:all .15s}
+    .mega-card:hover{border-color:var(--blue);box-shadow:0 2px 12px rgba(49,130,246,.08)}
+    .mega-card-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+    .mega-card-body{min-width:0}
+    .mega-card-title{font-size:14px;font-weight:700;letter-spacing:-0.02em;margin-bottom:2px}
+    .mega-card-desc{font-size:12px;color:var(--gray-500)}
+    .gnb-dropdown:hover .mega-menu{display:block}
+    .gnb-sub{font-size:14px;font-weight:600;color:#fff;background:var(--blue);padding:7px 16px;border-radius:8px}
+    .gnb-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:var(--gray-600)}
+    .gnb-icon svg{width:20px;height:20px}
+
+    .hero{background:#f7f7f7;padding:48px 0 40px;border-bottom:1px solid var(--gray-200)}
+    @media(min-width:768px){.hero{background:#f7f7f7;padding:64px 0 48px}}
+    .hero-inner{max-width:1100px;margin:0 auto;padding:0 24px}
+    .hero h1{font-size:32px;font-weight:800;letter-spacing:-0.03em;margin-bottom:10px}
+    @media(min-width:768px){.hero h1{font-size:40px}}
+    .hero p{font-size:16px;color:var(--gray-600);max-width:480px}
+
+    .page{max-width:1100px;margin:0 auto;padding:40px 24px 80px;display:flex;gap:48px}
+    .main{flex:1;min-width:0}
+    .sidebar{display:none}
+    @media(min-width:900px){.sidebar{display:block;width:260px;flex-shrink:0}}
+
+    .article{display:flex;gap:20px;padding:24px 0;border-bottom:1px solid var(--gray-200);align-items:flex-start}
+    .article:first-child{padding-top:0}
+    .article:hover .art-title{color:var(--blue)}
+    .art-body{flex:1;min-width:0}
+    .art-tags{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+    .art-tag{font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:2px 8px;border-radius:4px}
+    .art-tag-type{font-size:11px;font-weight:600;color:var(--gray-500);background:var(--gray-100);padding:2px 8px;border-radius:4px}
+    .art-title{font-size:18px;font-weight:700;line-height:1.4;letter-spacing:-0.02em;margin-bottom:6px;transition:color .12s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    @media(min-width:768px){.art-title{font-size:20px}}
+    .art-desc{font-size:14px;color:var(--gray-600);line-height:1.55;margin-bottom:8px}
+    .art-code{font-size:13px;color:var(--gray-500);line-height:1.5;font-family:'SF Mono',Monaco,monospace;background:var(--bg-sub);padding:10px 14px;border-radius:8px;border:1px solid var(--gray-200);margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .art-meta{font-size:13px;color:var(--gray-500)}
+    .copy-btn{font-size:12px;font-weight:600;color:var(--blue);background:var(--blue-bg);padding:4px 10px;border-radius:6px;transition:all .12s;border:none;cursor:pointer}
+    .copy-btn:hover{background:#d4e6fd}
+
+    .filter-box{position:sticky;top:80px}
+    .filter-title{font-size:16px;font-weight:800;letter-spacing:-0.02em;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+    .filter-reset{font-size:13px;font-weight:500;color:var(--gray-400);cursor:pointer}
+    .filter-reset:hover{color:var(--gray-600)}
+    .filter-list{list-style:none}
+    .filter-item{display:flex;align-items:center;gap:10px;padding:10px 0;font-size:15px;font-weight:500;color:var(--gray-600);cursor:pointer;transition:color .12s;border-bottom:1px solid var(--gray-100)}
+    .filter-item:hover{color:var(--ink)}
+    .filter-item.on{color:var(--blue);font-weight:700}
+    .filter-check{width:20px;height:20px;border-radius:4px;border:1.5px solid var(--gray-300);display:flex;align-items:center;justify-content:center;transition:all .12s;flex-shrink:0}
+    .filter-item.on .filter-check{border-color:var(--blue);background:var(--blue)}
+    .filter-item.on .filter-check::after{content:'';width:10px;height:6px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg);margin-top:-2px}
+    .filter-count{margin-left:auto;font-size:13px;color:var(--gray-400);font-weight:500}
+  </style>
+</head>
+<body>
+
+  <header class="gnb">
+    <div class="gnb-inner">
+      <a href="index.html" class="gnb-logo">Caselab</a>
+      <div class="gnb-right">
+        <nav class="gnb-nav">
+          <a href="cases.html">AI 실전케이스</a>
+          <a href="trends.html">AI 트렌드</a>
+          <div class="gnb-dropdown">
+            <a href="#" class="gnb-dropdown-trigger on">자료실 <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style="margin-left:2px;vertical-align:middle"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            <div class="mega-menu">
+              <div class="mega-inner">
+                <a href="tools.html" class="mega-card"><div class="mega-card-icon" style="background:linear-gradient(135deg,#e0e7ff,#f5f3ff)">🔧</div><div class="mega-card-body"><div class="mega-card-title">쓸만한 AI 도구</div><div class="mega-card-desc">이 일엔 이런 도구가 있더라</div></div></a>
+                <a href="prompts.html" class="mega-card" style="border-color:var(--blue)"><div class="mega-card-icon" style="background:linear-gradient(135deg,#d1fae5,#ecfdf5)">📋</div><div class="mega-card-body"><div class="mega-card-title">바로 쓰는 프롬프트</div><div class="mega-card-desc">복사해서 바로 쓰세요</div></div></a>
+                <a href="guides.html" class="mega-card"><div class="mega-card-icon" style="background:linear-gradient(135deg,#dbeafe,#eff6ff)">📘</div><div class="mega-card-body"><div class="mega-card-title">공식 가이드</div><div class="mega-card-desc">OpenAI, Anthropic 공식 문서 핵심</div></div></a>
+              </div>
+            </div>
+          </div>
+          <a href="ebook.html">ebook</a>
+        </nav>
+        <button class="gnb-sub">구독하기</button>
+        <a href="login.html" class="gnb-icon" title="로그인"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a>
+        <a href="#" class="gnb-icon" title="검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></a>
+      </div>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="hero-inner">
+      <h1>바로 쓰는 프롬프트</h1>
+      <p class="keepall">복사 한 번이면 끝. 실무에서 검증된 프롬프트만.</p>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="main">
+
+      <a href="#" class="article">
+        <div class="art-body">
+          <div class="art-tags"><span class="art-tag">기획</span><span class="art-tag-type">프롬프트</span></div>
+          <h2 class="art-title keepall">기획서 첫 페이지— 전제를 찾아주는 프롬프트</h2>
+          <div class="art-code">"다음 문단이 전제로 깔고 있는 가정 5개를 뽑아주세요. 각 가정은 의문문 형태로 다시 써주세요."</div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div class="art-meta">바로 복사 가능</div>
+            <button class="copy-btn" type="button">복사</button>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="article">
+        <div class="art-body">
+          <div class="art-tags"><span class="art-tag">마케팅</span><span class="art-tag-type">프롬프트</span></div>
+          <h2 class="art-title keepall">경쟁사 분석— 서로 모순되는 가설 3개 만들기</h2>
+          <div class="art-code">"다음 질문에 대해, 서로 모순되는 답 3개를 만들어주세요. 각 답이 사실이라면 어떤 데이터로 입증되는지 한 줄로."</div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div class="art-meta">바로 복사 가능</div>
+            <button class="copy-btn" type="button">복사</button>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="article">
+        <div class="art-body">
+          <div class="art-tags"><span class="art-tag">영업</span><span class="art-tag-type">템플릿</span></div>
+          <h2 class="art-title keepall">영업 주간 보고서— 맥락 카드 템플릿</h2>
+          <p class="art-desc keepall">거래처명 / 최근 미팅 내용 / 회사 보고서 톤 / 윗분이 자주 묻는 질문을 한 장에 정리. AI에 던지기 전에 이 카드를 먼저 만들면 결과가 달라짐.</p>
+          <div class="art-meta">읽는데 3분 · 적용 10분</div>
+        </div>
+      </a>
+
+      <a href="#" class="article">
+        <div class="art-body">
+          <div class="art-tags"><span class="art-tag">공통</span><span class="art-tag-type">프롬프트</span></div>
+          <h2 class="art-title keepall">AI 결과물 검증— "이 답의 약점 3개를 찾아줘"</h2>
+          <div class="art-code">"방금 답변에서 사실과 다를 수 있는 부분, 논리적 약점, 빠진 관점 3개를 찾아주세요."</div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div class="art-meta">바로 복사 가능</div>
+            <button class="copy-btn" type="button">복사</button>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="article">
+        <div class="art-body">
+          <div class="art-tags"><span class="art-tag">1인사업</span><span class="art-tag-type">템플릿</span></div>
+          <h2 class="art-title keepall">클라이언트 맥락 카드 — 한 번 만들면 매주 재활용</h2>
+          <p class="art-desc keepall">클라이언트 업종 / 타겟 고객 / 브랜드 톤 / 과거 피드백을 한 장에 정리. 제안서·콘텐츠마다 붙여넣기만 하면 됨.</p>
+          <div class="art-meta">읽는데 5분 · 적용 15분</div>
+        </div>
+      </a>
+
+    </div>
+
+    <aside class="sidebar">
+      <div class="filter-box">
+        <div class="filter-title">직무 카테고리<span class="filter-reset">초기화</span></div>
+        <ul class="filter-list">
+          <li class="filter-item on" data-cat="all"><span class="filter-check"></span>전체<span class="filter-count">5</span></li>
+          <li class="filter-item" data-cat="기획"><span class="filter-check"></span>기획<span class="filter-count">1</span></li>
+          <li class="filter-item" data-cat="마케팅"><span class="filter-check"></span>마케팅<span class="filter-count">1</span></li>
+          <li class="filter-item" data-cat="영업"><span class="filter-check"></span>영업<span class="filter-count">1</span></li>
+          <li class="filter-item" data-cat="1인사업"><span class="filter-check"></span>1인사업<span class="filter-count">1</span></li>
+          <li class="filter-item" data-cat="공통"><span class="filter-check"></span>공통<span class="filter-count">1</span></li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+</body>
+</html>

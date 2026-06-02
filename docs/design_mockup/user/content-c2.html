@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>경쟁사 분석 3시간 → 30분 — 3-스텝 도구 체인 (Snipit · Proby · Screenflow) · Caselab</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--bg:#fff;--bg-sub:#f7f7f7;--ink:#191f28;--gray-800:#333d4b;--gray-600:#6b7684;--gray-500:#8b95a1;--gray-400:#b0b8c1;--gray-300:#d1d6db;--gray-200:#e5e8eb;--gray-100:#f2f4f6;--blue:#3182f6;--blue-bg:#ebf4ff;--green:#03b26c;--red:#f04452}
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{font-size:16px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+    body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;letter-spacing:-0.02em}
+    .keepall{word-break:keep-all;overflow-wrap:break-word}
+    a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer;border:none;background:none}
+
+    .gnb{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--gray-200)}
+    .gnb-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .gnb-logo{font-family:'Playfair Display',serif;font-style:italic;font-size:24px;font-weight:700;letter-spacing:-0.01em}
+    .gnb-right{display:flex;align-items:center;gap:16px}
+    .gnb-back{font-size:14px;font-weight:500;color:var(--gray-600);display:flex;align-items:center;gap:4px}
+    .gnb-back:hover{color:var(--ink)}
+    .gnb-back svg{width:16px;height:16px}
+    .gnb-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:var(--gray-600);transition:background .15s}
+    .gnb-icon:hover{background:var(--gray-100)}
+    .gnb-icon svg{width:20px;height:20px}
+
+    .page-3col{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;gap:0}
+
+    .left-toc{display:none}
+    @media(min-width:1080px){
+      .left-toc{display:block;width:200px;flex-shrink:0;padding:40px 0;padding-right:24px}
+    }
+    .left-toc-inner{position:sticky;top:72px}
+    .lt-title{font-size:12px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:12px}
+    .lt-link{display:block;font-size:13px;font-weight:500;color:var(--gray-500);padding:6px 0;padding-left:12px;border-left:2px solid transparent;transition:all .12s}
+    .lt-link:hover{color:var(--ink)}
+    .lt-link.active{color:var(--blue);border-left-color:var(--blue);font-weight:600}
+
+    .article-wrap{flex:1;min-width:0;max-width:720px;padding:0 24px}
+    @media(min-width:1080px){.article-wrap{padding:0 40px}}
+
+    .right-rec{display:none}
+    @media(min-width:1080px){
+      .right-rec{display:block;width:240px;flex-shrink:0;padding:40px 0;padding-left:24px;border-left:1px solid var(--gray-200)}
+    }
+    .right-rec-inner{position:sticky;top:72px}
+    .rr-title{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-0.02em;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--ink)}
+    .rr-item{display:block;padding:12px 0;border-bottom:1px solid var(--gray-100)}
+    .rr-item:hover .rr-item-title{color:var(--blue)}
+    .rr-item:hover .rr-thumb img{transform:scale(1.05)}
+    .rr-thumb{width:100%;aspect-ratio:16/10;border-radius:8px;overflow:hidden;margin-bottom:6px;background:var(--gray-100)}
+    .rr-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s ease}
+    .rr-tag{font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:1px 6px;border-radius:3px;display:inline-block;margin-bottom:4px}
+    .rr-item-title{font-size:14px;font-weight:700;line-height:1.4;letter-spacing:-0.02em;transition:color .12s;margin-bottom:6px}
+    .rr-item-meta{font-size:11px;color:var(--gray-400)}
+
+    .art-header{padding:40px 0 32px}
+    @media(min-width:768px){.art-header{padding:56px 0 40px}}
+    .art-tag{display:inline-block;font-size:12px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:3px 10px;border-radius:5px;margin-bottom:16px}
+    .art-header h1{font-size:28px;font-weight:800;line-height:1.3;letter-spacing:-0.03em;margin-bottom:12px}
+    @media(min-width:768px){.art-header h1{font-size:36px}}
+    .art-header .subtitle{font-size:17px;color:var(--gray-600);line-height:1.6;margin-bottom:20px;max-width:600px}
+    .art-meta{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--gray-500);padding-bottom:24px;border-bottom:1px solid var(--gray-200)}
+    .art-meta span{display:flex;align-items:center;gap:4px}
+
+    .prose{font-size:16px;line-height:1.8;color:var(--gray-800);letter-spacing:-0.01em}
+    @media(min-width:768px){.prose{font-size:17px}}
+    .prose p{margin-bottom:16px}
+    .prose p+p{margin-top:0}
+    .prose h2{font-size:22px;font-weight:800;letter-spacing:-0.025em;margin:48px 0 16px;color:var(--ink)}
+    @media(min-width:768px){.prose h2{font-size:26px}}
+    .prose h3{font-size:18px;font-weight:700;margin:36px 0 12px;color:var(--ink)}
+    .prose strong{color:var(--ink);font-weight:600}
+    .prose em-blue{color:var(--blue);font-weight:600;font-style:normal}
+
+    .step-head{display:flex;align-items:baseline;gap:10px;margin:48px 0 20px}
+    .step-num{font-size:18px;font-weight:800;color:var(--blue)}
+    .step-label{font-size:15px;color:var(--gray-500)}
+
+    .role-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:16px}
+    @media(min-width:640px){.role-grid{grid-template-columns:1fr 1fr}}
+    .role-card{padding:16px;background:var(--bg-sub);border-radius:10px}
+    .role-card-label{font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px}
+    .role-card p{font-size:14px;color:var(--gray-800);line-height:1.55}
+
+    .prompt-block{position:relative;background:var(--bg-sub);border:1px solid var(--gray-200);border-left:3px solid var(--blue);border-radius:6px;font-family:'SF Mono',Monaco,'Fira Code',monospace;font-size:13px;line-height:1.7;color:var(--ink);padding:16px;padding-top:40px;white-space:pre-wrap;overflow-x:auto;margin-bottom:16px}
+    .copy-btn{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;font-family:'Pretendard',sans-serif;font-size:12px;font-weight:600;color:var(--blue);background:rgba(255,255,255,.7);border:1px solid var(--gray-200);border-radius:5px;cursor:pointer;transition:all .15s}
+    .copy-btn:hover{background:#fff}
+    .copy-btn.copied{color:#fff;background:var(--blue);border-color:var(--blue)}
+
+    .result-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:32px}
+    @media(min-width:640px){.result-grid{grid-template-columns:1fr 1fr}}
+    .result{border-radius:8px;padding:14px 16px;font-size:14px;line-height:1.6;border:1px solid}
+    .result-good{background:#fff;border-color:var(--gray-200)}
+    .result-bad{background:var(--bg-sub);border-color:var(--gray-200)}
+    .result-label{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;margin-bottom:6px}
+    .result-good .result-label{color:var(--blue)}
+    .result-bad .result-label{color:var(--gray-500);text-decoration:line-through}
+
+    .fw-list{list-style:none;margin-bottom:32px}
+    .fw-item{display:flex;gap:16px;padding:12px 0;border-bottom:1px solid var(--gray-100);align-items:flex-start}
+    .fw-num{font-size:20px;font-weight:800;color:var(--gray-200);min-width:32px}
+    .fw-item h4{font-size:15px;font-weight:700;letter-spacing:-0.02em;margin-bottom:2px}
+    .fw-item p{font-size:13px;color:var(--gray-600)}
+
+    .for-who{background:var(--bg-sub);border:1px solid var(--gray-200);border-radius:12px;padding:20px 24px;margin-bottom:32px}
+    .for-who-title{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-0.02em;margin-bottom:12px}
+    .for-who-list{display:flex;flex-direction:column;gap:8px}
+    .for-who-item{display:flex;align-items:flex-start;gap:8px;font-size:14px;color:var(--gray-800);line-height:1.5}
+    .for-who-check{color:var(--blue);font-weight:700;flex-shrink:0;margin-top:1px}
+
+    .stack-strip{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:32px}
+    @media(min-width:640px){.stack-strip{grid-template-columns:1fr 1fr 1fr}}
+    .stack-item{padding:14px 16px;border:1px solid var(--gray-200);border-radius:10px;background:#fff}
+    .stack-item-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+    .stack-icon{font-size:18px}
+    .stack-name{font-size:14px;font-weight:800;letter-spacing:-0.02em}
+    .stack-step{font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:1px 6px;border-radius:3px;margin-left:auto}
+    .stack-role{font-size:12px;color:var(--gray-600);line-height:1.5}
+
+    .highlight-box{background:var(--blue-bg);border-radius:10px;padding:20px 24px;margin:24px 0;font-size:15px;line-height:1.7;color:var(--ink);border-left:3px solid var(--blue)}
+    .highlight-box strong{color:var(--blue)}
+
+    [contenteditable]:focus{outline:none;box-shadow:inset 0 -2px 0 var(--blue)}
+
+    .comments{margin:40px 0;padding-top:32px;border-top:1px solid var(--gray-200)}
+    .comments-head{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+    .comments-title{font-size:18px;font-weight:800;letter-spacing:-0.02em}
+    .comments-count{font-size:14px;font-weight:700;color:var(--blue)}
+    .comment-form{margin-bottom:20px}
+    .comment-input{width:100%;padding:14px;font-size:14px;font-family:inherit;border:1px solid var(--gray-200);border-radius:10px;outline:none;resize:vertical;transition:border-color .15s;color:var(--ink);letter-spacing:-0.01em;min-height:80px}
+    .comment-input:focus{border-color:var(--blue)}
+    .comment-input::placeholder{color:var(--gray-400)}
+    .comment-form-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+    .comment-hint{font-size:12px;color:var(--gray-400)}
+    .comment-submit{padding:8px 18px;font-size:13px;font-weight:600;color:#fff;background:var(--blue);border:none;border-radius:8px;cursor:pointer;transition:background .12s}
+    .comment-submit:hover{background:#1b6ef2}
+    .comment-empty{text-align:center;padding:32px 0;font-size:14px;color:var(--gray-400)}
+
+    .explore{margin:40px 0 48px;padding-top:32px;border-top:1px solid var(--gray-200)}
+    .explore-title{font-size:18px;font-weight:800;letter-spacing:-0.02em;margin-bottom:16px}
+    .explore-scroll{position:relative}
+    .explore-scroll::after{content:'';position:absolute;top:0;right:0;bottom:4px;width:48px;background:linear-gradient(to right,transparent,var(--bg));pointer-events:none;z-index:1}
+    .explore-grid{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;padding-right:48px;scroll-behavior:smooth}
+    .explore-grid::-webkit-scrollbar{display:none}
+    .explore-arrow{position:absolute;top:50%;right:0;transform:translateY(-50%);z-index:2;width:36px;height:36px;border-radius:50%;background:#fff;border:1px solid var(--gray-200);display:flex;align-items:center;justify-content:center;color:var(--gray-500);box-shadow:0 2px 8px rgba(0,0,0,.08);transition:all .12s;cursor:pointer}
+    .explore-arrow:hover{border-color:var(--gray-400);color:var(--ink)}
+    .explore-arrow svg{width:16px;height:16px}
+    .explore-card{display:flex;align-items:center;gap:12px;padding:14px 18px;border:1px solid var(--gray-200);border-radius:12px;flex-shrink:0;transition:all .12s;min-width:180px}
+    .explore-card:hover{border-color:var(--blue);background:var(--bg-sub)}
+    .explore-icon{font-size:24px;flex-shrink:0}
+    .explore-name{font-size:14px;font-weight:700;letter-spacing:-0.02em}
+    .explore-desc{font-size:11px;color:var(--gray-500)}
+
+    .share-section{text-align:center;padding:32px 0;margin:40px 0;border-top:1px solid var(--gray-200);border-bottom:1px solid var(--gray-200)}
+    .share-section .share-text{font-size:15px;font-weight:600;color:var(--gray-800);margin-bottom:16px}
+    .share-btns{display:flex;gap:10px;justify-content:center}
+    .share-btn{display:flex;align-items:center;gap:6px;padding:10px 18px;font-size:13px;font-weight:600;border:1px solid var(--gray-200);border-radius:10px;color:var(--gray-600);transition:all .12s}
+    .share-btn:hover{border-color:var(--gray-400);color:var(--ink);background:var(--bg-sub)}
+    .share-btn svg{width:16px;height:16px}
+    .share-btn.kakao{color:#191919;border-color:#FEE500;background:#FEE500}
+    .share-btn.kakao:hover{background:#fdd835}
+    .share-btn.copied{color:#fff;background:var(--blue);border-color:var(--blue)}
+
+    .actions{display:flex;align-items:center;gap:16px;padding:20px 0;border-top:1px solid var(--gray-200);border-bottom:1px solid var(--gray-200);margin:40px 0}
+    .action-btn{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:var(--gray-600);transition:color .12s;padding:6px 0}
+    .action-btn:hover{color:var(--blue)}
+    .action-btn.active{color:var(--blue)}
+    .action-btn svg{width:18px;height:18px}
+    .action-btn.ml-auto{margin-left:auto}
+
+    .footer{padding:28px 0;border-top:1px solid var(--gray-200)}
+    .footer-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;flex-direction:column;gap:8px}
+    @media(min-width:768px){.footer-inner{flex-direction:row;justify-content:space-between;align-items:center}}
+    .footer-txt{font-size:13px;color:var(--gray-500)}
+    .footer-links{display:flex;gap:16px;font-size:13px;color:var(--gray-500)}
+  </style>
+</head>
+<body>
+
+  <header class="gnb">
+    <div class="gnb-inner">
+      <a href="index.html" class="gnb-logo">Caselab</a>
+      <div class="gnb-right">
+        <a href="tools.html" class="gnb-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          도구 모음
+        </a>
+        <a href="login.html" class="gnb-icon" title="로그인"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-3col">
+
+    <nav class="left-toc">
+      <div class="left-toc-inner">
+        <div class="lt-title">목차</div>
+        <a href="#s1" class="lt-link active" data-section="s1">왜 3시간이 걸렸나</a>
+        <a href="#s2" class="lt-link" data-section="s2">3-스텝 도구 체인</a>
+        <a href="#s3" class="lt-link" data-section="s3">Step 1 · Snipit</a>
+        <a href="#s4" class="lt-link" data-section="s4">Step 2 · Proby</a>
+        <a href="#s5" class="lt-link" data-section="s5">Step 3 · Screenflow</a>
+        <a href="#s6" class="lt-link" data-section="s6">솔직한 후기</a>
+      </div>
+    </nav>
+
+    <div class="article-wrap">
+
+    <div class="art-header">
+      <span class="art-tag" data-content-id="case-03" data-field="tag">실전 케이스 · 마케팅 · #03</span>
+      <h1 class="keepall" data-content-id="case-03" data-field="title">경쟁사 분석 3시간 → 30분, 손이 가장 많이 가던 일을 도구 3개로 묶었다</h1>
+      <p class="subtitle keepall" data-content-id="case-03" data-field="subtitle">Snipit · Proby · Screenflow — 같은 일을 세 번 나눠서 다른 도구로 풀었더니, 가장 시간 잡아먹던 단순 반복이 사라졌다.</p>
+      <div class="art-meta">
+        <span>2026년 5월 27일</span>
+        <span>읽는데 6분</span>
+        <span>적용 30분</span>
+      </div>
+    </div>
+
+    <div class="for-who">
+      <div class="for-who-title">이런 분을 위한 글이에요</div>
+      <div class="for-who-list">
+        <div class="for-who-item">
+          <span class="for-who-check">✓</span>
+          <span>경쟁사 분석 한 번에 반나절씩 사라지는 마케터·기획자</span>
+        </div>
+        <div class="for-who-item">
+          <span class="for-who-check">✓</span>
+          <span>레퍼런스 캡처 → 핀터레스트 저장 → 노션 정리 루틴이 항상 정리가 안 되는 분</span>
+        </div>
+        <div class="for-who-item">
+          <span class="for-who-check">✓</span>
+          <span>한 가지 AI 도구로 다 풀려고 하다가 더 오래 걸린 경험이 있는 분</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="prose keepall">
+
+      <h2 id="s1">왜 3시간이 걸렸나</h2>
+      <p>새 캠페인 톤을 잡기 전, 항상 같은 루틴이 있었습니다. 경쟁사 광고 캡처 → 핀터레스트에서 비주얼 레퍼런스 모으기 → 사용자 인터뷰 짧게 → 타사 랜딩 화면 따라가며 IA 그려보기. <strong>같은 일을 매번 반나절씩</strong> 했어요.</p>
+      <p>처음엔 이걸 한 번에 풀려고 ChatGPT에 통째로 던졌습니다. "경쟁사 A·B·C 분석해서 우리 캠페인 방향 제안해줘." 결과는 항상 비슷했어요 — 출처 없는 일반론.</p>
+      <p><em-blue>한 도구로 다 풀려고 한 게 문제였습니다.</em-blue> 경쟁사 분석은 사실 세 가지 일이 묶여 있는 거였어요: 레퍼런스 수집, 가설 검증, 화면 분석. 각각 잘하는 도구가 따로 있었습니다.</p>
+
+      <h2 id="s2">3-스텝 도구 체인</h2>
+      <p>세 도구를 순서대로 묶었더니, 같은 일이 30분 안에 끝났습니다.</p>
+
+      <div class="stack-strip">
+        <div class="stack-item">
+          <div class="stack-item-head"><span class="stack-icon">🔎</span><span class="stack-name">Snipit</span><span class="stack-step">STEP 1</span></div>
+          <div class="stack-role keepall">레퍼런스 자동 수집 — 경쟁사 광고 흩어진 캡처를 모음</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-item-head"><span class="stack-icon">💬</span><span class="stack-name">Proby</span><span class="stack-step">STEP 2</span></div>
+          <div class="stack-role keepall">AI 심층 인터뷰 — 모은 가설을 사용자에게 검증</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-item-head"><span class="stack-icon">🖼️</span><span class="stack-name">Screenflow</span><span class="stack-step">STEP 3</span></div>
+          <div class="stack-role keepall">화면 플로우 자동 캡처 — 타사 UX를 통째로 가져옴</div>
+        </div>
+      </div>
+
+      <p>아래에서 각 단계를 따로 풀어보겠습니다. 사람이 할 일과 AI(도구)에게 시킬 일을 분리해서 적었어요.</p>
+
+      <div class="step-head"><span class="step-num">Step 1</span><span class="step-label">— Snipit · 레퍼런스 수집</span></div>
+      <p>경쟁사가 어떤 소구점으로 고객을 모으는지 보고 싶을 때, 평소엔 페이스북 광고 라이브러리 + 핀터레스트 + 스크린샷 폴더를 왔다 갔다 했습니다. Snipit은 그걸 한 자리에 모아줍니다.</p>
+      <div class="role-grid">
+        <div class="role-card"><div class="role-card-label">사람이 할 일</div><p>찾고 싶은 방향을 <strong>한 줄</strong>로. "20대 여성, 가을, 향수 광고 톤."</p></div>
+        <div class="role-card"><div class="role-card-label">Snipit에게 시킬 것</div><p>그 한 줄에 맞는 메타(Meta) 광고 + 비주얼 레퍼런스를 자동으로 모으게 한다.</p></div>
+      </div>
+      <div class="result-grid">
+        <div class="result result-good"><div class="result-label">✓ 잘된 것</div><div class="keepall">15분 만에 <em>경쟁사 5곳의 광고 30개</em>가 한 보드에 모임. 카피·비주얼·CTA 톤이 한눈에 비교됨.</div></div>
+        <div class="result result-bad"><div class="result-label">✗ 별로인 것</div><div class="keepall">"향수 광고 트렌드" 너무 넓게 던지면 결과가 흩어짐. <strong>타겟 + 시즌 + 무드</strong> 셋은 한 줄에 같이 있어야 함.</div></div>
+      </div>
+
+      <div class="step-head"><span class="step-num">Step 2</span><span class="step-label">— Proby · 가설 검증</span></div>
+      <p>Snipit으로 본 레퍼런스에서 가설 한 줄이 나옵니다 — "20대 여성은 향 자체보다 '향에 얽힌 기억' 카피에 더 반응할 것이다." 이 가설을 평소엔 친구 5명한테 묻거나 설문폼 돌려서 검증했어요. Proby는 AI가 사용자에게 직접 꼬리질문까지 던집니다.</p>
+      <div class="role-grid">
+        <div class="role-card"><div class="role-card-label">사람이 할 일</div><p>가설 1개를 <strong>의문문</strong>으로. "기억과 묶인 카피가 정말 더 끌리는가?"</p></div>
+        <div class="role-card"><div class="role-card-label">Proby에게 시킬 것</div><p>그 질문을 사용자에게 1차로 던지고, 답변에 맞춰 <em>꼬리질문</em>까지 자동으로 이어가게 한다.</p></div>
+      </div>
+      <div class="result-grid">
+        <div class="result result-good"><div class="result-label">✓ 잘된 것</div><div class="keepall">"기억" 키워드에 반응한 사람이 절반. 그중 <em>"누구의 향이 떠오르는 카피"</em>가 더 강하게 박힌다는 꼬리답변 확보.</div></div>
+        <div class="result result-bad"><div class="result-label">✗ 별로인 것</div><div class="keepall">가설 없이 "사용자 인사이트 좀 알려줘"는 안 됨. 의문문 한 줄이 있어야 꼬리질문이 의미를 가짐.</div></div>
+      </div>
+
+      <div class="step-head"><span class="step-num">Step 3</span><span class="step-label">— Screenflow · 화면 분석</span></div>
+      <p>가설이 검증되면 다음은 "그 카피를 어디에 어떻게 둘 건가." 랜딩 페이지에 적용하려면 타사 랜딩을 통째로 봐야 하는데, 평소엔 스크롤 캡처를 한 땀 한 땀 해서 피그마에 붙였습니다. Screenflow는 URL 하나로 끝납니다.</p>
+      <div class="role-grid">
+        <div class="role-card"><div class="role-card-label">사람이 할 일</div><p>분석할 <strong>경쟁사 URL 3개</strong>를 고른다.</p></div>
+        <div class="role-card"><div class="role-card-label">Screenflow에게 시킬 것</div><p>각 URL의 화면 플로우(Depth)를 통째로 캡처해서 <em>피그마로 한 번에 복사</em>하게 한다.</p></div>
+      </div>
+      <div class="result-grid">
+        <div class="result result-good"><div class="result-label">✓ 잘된 것</div><div class="keepall">3개 랜딩의 첫 화면·스크롤 1·스크롤 2·CTA 위치까지 <em>피그마 한 보드</em>에 정렬. 우리 페이지와 나란히 비교됨.</div></div>
+        <div class="result result-bad"><div class="result-label">✗ 별로인 것</div><div class="keepall">"피그마에서 한 번에 정리해줘"라고 가공까지 시키면 흐트러짐. 일단 <strong>캡처만 가져오고</strong>, 정렬은 사람이.</div></div>
+      </div>
+
+      <h2 id="s6">솔직한 후기</h2>
+      <p>처음에 도구 3개를 동시에 켜두면 더 빠를 줄 알았는데, 그게 오히려 헷갈렸습니다. <strong>Step 1 끝낸 다음 Snipit을 닫고, Step 2 켜서 Proby만 보는 식</strong>이 결과가 훨씬 깔끔했어요. 사람의 집중력은 한 번에 하나의 일밖에 못 하더라고요.</p>
+      <p><em-blue>3시간이 30분으로 줄어든 진짜 이유는 "도구가 빨라서"가 아니라 "일을 세 개로 쪼개서"였습니다.</em-blue> 같은 도구 3개여도 순서 없이 쓰면 다시 3시간 걸릴 것 같아요.</p>
+
+      <div class="highlight-box keepall">
+        <strong>핵심 인사이트:</strong> 한 도구로 다 풀려고 하지 않는 게 핵심. 경쟁사 분석은 (1) 레퍼런스 수집 (2) 가설 검증 (3) 화면 분석 — 세 가지 다른 일이고, 각각 잘하는 도구가 따로 있다.
+      </div>
+
+      <h3>별로였던 것 (이건 따라하지 마세요)</h3>
+      <p>"세 도구 결과를 ChatGPT에 다 던져서 한 번에 보고서 만들어줘" — 결과가 다시 일반론으로 돌아왔습니다. 도구의 강점은 <strong>각자 원본 형태로 두는 데</strong> 있고, 합치는 일은 사람이 마지막에 한 번만 하는 게 맞았습니다.</p>
+      <p>Snipit으로 모은 광고를 보고 가설을 너무 일찍 굳히면, Step 2 Proby의 꼬리질문이 가설을 강화하는 쪽으로만 흐릅니다. <strong>Snipit 결과를 본 직후엔 가설 후보 3개를 같이</strong> 적어두고, Proby로는 가장 약한 가설부터 깨러 갔습니다.</p>
+
+      <h3>다음에 다시 한다면</h3>
+      <p>Step 0을 하나 더 넣을 것 같아요 — 종이에 "이번 캠페인에서 가장 모르는 게 뭔가" 한 줄 적기. 그 한 줄이 Step 1의 입력이 됩니다. 도구 켜기 전 5분이 가장 중요합니다.</p>
+    </div>
+
+    <div class="actions">
+      <button class="action-btn" type="button" id="likeBtn" onclick="handleLike()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <span id="likeBtnText">좋아요</span> <span id="likeCount" style="color:var(--gray-400)"></span>
+      </button>
+      <button class="action-btn ml-auto" type="button" id="saveBtn" onclick="handleSave()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        <span id="saveBtnText">저장</span>
+      </button>
+    </div>
+
+    <div class="share-section">
+      <div class="share-text keepall">이 글이 도움이 됐다면 공유해주세요</div>
+      <div class="share-btns">
+        <button class="share-btn kakao" type="button" onclick="shareKakao()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.477 3 2 6.463 2 10.691c0 2.726 1.8 5.117 4.51 6.473-.145.522-.935 3.367-.968 3.578 0 0-.02.166.088.229.108.063.235.03.235.03.31-.044 3.588-2.342 4.157-2.741.64.09 1.3.14 1.978.14 5.523 0 10-3.463 10-7.709C22 6.463 17.523 3 12 3"/></svg>
+          카카오톡
+        </button>
+        <button class="share-btn" type="button" onclick="shareTwitter()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          X
+        </button>
+        <button class="share-btn" type="button" id="copyLinkBtn" onclick="copyLink()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          링크 복사
+        </button>
+      </div>
+    </div>
+
+    <div class="comments">
+      <div class="comments-head">
+        <span class="comments-title">댓글</span>
+        <span class="comments-count">0</span>
+      </div>
+      <form class="comment-form" onsubmit="return false;">
+        <textarea class="comment-input" rows="3" placeholder="이 글에 대한 생각이나 질문을 남겨주세요."></textarea>
+        <div class="comment-form-footer">
+          <span class="comment-hint">로그인하면 댓글을 작성할 수 있습니다.</span>
+          <button type="submit" class="comment-submit">등록</button>
+        </div>
+      </form>
+      <div class="comment-empty">아직 댓글이 없습니다. 첫 댓글을 남겨보세요.</div>
+    </div>
+
+    <div class="explore">
+      <div class="explore-title">다른 콘텐츠 둘러보기</div>
+      <div class="explore-scroll">
+        <button class="explore-arrow" type="button" onclick="document.getElementById('exploreGrid').scrollLeft+=200">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+        </button>
+        <div class="explore-grid" id="exploreGrid">
+        <a href="cases.html" class="explore-card">
+          <div class="explore-icon">📝</div>
+          <div class="explore-name">실전 케이스</div>
+          <div class="explore-desc">써봤더니 이랬습니다</div>
+        </a>
+        <a href="trends.html" class="explore-card">
+          <div class="explore-icon">📈</div>
+          <div class="explore-name">AI 트렌드</div>
+          <div class="explore-desc">새로 나온 것, 실무자 눈으로</div>
+        </a>
+        <a href="tools.html" class="explore-card">
+          <div class="explore-icon">🔧</div>
+          <div class="explore-name">도구 모음</div>
+          <div class="explore-desc">이 일엔 이런 도구가 있더라</div>
+        </a>
+        <a href="prompts.html" class="explore-card">
+          <div class="explore-icon">📋</div>
+          <div class="explore-name">프롬프트 & 템플릿</div>
+          <div class="explore-desc">복사해서 바로 쓰세요</div>
+        </a>
+        <a href="guides.html" class="explore-card">
+          <div class="explore-icon">📘</div>
+          <div class="explore-name">공식 가이드</div>
+          <div class="explore-desc">공식 문서 핵심 정리</div>
+        </a>
+      </div></div>
+    </div>
+
+    </div>
+
+    <aside class="right-rec">
+      <div class="right-rec-inner">
+        <div class="rr-title">이어서 읽기</div>
+        <a href="content-c1.html" class="rr-item">
+          <span class="rr-tag">마케팅</span>
+          <div class="rr-item-title keepall">외국인 고객 멤버십이 묻혀버린 이유 — AI한테 다시 풀게 한 5줄</div>
+          <div class="rr-thumb"><img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&q=80" alt="" /></div>
+          <div class="rr-item-meta">읽는데 7분</div>
+        </a>
+        <a href="content.html" class="rr-item">
+          <span class="rr-tag">기획</span>
+          <div class="rr-item-title keepall">기획서 첫 페이지가 안 풀릴 때 — '의도' 던지는 5단계</div>
+          <div class="rr-thumb"><img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&q=80" alt="" /></div>
+          <div class="rr-item-meta">읽는데 8분</div>
+        </a>
+        <a href="tools.html" class="rr-item">
+          <span class="rr-tag">도구</span>
+          <div class="rr-item-title keepall">도구 모음 — 직접 써본 AI 도구 디렉토리</div>
+          <div class="rr-thumb"><img src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=80" alt="" /></div>
+          <div class="rr-item-meta">전체 보기</div>
+        </a>
+      </div>
+    </aside>
+
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-txt keepall"><strong style="font-family:'Playfair Display',serif;font-style:italic;font-weight:700">Caselab</strong> — 내 일에 AI를 어떻게 쓸지, 실험하며 찾아가는 공간.</div>
+      <nav class="footer-links">
+        <a href="ebook.html">ebook</a>
+        <a href="#">개인정보 처리방침</a>
+        <span style="color:var(--gray-400)">© 2026</span>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    var tocLinks = document.querySelectorAll('.lt-link');
+    var sections = ['s1','s2','s3','s4','s5','s6'].map(function(id){return document.getElementById(id)}).filter(Boolean);
+    window.addEventListener('scroll', function(){
+      var scrollPos = window.scrollY + 100;
+      var current = '';
+      sections.forEach(function(sec){
+        if(sec.offsetTop <= scrollPos) current = sec.id;
+      });
+      tocLinks.forEach(function(link){
+        link.classList.toggle('active', link.dataset.section === current);
+      });
+    });
+
+    tocLinks.forEach(function(link){
+      link.addEventListener('click', function(e){
+        e.preventDefault();
+        var target = document.getElementById(this.dataset.section);
+        if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+      });
+    });
+
+    function shareKakao() {
+      var url = window.location.href;
+      if (navigator.share) {
+        navigator.share({ title: document.title, url: url });
+      } else {
+        window.open('https://story.kakao.com/share?url=' + encodeURIComponent(url), '_blank', 'width=600,height=400');
+      }
+    }
+    function shareTwitter() {
+      var url = window.location.href;
+      var text = document.querySelector('h1').textContent;
+      window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank', 'width=600,height=400');
+    }
+    function copyLink() {
+      navigator.clipboard.writeText(window.location.href).then(function() {
+        var btn = document.getElementById('copyLinkBtn');
+        btn.classList.add('copied');
+        var orig = btn.innerHTML;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><polyline points="20 6 9 17 4 12"/></svg> 복사됨';
+        setTimeout(function(){ btn.classList.remove('copied'); btn.innerHTML = orig; }, 2000);
+      });
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-config.js"></script>
+  <script>
+    var CID='case-03-three-tool-chain',CTL='경쟁사 분석 3시간 → 30분, 손이 가장 많이 가던 일을 도구 3개로 묶었다';
+    async function initActions(){var l=await isLiked(CID),s=await isSaved(CID),c=await getLikeCount(CID);document.getElementById('likeBtnText').textContent=l?'좋아요 취소':'좋아요';if(l)document.getElementById('likeBtn').classList.add('active');document.getElementById('likeCount').textContent=c>0?c:'';document.getElementById('saveBtnText').textContent=s?'저장됨':'저장';if(s)document.getElementById('saveBtn').classList.add('active')}
+    async function handleLike(){var r=await toggleLike(CID,CTL);if(r===undefined)return;var c=await getLikeCount(CID);document.getElementById('likeBtnText').textContent=r?'좋아요 취소':'좋아요';document.getElementById('likeBtn').classList.toggle('active',r);document.getElementById('likeCount').textContent=c>0?c:''}
+    async function handleSave(){var r=await toggleSave(CID,CTL);if(r===undefined)return;document.getElementById('saveBtnText').textContent=r?'저장됨':'저장';document.getElementById('saveBtn').classList.toggle('active',r)}
+    initActions();
+  </script>
+
+  <script src="../js/content-sync.js"></script>
+</body>
+</html>

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Proby — AI 심층 인터뷰 도구 · Caselab</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--bg:#fff;--bg-sub:#f7f7f7;--ink:#191f28;--gray-800:#333d4b;--gray-600:#6b7684;--gray-500:#8b95a1;--gray-400:#b0b8c1;--gray-300:#d1d6db;--gray-200:#e5e8eb;--gray-100:#f2f4f6;--blue:#3182f6;--blue-bg:#ebf4ff;--green:#03b26c;--green-bg:#e6f7ef;--red:#f04452}
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{font-size:16px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+    body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;letter-spacing:-0.02em}
+    .keepall{word-break:keep-all;overflow-wrap:break-word}
+    a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer;border:none;background:none}
+
+    .gnb{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--gray-200)}
+    .gnb-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .gnb-logo{font-family:'Playfair Display',serif;font-style:italic;font-size:24px;font-weight:700;letter-spacing:-0.01em}
+    .gnb-right{display:flex;align-items:center;gap:16px}
+    .gnb-back{font-size:14px;font-weight:500;color:var(--gray-600);display:flex;align-items:center;gap:4px}
+    .gnb-back:hover{color:var(--ink)}
+    .gnb-back svg{width:16px;height:16px}
+    .gnb-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:var(--gray-600)}
+    .gnb-icon:hover{background:var(--gray-100)}
+    .gnb-icon svg{width:20px;height:20px}
+
+    .page{max-width:1100px;margin:0 auto;padding:32px 24px 72px;display:flex;gap:0}
+
+    .left-toc{display:none}
+    @media(min-width:1000px){
+      .left-toc{display:block;width:200px;flex-shrink:0;padding-right:32px}
+    }
+    .left-toc-inner{position:sticky;top:80px}
+    .lt-title{font-size:12px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:12px}
+    .lt-link{display:block;font-size:13px;font-weight:500;color:var(--gray-500);padding:6px 0;padding-left:12px;border-left:2px solid transparent;transition:all .12s;cursor:pointer}
+    .lt-link:hover{color:var(--ink)}
+    .lt-link.active{color:var(--blue);border-left-color:var(--blue);font-weight:600}
+
+    .main-col{flex:1;min-width:0}
+
+    .crumb{font-size:13px;color:var(--gray-500);margin-bottom:20px;display:flex;align-items:center;gap:6px}
+    .crumb a:hover{color:var(--blue)}
+    .crumb-sep{color:var(--gray-300)}
+
+    .hero{display:grid;grid-template-columns:1fr;gap:24px;margin-bottom:40px}
+    @media(min-width:760px){.hero{grid-template-columns:1fr 1.1fr;gap:36px;align-items:center}}
+    .hero-media{aspect-ratio:16/10;border-radius:14px;overflow:hidden;border:1px solid var(--gray-200);background:var(--gray-100)}
+    .hero-media img{width:100%;height:100%;object-fit:cover;display:block}
+    .hero-info{display:flex;flex-direction:column;gap:14px}
+    .hero-cat{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:4px 10px;border-radius:5px;width:fit-content}
+    .hero h1{font-size:30px;font-weight:800;line-height:1.2;letter-spacing:-0.03em}
+    @media(min-width:768px){.hero h1{font-size:38px}}
+    .hero-tagline{font-size:16px;color:var(--gray-600);line-height:1.6;max-width:520px}
+    .hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+    .hero-tag{font-size:12px;font-weight:600;padding:4px 10px;border-radius:5px}
+    .htag-free{color:var(--green);background:var(--green-bg)}
+    .htag-paid{color:var(--gray-600);background:var(--gray-100)}
+    .htag-target{color:var(--gray-600);background:var(--gray-100)}
+    .hero-cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+    .btn-primary{display:inline-flex;align-items:center;gap:6px;padding:11px 20px;font-size:14px;font-weight:700;color:#fff;background:var(--ink);border-radius:10px;transition:background .12s}
+    .btn-primary:hover{background:#000}
+    .btn-primary svg{width:14px;height:14px}
+    .btn-secondary{display:inline-flex;align-items:center;gap:6px;padding:11px 18px;font-size:14px;font-weight:600;color:var(--gray-800);background:var(--gray-100);border-radius:10px;transition:background .12s}
+    .btn-secondary:hover{background:var(--gray-200)}
+
+    .sec{margin-bottom:48px}
+    .sec-label{font-size:11px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px}
+    .sec h2{font-size:22px;font-weight:800;letter-spacing:-0.025em;margin-bottom:16px;color:var(--ink)}
+    .sec p{font-size:15.5px;line-height:1.75;color:var(--gray-800);max-width:680px}
+    .sec p+p{margin-top:14px}
+    .sec strong{color:var(--ink);font-weight:600}
+    .sec em-blue{color:var(--blue);font-weight:600;font-style:normal}
+
+    .when-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:8px}
+    @media(min-width:640px){.when-grid{grid-template-columns:1fr 1fr}}
+    .when-item{padding:16px 18px;border:1px solid var(--gray-200);border-radius:10px;background:#fff}
+    .when-icon{font-size:18px;margin-bottom:6px;display:inline-block}
+    .when-title{font-size:14px;font-weight:700;letter-spacing:-0.02em;margin-bottom:4px}
+    .when-desc{font-size:13px;color:var(--gray-600);line-height:1.55}
+
+    .feat-grid{display:grid;grid-template-columns:1fr;gap:0;margin-top:8px;border-top:1px solid var(--gray-200)}
+    .feat-item{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--gray-200);align-items:flex-start}
+    .feat-num{font-size:13px;font-weight:800;color:var(--gray-400);min-width:24px;letter-spacing:0.04em}
+    .feat-body{flex:1}
+    .feat-title{font-size:15px;font-weight:700;letter-spacing:-0.02em;margin-bottom:4px;color:var(--ink)}
+    .feat-desc{font-size:13.5px;color:var(--gray-600);line-height:1.6}
+
+    .price-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:8px}
+    @media(min-width:640px){.price-grid{grid-template-columns:1fr 1fr}}
+    .price-item{padding:18px 20px;border:1px solid var(--gray-200);border-radius:12px;background:#fff}
+    .price-name{font-size:13px;font-weight:700;color:var(--gray-500);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:6px}
+    .price-amount{font-size:22px;font-weight:800;letter-spacing:-0.02em;margin-bottom:8px}
+    .price-amount small{font-size:13px;font-weight:500;color:var(--gray-500)}
+    .price-includes{font-size:13px;color:var(--gray-600);line-height:1.55}
+
+    .uc-banner{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--blue-bg);border-radius:10px;font-size:13px;color:var(--gray-800);margin-bottom:14px}
+    .uc-banner svg{width:18px;height:18px;color:var(--blue);flex-shrink:0}
+    .uc-grid{display:grid;grid-template-columns:1fr;gap:14px}
+    @media(min-width:760px){.uc-grid{grid-template-columns:1fr}}
+    .uc-card{display:flex;gap:18px;padding:18px;border:1px solid var(--gray-200);border-radius:12px;transition:all .12s;background:#fff}
+    .uc-card:hover{border-color:var(--blue);box-shadow:0 4px 14px rgba(49,130,246,.06)}
+    .uc-thumb{width:140px;aspect-ratio:16/10;border-radius:8px;overflow:hidden;flex-shrink:0;background:var(--gray-100)}
+    @media(max-width:640px){.uc-thumb{width:96px}}
+    .uc-thumb img{width:100%;height:100%;object-fit:cover}
+    .uc-body{flex:1;min-width:0}
+    .uc-tag{font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:1px 7px;border-radius:3px;display:inline-block;margin-bottom:6px}
+    .uc-title{font-size:15.5px;font-weight:700;letter-spacing:-0.02em;line-height:1.4;margin-bottom:6px;color:var(--ink)}
+    .uc-meta{font-size:12px;color:var(--gray-500)}
+
+    .actions{display:flex;align-items:center;gap:16px;padding:20px 0;border-top:1px solid var(--gray-200);border-bottom:1px solid var(--gray-200);margin:32px 0}
+    .action-btn{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:var(--gray-600);padding:6px 0}
+    .action-btn:hover{color:var(--blue)}
+    .action-btn.active{color:var(--blue)}
+    .action-btn svg{width:18px;height:18px}
+    .action-btn.ml-auto{margin-left:auto}
+
+    .other-title{font-size:16px;font-weight:800;letter-spacing:-0.02em;margin-bottom:14px;color:var(--ink)}
+    .other-grid{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:640px){.other-grid{grid-template-columns:1fr 1fr}}
+    .other-card{display:flex;align-items:center;gap:14px;padding:14px;border:1px solid var(--gray-200);border-radius:10px;transition:all .12s}
+    .other-card:hover{border-color:var(--blue);background:var(--bg-sub)}
+    .other-thumb{width:64px;aspect-ratio:1;border-radius:8px;overflow:hidden;flex-shrink:0;background:var(--gray-100)}
+    .other-thumb img{width:100%;height:100%;object-fit:cover}
+    .other-name{font-size:14px;font-weight:800;letter-spacing:-0.02em}
+    .other-desc{font-size:12px;color:var(--gray-500);margin-top:2px}
+
+    .footer{padding:28px 0;border-top:1px solid var(--gray-200);margin-top:48px}
+    .footer-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--gray-500)}
+    @media(min-width:768px){.footer-inner{flex-direction:row;justify-content:space-between;align-items:center}}
+    .footer-links{display:flex;gap:16px}
+  </style>
+</head>
+<body>
+
+  <header class="gnb">
+    <div class="gnb-inner">
+      <a href="index.html" class="gnb-logo">Caselab</a>
+      <div class="gnb-right">
+        <a href="tools.html" class="gnb-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          도구 모음
+        </a>
+        <a href="login.html" class="gnb-icon" title="로그인"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+
+    <nav class="left-toc" aria-label="페이지 목차">
+      <div class="left-toc-inner">
+        <div class="lt-title">목차</div>
+        <a href="#hero" class="lt-link active" data-section="hero">개요</a>
+        <a href="#about" class="lt-link" data-section="about">어떤 서비스인가요</a>
+        <a href="#when" class="lt-link" data-section="when">언제 쓰면 좋은가요</a>
+        <a href="#features" class="lt-link" data-section="features">주요 기능</a>
+        <a href="#pricing" class="lt-link" data-section="pricing">가격</a>
+        <a href="#use-cases" class="lt-link" data-section="use-cases">실전 사용기</a>
+      </div>
+    </nav>
+
+    <div class="main-col">
+
+    <div class="crumb">
+      <a href="tools.html">도구 모음</a>
+      <span class="crumb-sep">›</span>
+      <span>리서치</span>
+      <span class="crumb-sep">›</span>
+      <span>Proby</span>
+    </div>
+
+    <section class="hero" id="hero">
+      <div class="hero-media">
+        <img src="images/tools/proby.png" alt="Proby 실제 사용 화면 — AI 심층 인터뷰 인터페이스" />
+      </div>
+      <div class="hero-info">
+        <span class="hero-cat">리서치 · 사용자 리서치</span>
+        <h1 class="keepall">Proby</h1>
+        <p class="hero-tagline keepall">AI 인터뷰어가 유저에게 꼬리질문까지 던지는 심층 인터뷰 도구. 1:1 인터뷰의 깊이를 설문의 속도로.</p>
+        <div class="hero-meta">
+          <span class="hero-tag htag-paid">유료</span>
+          <span class="hero-tag htag-target">한국어 지원</span>
+          <span class="hero-tag htag-target">다국어 인터뷰</span>
+        </div>
+        <div class="hero-cta">
+          <a href="https://proby.ai" target="_blank" rel="noopener" class="btn-primary">
+            공식 사이트 방문
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+          </a>
+          <a href="#use-cases" class="btn-secondary">실전 사용기 보기</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="about">
+      <div class="sec-label">어떤 서비스인가요</div>
+      <h2 class="keepall">인터뷰의 깊이를 설문의 속도로</h2>
+      <p class="keepall">단순 객관식 설문은 표면만 긁고 끝납니다. Proby는 <strong>AI 인터뷰어가 사용자의 첫 답변에 따라 꼬리질문을 자동으로 이어가</strong>, 1:1 심층 인터뷰에 가까운 답을 설문처럼 빠르게 모읍니다.</p>
+      <p class="keepall">글로벌 타겟 인터뷰도 자동 번역으로 대화 가능하고, 수집된 응답을 분석해 <strong>페르소나·인사이트까지 자동 도출</strong>. 인터뷰 기획 → 진행 → 분석을 한 도구 안에서 끝낼 수 있어, 평소 며칠 걸리던 정성 리서치가 반나절로 줄어듭니다.</p>
+    </section>
+
+    <section class="sec" id="when">
+      <div class="sec-label">언제 쓰면 좋은가요</div>
+      <h2 class="keepall">이런 일을 할 때 가장 빛납니다</h2>
+      <div class="when-grid">
+        <div class="when-item">
+          <span class="when-icon">🧪</span>
+          <div class="when-title keepall">새 기능·컨셉 검증 전</div>
+          <div class="when-desc keepall">"이 카피가 정말 더 끌리나?" 가설 1개로 50명에게 동시에 깊이 묻고 싶을 때.</div>
+        </div>
+        <div class="when-item">
+          <span class="when-icon">🌐</span>
+          <div class="when-title keepall">글로벌 타겟 리서치</div>
+          <div class="when-desc keepall">영어·일본어 응답자가 모국어로 답해도 한국어로 자동 정리되어 옴.</div>
+        </div>
+        <div class="when-item">
+          <span class="when-icon">👤</span>
+          <div class="when-title keepall">페르소나 도출</div>
+          <div class="when-desc keepall">정성 응답에서 사용자 군집을 자동으로 분류. 인사이트 회의 자료로 바로 사용.</div>
+        </div>
+        <div class="when-item">
+          <span class="when-icon">⏱️</span>
+          <div class="when-title keepall">인터뷰 분석 시간 줄이기</div>
+          <div class="when-desc keepall">녹취 풀어 정리하는 시간이 0. 응답이 들어오는 동시에 핵심 인용·요약 자동 생성.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="features">
+      <div class="sec-label">주요 기능</div>
+      <h2 class="keepall">이 도구가 잘하는 것</h2>
+      <div class="feat-grid">
+        <div class="feat-item">
+          <div class="feat-num">01</div>
+          <div class="feat-body">
+            <div class="feat-title keepall">꼬리질문 자동 생성</div>
+            <div class="feat-desc keepall">응답자가 답할 때마다 의도에 맞는 후속 질문을 AI가 즉석에서 생성. 1:1 인터뷰처럼 깊이가 쌓입니다.</div>
+          </div>
+        </div>
+        <div class="feat-item">
+          <div class="feat-num">02</div>
+          <div class="feat-body">
+            <div class="feat-title keepall">다국어 인터뷰</div>
+            <div class="feat-desc keepall">응답자는 모국어로 답하고, 운영자에게는 한국어로 번역되어 도착. 글로벌 사용자 리서치의 진입 장벽이 사라짐.</div>
+          </div>
+        </div>
+        <div class="feat-item">
+          <div class="feat-num">03</div>
+          <div class="feat-body">
+            <div class="feat-title keepall">페르소나 자동 도출</div>
+            <div class="feat-desc keepall">응답 패턴을 분석해 비슷한 답을 한 사용자끼리 자동 군집. 페르소나 카드로 정리되어 나옴.</div>
+          </div>
+        </div>
+        <div class="feat-item">
+          <div class="feat-num">04</div>
+          <div class="feat-body">
+            <div class="feat-title keepall">인사이트 요약</div>
+            <div class="feat-desc keepall">인터뷰 N개의 핵심 인용·반복 키워드·합의·이견을 자동 정리. 리포트 1차 초안이 자동 생성.</div>
+          </div>
+        </div>
+        <div class="feat-item">
+          <div class="feat-num">05</div>
+          <div class="feat-body">
+            <div class="feat-title keepall">링크 한 줄로 응답자 모집</div>
+            <div class="feat-desc keepall">인터뷰 일정 조율 없이 링크만 공유. 응답자는 원하는 시간에 AI와 대화하면 끝.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="pricing">
+      <div class="sec-label">가격</div>
+      <h2 class="keepall">요금 정보</h2>
+      <div class="price-grid">
+        <div class="price-item">
+          <div class="price-name">Demo</div>
+          <div class="price-amount">데모 예약</div>
+          <div class="price-includes keepall">실제 인터뷰 데모를 받아볼 수 있음. 가입 전에 도구 흐름이 우리 팀에 맞는지 확인하는 용도.</div>
+        </div>
+        <div class="price-item">
+          <div class="price-name">Pro</div>
+          <div class="price-amount">유료 <small>· 공식 사이트에서 확인</small></div>
+          <div class="price-includes keepall">인터뷰 수 확장, 다국어, 페르소나·인사이트 자동 분석 풀 기능. 실제 리서치 프로젝트용.</div>
+        </div>
+      </div>
+      <p style="margin-top:14px;font-size:13px;color:var(--gray-500)">* 정확한 요금은 공식 사이트에서 확인해주세요.</p>
+    </section>
+
+    <section class="sec" id="use-cases">
+      <div class="sec-label">실전 사용기 · 옵션</div>
+      <h2 class="keepall">이 도구를 직접 써본 케이스</h2>
+      <div class="uc-banner keepall">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        실제 업무에 적용해본 케이스가 있을 때만 표시됩니다. 새 사용기는 케이스랩에 글이 올라오면 여기에 자동으로 묶여요.
+      </div>
+      <div class="uc-grid">
+        <a href="content-c2.html" class="uc-card">
+          <div class="uc-thumb"><img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400&q=80" alt="" /></div>
+          <div class="uc-body">
+            <span class="uc-tag">실전 케이스 · 마케팅</span>
+            <h3 class="uc-title keepall">경쟁사 분석 3시간 → 30분, 도구 3개 묶음 케이스</h3>
+            <p class="uc-meta">읽는데 6분 · Snipit · Proby · ScreenFlow</p>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button class="action-btn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        좋아요
+      </button>
+      <button class="action-btn ml-auto" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        저장
+      </button>
+    </div>
+
+    <section class="sec">
+      <div class="other-title">같은 카테고리 도구</div>
+      <div class="other-grid">
+        <a href="tool-snipit.html" class="other-card">
+          <div class="other-thumb"><img src="images/tools/snipit.png" alt="" /></div>
+          <div>
+            <div class="other-name">Snipit</div>
+            <div class="other-desc">경쟁사 광고 큐레이션 · 리서치</div>
+          </div>
+        </a>
+        <a href="#" class="other-card">
+          <div class="other-thumb" style="background:linear-gradient(135deg,#f2f4f6,#e5e8eb);display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.5">🔍</div>
+          <div>
+            <div class="other-name">Perplexity</div>
+            <div class="other-desc">출처 있는 AI 검색 · 리서치</div>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    </div>
+
+  </main>
+
+  <script>
+    var tocLinks = document.querySelectorAll('.lt-link');
+    var sections = ['hero','about','when','features','pricing','use-cases']
+      .map(function(id){return document.getElementById(id)}).filter(Boolean);
+
+    window.addEventListener('scroll', function(){
+      var scrollPos = window.scrollY + 120;
+      var current = sections[0] ? sections[0].id : '';
+      sections.forEach(function(sec){
+        if(sec.offsetTop <= scrollPos) current = sec.id;
+      });
+      tocLinks.forEach(function(link){
+        link.classList.toggle('active', link.dataset.section === current);
+      });
+    });
+
+    tocLinks.forEach(function(link){
+      link.addEventListener('click', function(e){
+        e.preventDefault();
+        var target = document.getElementById(this.dataset.section);
+        if(target){
+          var top = target.getBoundingClientRect().top + window.scrollY - 72;
+          window.scrollTo({top: top, behavior:'smooth'});
+        }
+      });
+    });
+  </script>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="keepall"><strong style="font-family:'Playfair Display',serif;font-style:italic;font-weight:700;color:var(--ink)">Caselab</strong> — 내 일에 AI를 어떻게 쓸지, 실험하며 찾아가는 공간.</div>
+      <nav class="footer-links">
+        <a href="ebook.html">ebook</a>
+        <a href="#">개인정보 처리방침</a>
+        <span style="color:var(--gray-400)">© 2026</span>
+      </nav>
+    </div>
+  </footer>
+
+</body>
+</html>

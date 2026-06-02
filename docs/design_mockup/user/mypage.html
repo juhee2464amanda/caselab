@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>마이페이지 — 케이스랩</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--bg:#fff;--bg-sub:#f7f7f7;--ink:#191f28;--gray-800:#333d4b;--gray-600:#6b7684;--gray-500:#8b95a1;--gray-400:#b0b8c1;--gray-300:#d1d6db;--gray-200:#e5e8eb;--gray-100:#f2f4f6;--blue:#3182f6;--blue-bg:#ebf4ff;--red:#f04452}
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{font-size:16px;-webkit-font-smoothing:antialiased}
+    body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;letter-spacing:-0.02em}
+    .keepall{word-break:keep-all;overflow-wrap:break-word}
+    a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer;border:none;background:none}
+
+    /* GNB */
+    .gnb{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--gray-200)}
+    .gnb-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .gnb-logo{font-family:'Playfair Display',serif;font-style:italic;font-size:28px;font-weight:700;letter-spacing:-0.01em}
+    
+    .gnb-right{display:flex;align-items:center;gap:8px}
+    .gnb-profile{position:relative;display:flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;border-radius:8px;cursor:pointer;transition:background .12s}
+    .gnb-profile:hover{background:var(--gray-100)}
+    .gnb-avatar{width:32px;height:32px;border-radius:50%;background:var(--blue-bg);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--blue);overflow:hidden}
+    .gnb-profile-name{font-size:14px;font-weight:600;color:var(--ink)}
+    .gnb-profile-menu{display:none;position:absolute;top:100%;right:0;margin-top:8px;width:180px;background:#fff;border:1px solid var(--gray-200);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.08);padding:6px;z-index:110}
+    .gnb-profile:hover .gnb-profile-menu{display:block}
+    .pm-item{display:flex;align-items:center;gap:8px;padding:10px 12px;font-size:14px;font-weight:500;color:var(--gray-600);border-radius:8px;transition:all .1s}
+    .pm-item:hover{background:var(--gray-100);color:var(--ink)}
+    .pm-item svg{width:16px;height:16px;flex-shrink:0}
+    .pm-divider{height:1px;background:var(--gray-100);margin:4px 0}
+
+    /* Page */
+    .page{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;min-height:calc(100vh - 56px)}
+    .side-nav{width:200px;flex-shrink:0;padding:32px 0;padding-right:24px;border-right:1px solid var(--gray-200);display:none}
+    @media(min-width:768px){.side-nav{display:block}}
+    .sn-item{display:flex;align-items:center;gap:10px;padding:10px 14px;margin:0 -14px 2px;font-size:14px;font-weight:500;color:var(--gray-600);border-radius:10px;transition:all .12s;cursor:pointer}
+    .sn-item:hover{background:var(--gray-100);color:var(--ink)}
+    .sn-item.on{background:var(--ink);color:#fff}
+    .sn-item svg{width:18px;height:18px;flex-shrink:0}
+    .sn-sub{font-size:11px;color:var(--gray-400);display:block;margin-top:1px}
+    .sn-item.on .sn-sub{color:rgba(255,255,255,.5)}
+
+    .mob-tabs{display:flex;gap:4px;padding:16px 0;overflow-x:auto;border-bottom:1px solid var(--gray-200)}
+    .mob-tabs::-webkit-scrollbar{display:none}
+    @media(min-width:768px){.mob-tabs{display:none}}
+    .mob-tab{padding:8px 14px;font-size:13px;font-weight:600;color:var(--gray-500);border:1px solid var(--gray-200);border-radius:8px;white-space:nowrap}
+    .mob-tab.on{color:#fff;background:var(--ink);border-color:var(--ink)}
+
+    .main{flex:1;padding:32px 0;min-width:0}
+    @media(min-width:768px){.main{padding:32px 0 32px 32px}}
+    .panel{display:none}.panel.on{display:block}
+    .panel-title{font-size:22px;font-weight:800;letter-spacing:-0.03em;margin-bottom:24px}
+
+    .empty{text-align:center;padding:56px 0;color:var(--gray-500)}
+    .empty-icon{font-size:40px;margin-bottom:12px;opacity:.4}
+    .empty-text{font-size:15px;margin-bottom:16px}
+    .empty-cta{display:inline-flex;padding:10px 20px;font-size:14px;font-weight:600;color:#fff;background:var(--blue);border-radius:8px}
+
+    .ci{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--gray-200)}
+    .ci:hover .ci-title{color:var(--blue)}
+    .ci-body{min-width:0;flex:1}
+    .ci-cat{font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:1px 6px;border-radius:3px;display:inline-block;margin-bottom:4px}
+    .ci-title{font-size:15px;font-weight:600;letter-spacing:-0.02em;transition:color .12s}
+    .ci-meta{font-size:12px;color:var(--gray-500);margin-top:2px}
+    .ci-remove{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:6px;color:var(--gray-400);flex-shrink:0}
+    .ci-remove:hover{background:var(--gray-100);color:var(--red)}
+    .ci-remove svg{width:16px;height:16px}
+
+    .form-group{margin-bottom:20px}
+    .form-label{font-size:14px;font-weight:600;margin-bottom:6px;display:block}
+    .form-input{width:100%;max-width:400px;padding:11px 14px;font-size:15px;font-family:inherit;border:1px solid var(--gray-200);border-radius:10px;outline:none;transition:border-color .15s;color:var(--ink)}
+    .form-input:focus{border-color:var(--blue)}
+    .form-input:disabled{background:var(--gray-100);color:var(--gray-500)}
+    .form-input::placeholder{color:var(--gray-400)}
+    .form-hint{font-size:12px;color:var(--gray-500);margin-top:4px}
+    .form-select{width:100%;max-width:400px;padding:11px 14px;font-size:15px;font-family:inherit;border:1px solid var(--gray-200);border-radius:10px;outline:none;color:var(--ink);appearance:none;background:#fff url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23b0b8c1' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 14px center}
+    .btn{padding:10px 20px;font-size:14px;font-weight:600;border-radius:8px;transition:all .12s;display:inline-flex;align-items:center;gap:6px}
+    .btn-primary{color:#fff;background:var(--blue)}.btn-primary:hover{background:#1b6ef2}
+    .btn-outline{color:var(--gray-600);border:1px solid var(--gray-200)}.btn-outline:hover{border-color:var(--gray-400)}
+    .btn-danger{color:var(--red);border:1px solid var(--gray-200)}.btn-danger:hover{background:#fff5f5;border-color:var(--red)}
+    .btn-row{display:flex;gap:8px;margin-top:20px}
+
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--gray-200)}
+    .toggle-label{font-size:14px;font-weight:600}
+    .toggle-desc{font-size:12px;color:var(--gray-500);margin-top:2px}
+    .toggle{width:44px;height:24px;background:var(--gray-300);border-radius:12px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+    .toggle.on{background:var(--blue)}
+    .toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+    .toggle.on::after{transform:translateX(20px)}
+
+    .sub-card{padding:20px;background:var(--bg-sub);border:1px solid var(--gray-200);border-radius:12px;margin-bottom:20px}
+    .sub-card-title{font-size:14px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+    .sub-status{font-size:12px;font-weight:600;color:var(--blue);background:var(--blue-bg);padding:2px 8px;border-radius:4px}
+    .sub-card-desc{font-size:13px;color:var(--gray-600)}
+
+    /* Support tabs */
+    .sup-tab{padding:8px 16px;font-size:13px;font-weight:600;color:var(--gray-500);border:1px solid var(--gray-200);border-radius:8px;transition:all .12s}
+    .sup-tab.on{color:#fff;background:var(--ink);border-color:var(--ink)}
+    .sup-panel{display:none}.sup-panel.on{display:block}
+    .radio-label{display:flex;align-items:center;gap:5px;font-size:14px;color:var(--gray-600);cursor:pointer}
+    .radio-label input{accent-color:var(--blue)}
+
+    /* FAQ */
+    .faq-item{border-bottom:1px solid var(--gray-200)}
+    .faq-q{display:flex;align-items:center;justify-content:space-between;padding:16px 0;font-size:15px;font-weight:600;cursor:pointer;transition:color .12s}
+    .faq-q:hover{color:var(--blue)}
+    .faq-arrow{font-size:12px;color:var(--gray-400);transition:transform .2s}
+    .faq-item.open .faq-arrow{transform:rotate(180deg)}
+    .faq-a{display:none;font-size:14px;color:var(--gray-600);line-height:1.6;padding:0 0 16px}
+    .faq-item.open .faq-a{display:block}
+
+    /* Inquiry history */
+    .inquiry-item{padding:16px 0;border-bottom:1px solid var(--gray-200);cursor:pointer}
+    .inquiry-item:hover .inq-title{color:var(--blue)}
+    .inq-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+    .inq-type{font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:2px 8px;border-radius:4px}
+    .inq-status{font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px}
+    .inq-status.answered{color:var(--green);background:#e8f8f0}
+    .inq-status.waiting{color:var(--gray-500);background:var(--gray-100)}
+    .inq-lock{font-size:11px;color:var(--gray-400)}
+    .inq-date{font-size:12px;color:var(--gray-400);margin-left:auto}
+    .inq-title{font-size:15px;font-weight:600;letter-spacing:-0.02em;transition:color .12s}
+
+    .tool-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+    .tool-chip{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;font-size:13px;font-weight:500;color:var(--gray-600);border:1.5px solid var(--gray-200);border-radius:20px;cursor:pointer;transition:all .12s;user-select:none}
+    .tool-chip:hover{border-color:var(--gray-400)}
+    .tool-chip.on{border-color:var(--blue);background:var(--blue-bg);color:var(--blue);font-weight:600}
+    .tool-chip input{display:none}
+
+    .danger-zone{margin-top:40px;padding:20px;border:1px solid var(--gray-200);border-radius:12px}
+    .dz-title{font-size:15px;font-weight:700;color:var(--red);margin-bottom:4px}
+    .dz-desc{font-size:13px;color:var(--gray-600);margin-bottom:16px}
+  </style>
+</head>
+<body>
+
+  <header class="gnb">
+    <div class="gnb-inner">
+      <a href="index.html" class="gnb-logo">Caselab</a>
+      <div class="gnb-right">
+        <div class="gnb-profile">
+          <div class="gnb-avatar">김</div>
+          <span class="gnb-profile-name">김케랩</span>
+          <div class="gnb-profile-menu">
+            <a href="mypage.html" class="pm-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>마이페이지</a>
+            <a href="mypage.html#profile" class="pm-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>설정</a>
+            <div class="pm-divider"></div>
+            <a href="index.html" class="pm-item" style="color:var(--gray-400)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>로그아웃</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="page">
+    <nav class="side-nav">
+      <div class="sn-item on" data-panel="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><div>프로필<span class="sn-sub">이름·직무·비밀번호</span></div></div>
+      <div class="sn-item" data-panel="library"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><div>저장<span class="sn-sub">저장한 글</span></div></div>
+      <div class="sn-item" data-panel="likes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg><div>좋아요<span class="sn-sub">좋아요한 콘텐츠</span></div></div>
+      <div class="sn-item" data-panel="subscription"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><div>구독·결제<span class="sn-sub">뉴스레터·멤버십</span></div></div>
+      <div class="sn-item" data-panel="ebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><div>ebook<span class="sn-sub">구매한 전자책</span></div></div>
+      <div class="sn-item" data-panel="support"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><div>고객센터<span class="sn-sub">1:1문의·FAQ</span></div></div>
+    </nav>
+
+    <div class="main">
+      <div class="mob-tabs">
+        <button class="mob-tab on" data-panel="profile">프로필</button>
+        <button class="mob-tab" data-panel="library">저장</button>
+        <button class="mob-tab" data-panel="likes">좋아요</button>
+        <button class="mob-tab" data-panel="subscription">구독·결제</button>
+        <button class="mob-tab" data-panel="ebook">ebook</button>
+        <button class="mob-tab" data-panel="support">고객센터</button>
+      </div>
+
+      <!-- 내 서재 -->
+      <div class="panel" id="panel-library">
+        <h2 class="panel-title">저장</h2>
+        <div class="empty">
+          <div class="empty-icon">📖</div>
+          <div class="empty-text keepall">아직 저장한 글이 없습니다.<br>마음에 드는 콘텐츠를 저장하면 여기에 모입니다.</div>
+          <a href="index.html" class="empty-cta">둘러보기</a>
+        </div>
+      </div>
+
+      <!-- 좋아요 -->
+      <div class="panel" id="panel-likes">
+        <h2 class="panel-title">좋아요</h2>
+        <div class="empty">
+          <div class="empty-icon">❤️</div>
+          <div class="empty-text keepall">아직 좋아요한 글이 없습니다.</div>
+          <a href="index.html" class="empty-cta">둘러보기</a>
+        </div>
+      </div>
+
+      <!-- 구독·결제 -->
+      <div class="panel" id="panel-subscription">
+        <h2 class="panel-title">구독·결제</h2>
+        <div class="sub-card">
+          <div class="sub-card-title">뉴스레터 <span class="sub-status">구독 중</span></div>
+          <div class="sub-card-desc">매주 새 글과 AI 트렌드 소식을 이메일로 받고 있습니다.</div>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">뉴스레터 수신</div><div class="toggle-desc">새 글, AI 트렌드 소식을 이메일로 받습니다.</div></div>
+          <div class="toggle on" id="newsToggle"></div>
+        </div>
+        <div class="sub-card" style="margin-top:24px">
+          <div class="sub-card-title">멤버십</div>
+          <div class="sub-card-desc keepall">현재 무료 플랜입니다. 프리미엄 멤버십이 준비되면 알려드릴게요.</div>
+        </div>
+      </div>
+
+      <!-- ebook -->
+      <div class="panel" id="panel-ebook">
+        <h2 class="panel-title">ebook</h2>
+        <div class="empty">
+          <div class="empty-icon">📖</div>
+          <div class="empty-text keepall">아직 구매한 전자책이 없습니다.<br>ebook을 구매하면 여기에서 PDF 다운로드 및 뷰어로 읽을 수 있습니다.</div>
+          <a href="ebook.html" class="empty-cta">둘러보기</a>
+        </div>
+      </div>
+
+      <!-- 고객센터 -->
+      <div class="panel" id="panel-support">
+        <h2 class="panel-title">고객센터</h2>
+
+        <!-- 탭: 1:1문의 / FAQ / 내 문의내역 -->
+        <div style="display:flex;gap:6px;margin-bottom:24px">
+          <button class="sup-tab on" data-sup="inquiry" onclick="switchSup('inquiry',this)">1:1 문의</button>
+          <button class="sup-tab" data-sup="faq" onclick="switchSup('faq',this)">FAQ</button>
+          <button class="sup-tab" data-sup="history" onclick="switchSup('history',this)">내 문의 내역</button>
+        </div>
+
+        <!-- 1:1 문의 -->
+        <div class="sup-panel on" id="sup-inquiry">
+          <form onsubmit="return false;" id="inquiryForm">
+            <div class="form-group">
+              <label class="form-label">문의 유형 <span style="color:var(--red)">*</span></label>
+              <select class="form-select" id="inquiryType">
+                <option value="">선택해주세요</option>
+                <option value="account">계정·로그인</option>
+                <option value="content">콘텐츠 관련</option>
+                <option value="ebook">ebook·결제</option>
+                <option value="bug">오류·버그 신고</option>
+                <option value="suggest">기능 제안</option>
+                <option value="etc">기타</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">제목 <span style="color:var(--red)">*</span></label>
+              <input class="form-input" type="text" placeholder="문의 제목을 입력하세요" id="inquiryTitle" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">내용 <span style="color:var(--red)">*</span></label>
+              <textarea class="form-input" rows="6" placeholder="문의 내용을 자세히 적어주세요." id="inquiryBody" style="resize:vertical"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">공개 여부</label>
+              <div style="display:flex;gap:12px;margin-top:4px">
+                <label class="radio-label"><input type="radio" name="visibility" value="public" checked /> 공개</label>
+                <label class="radio-label"><input type="radio" name="visibility" value="private" onchange="document.getElementById('pwField').style.display=this.checked?'block':'none'" /> 비공개</label>
+              </div>
+            </div>
+            <div class="form-group" id="pwField" style="display:none">
+              <label class="form-label">비밀번호 (비공개 문의)</label>
+              <input class="form-input" type="password" placeholder="비공개 문의 조회 시 필요합니다" style="max-width:300px" />
+            </div>
+            <div class="btn-row">
+              <button type="submit" class="btn btn-primary" onclick="submitInquiry()">문의하기</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- FAQ -->
+        <div class="sup-panel" id="sup-faq">
+          <div class="faq-item">
+            <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+              <span>회원 탈퇴는 어떻게 하나요?</span>
+              <span class="faq-arrow">▾</span>
+            </div>
+            <div class="faq-a keepall">마이페이지 > 프로필 > 하단 "회원 탈퇴" 버튼을 눌러주세요. 탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+              <span>ebook은 어떤 포맷으로 제공되나요?</span>
+              <span class="faq-arrow">▾</span>
+            </div>
+            <div class="faq-a keepall">PDF 다운로드와 웹 전자책 뷰어 두 가지로 제공됩니다. 마이페이지 > 내 서재에서 확인할 수 있습니다.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+              <span>유료 ebook 환불이 가능한가요?</span>
+              <span class="faq-arrow">▾</span>
+            </div>
+            <div class="faq-a keepall">디지털 콘텐츠 특성상 결제 후 7일 이내, 다운로드하지 않은 경우에만 환불이 가능합니다.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+              <span>뉴스레터 수신을 해지하고 싶어요.</span>
+              <span class="faq-arrow">▾</span>
+            </div>
+            <div class="faq-a keepall">마이페이지 > 구독·결제에서 뉴스레터 수신 토글을 끄시면 즉시 해지됩니다.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+              <span>콘텐츠 주제를 제안하고 싶어요.</span>
+              <span class="faq-arrow">▾</span>
+            </div>
+            <div class="faq-a keepall">홈 하단의 "이런 거 다뤄주세요" 섹션에서 주제를 제안하거나, 1:1 문의로 남겨주세요.</div>
+          </div>
+        </div>
+
+        <!-- 내 문의 내역 -->
+        <div class="sup-panel" id="sup-history">
+          <div class="inquiry-item">
+            <div class="inq-header">
+              <span class="inq-type">ebook·결제</span>
+              <span class="inq-status answered">답변 완료</span>
+              <span class="inq-date">2026.05.26</span>
+            </div>
+            <div class="inq-title">프리미엄 ebook 결제 후 다운로드가 안 됩니다</div>
+          </div>
+          <div class="inquiry-item">
+            <div class="inq-header">
+              <span class="inq-type">기능 제안</span>
+              <span class="inq-status waiting">답변 대기</span>
+              <span class="inq-date">2026.05.27</span>
+            </div>
+            <div class="inq-title">프롬프트 즐겨찾기 기능이 있으면 좋겠습니다</div>
+          </div>
+          <div class="inquiry-item private">
+            <div class="inq-header">
+              <span class="inq-type">기타</span>
+              <span class="inq-lock">🔒 비공개</span>
+              <span class="inq-status answered">답변 완료</span>
+              <span class="inq-date">2026.05.20</span>
+            </div>
+            <div class="inq-title">비공개 문의입니다</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 프로필 -->
+      <div class="panel on" id="panel-profile">
+        <h2 class="panel-title">프로필</h2>
+        <form onsubmit="return false;">
+
+          <!-- 필수 -->
+          <div style="margin-bottom:28px">
+            <div style="font-size:12px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:16px">필수 정보</div>
+            <div class="form-group">
+              <label class="form-label">이름 <span style="color:var(--red)">*</span></label>
+              <input class="form-input" type="text" value="김케랩" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">이메일 <span style="color:var(--red)">*</span></label>
+              <input class="form-input" type="email" value="caselab@gmail.com" disabled />
+              <div class="form-hint">이메일은 변경할 수 없습니다.</div>
+            </div>
+          </div>
+
+          <!-- 선택 -->
+          <div style="margin-bottom:28px">
+            <div style="font-size:12px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:16px">선택 정보 <span style="font-size:11px;font-weight:500;text-transform:none;letter-spacing:0">맞춤 콘텐츠 추천에 활용됩니다</span></div>
+            <div class="form-group">
+              <label class="form-label">(선택) 직무</label>
+              <select class="form-select">
+                <option value="">선택 안 함</option>
+                <option value="기획" selected>기획</option>
+                <option value="마케팅">마케팅</option>
+                <option value="영업">영업</option>
+                <option value="1인사업">1인사업 / 프리랜서</option>
+                <option value="기타">기타</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">(선택) 회사 규모</label>
+              <select class="form-select">
+                <option value="">선택 안 함</option>
+                <option value="1인">1인 / 프리랜서</option>
+                <option value="스타트업">스타트업 (1~30명)</option>
+                <option value="중소기업">중소기업 (30~300명)</option>
+                <option value="중견기업">중견기업 (300~1000명)</option>
+                <option value="대기업">대기업 (1000명+)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">(선택) 주로 쓰는 AI 도구</label>
+              <div class="tool-chips" id="toolChips">
+                <label class="tool-chip on"><input type="checkbox" checked />ChatGPT</label>
+                <label class="tool-chip"><input type="checkbox" />Claude</label>
+                <label class="tool-chip"><input type="checkbox" />Perplexity</label>
+                <label class="tool-chip"><input type="checkbox" />Gemini</label>
+                <label class="tool-chip"><input type="checkbox" />Notion AI</label>
+                <label class="tool-chip"><input type="checkbox" />Copilot</label>
+                <label class="tool-chip"><input type="checkbox" />Cursor</label>
+                <label class="tool-chip"><input type="checkbox" />기타</label>
+              </div>
+              <div class="form-hint">복수 선택 가능. 맞춤 콘텐츠 추천에 활용됩니다.</div>
+            </div>
+          </div>
+
+          <div class="btn-row"><button type="submit" class="btn btn-primary">저장</button></div>
+        </form>
+
+        <div style="margin-top:32px;padding-top:24px;border-top:1px solid var(--gray-200)">
+          <div class="form-group">
+            <label class="form-label">비밀번호 변경</label>
+            <input class="form-input" type="password" placeholder="새 비밀번호 (8자 이상)" style="margin-bottom:8px" />
+            <input class="form-input" type="password" placeholder="새 비밀번호 확인" />
+          </div>
+          <div class="btn-row"><button class="btn btn-outline">비밀번호 변경</button></div>
+        </div>
+
+        <div class="danger-zone">
+          <div class="dz-title">회원 탈퇴</div>
+          <div class="dz-desc keepall">탈퇴하면 좋아요, 저장한 글, 프로필 정보가 모두 삭제되며 복구할 수 없습니다.</div>
+          <button class="btn btn-danger">회원 탈퇴</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.sn-item, .mob-tab').forEach(function(item){
+      item.addEventListener('click',function(){
+        var p=this.dataset.panel;
+        document.querySelectorAll('.sn-item').forEach(function(n){n.classList.remove('on')});
+        document.querySelectorAll('.mob-tab').forEach(function(n){n.classList.remove('on')});
+        document.querySelectorAll('.panel').forEach(function(n){n.classList.remove('on')});
+        document.querySelectorAll('[data-panel="'+p+'"]').forEach(function(n){n.classList.add('on')});
+        document.getElementById('panel-'+p).classList.add('on');
+      });
+    });
+    document.getElementById('newsToggle').addEventListener('click',function(){this.classList.toggle('on')});
+    // Support tabs
+    function switchSup(id, btn){
+      document.querySelectorAll('.sup-tab').forEach(function(t){t.classList.remove('on')});
+      document.querySelectorAll('.sup-panel').forEach(function(p){p.classList.remove('on')});
+      btn.classList.add('on');
+      document.getElementById('sup-'+id).classList.add('on');
+    }
+    function submitInquiry(){
+      var type=document.getElementById('inquiryType').value;
+      var title=document.getElementById('inquiryTitle').value.trim();
+      var body=document.getElementById('inquiryBody').value.trim();
+      if(!type){alert('문의 유형을 선택해주세요.');return}
+      if(!title){alert('제목을 입력해주세요.');return}
+      if(!body){alert('내용을 입력해주세요.');return}
+      alert('문의가 등록되었습니다. 내 문의 내역에서 확인할 수 있습니다.');
+    }
+    // Visibility radio
+    document.querySelectorAll('input[name="visibility"]').forEach(function(r){
+      r.addEventListener('change',function(){
+        document.getElementById('pwField').style.display=this.value==='private'?'block':'none';
+      });
+    });
+
+    // Tool chips toggle
+    document.querySelectorAll('.tool-chip').forEach(function(chip){
+      chip.addEventListener('click',function(){this.classList.toggle('on');this.querySelector('input').checked=this.classList.contains('on')});
+    });
+  </script>
+</body>
+</html>

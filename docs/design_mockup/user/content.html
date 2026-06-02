@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>기획서 첫 페이지가 안 풀릴 때 — '의도' 던지는 5단계 · Caselab</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--bg:#fff;--bg-sub:#f7f7f7;--ink:#191f28;--gray-800:#333d4b;--gray-600:#6b7684;--gray-500:#8b95a1;--gray-400:#b0b8c1;--gray-300:#d1d6db;--gray-200:#e5e8eb;--gray-100:#f2f4f6;--blue:#3182f6;--blue-bg:#ebf4ff;--green:#03b26c;--red:#f04452}
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{font-size:16px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+    body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;letter-spacing:-0.02em}
+    .keepall{word-break:keep-all;overflow-wrap:break-word}
+    a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer;border:none;background:none}
+
+    /* GNB */
+    .gnb{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--gray-200)}
+    .gnb-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .gnb-logo{font-family:'Playfair Display',serif;font-style:italic;font-size:28px;font-weight:700;letter-spacing:-0.01em}
+    .gnb-right{display:flex;align-items:center;gap:6px}
+    .gnb-nav{display:none;gap:22px;font-size:15px;font-weight:500;color:var(--gray-600);margin-right:16px}
+    .gnb-nav a:hover{color:var(--ink)}
+    @media(min-width:768px){.gnb-nav{display:flex}}
+    .gnb-back{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;color:var(--gray-500);transition:background .12s}
+    .gnb-back:hover{background:var(--gray-100);color:var(--ink)}
+    .gnb-back svg{width:18px;height:18px}
+    .gnb-dropdown{position:static}
+    .gnb-dropdown-trigger{display:inline-flex;align-items:center}
+    .mega-menu{display:none;position:absolute;left:0;right:0;top:56px;background:#fff;border-bottom:1px solid var(--gray-200);box-shadow:0 8px 24px rgba(0,0,0,.06);z-index:110}
+    .mega-menu::before{content:'';position:absolute;top:-16px;left:0;right:0;height:16px}
+    .mega-inner{max-width:1100px;margin:0 auto;padding:24px;display:flex;gap:12px;justify-content:center}
+    .mega-card{display:flex;align-items:center;gap:14px;padding:16px 20px;border:1px solid var(--gray-200);border-radius:12px;flex:1;max-width:280px;transition:all .15s}
+    .mega-card:hover{border-color:var(--blue);box-shadow:0 2px 12px rgba(49,130,246,.08)}
+    .mega-card-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+    .mega-card-body{min-width:0}
+    .mega-card-title{font-size:14px;font-weight:700;letter-spacing:-0.02em;margin-bottom:2px}
+    .mega-card-desc{font-size:12px;color:var(--gray-500)}
+    .gnb-dropdown:hover .mega-menu{display:block}
+    .gnb-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:var(--gray-600);transition:background .15s}
+    .gnb-icon:hover{background:var(--gray-100)}
+    .gnb-icon svg{width:20px;height:20px}
+
+    /* 3-col layout */
+    .page-3col{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;gap:0}
+
+    /* Left: sticky TOC */
+    .left-toc{display:none}
+    @media(min-width:1080px){
+      .left-toc{display:block;width:200px;flex-shrink:0;padding:40px 0;padding-right:24px}
+    }
+    .left-toc-inner{position:sticky;top:72px}
+    .lt-title{font-size:12px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:12px}
+    .lt-link{display:block;font-size:13px;font-weight:500;color:var(--gray-500);padding:6px 0;padding-left:12px;border-left:2px solid transparent;transition:all .12s}
+    .lt-link:hover{color:var(--ink)}
+    .lt-link.active{color:var(--blue);border-left-color:var(--blue);font-weight:600}
+
+    .article-wrap{flex:1;min-width:0;max-width:720px;padding:0 24px}
+    @media(min-width:1080px){.article-wrap{padding:0 40px}}
+
+    /* Right: 추천 */
+    .right-rec{display:none}
+    @media(min-width:1080px){
+      .right-rec{display:block;width:240px;flex-shrink:0;padding:40px 0;padding-left:24px;border-left:1px solid var(--gray-200)}
+    }
+    .right-rec-inner{position:sticky;top:72px}
+    .rr-title{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-0.02em;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--ink)}
+    .rr-item{display:block;padding:12px 0;border-bottom:1px solid var(--gray-100)}
+    .rr-item:hover .rr-item-title{color:var(--blue)}
+    .rr-item:hover .rr-thumb img{transform:scale(1.05)}
+    .rr-thumb{width:100%;aspect-ratio:16/10;border-radius:8px;overflow:hidden;margin-bottom:6px;background:var(--gray-100)}
+    .rr-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s ease}
+    .rr-tag{font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:1px 6px;border-radius:3px;display:inline-block;margin-bottom:4px}
+    .rr-item-title{font-size:14px;font-weight:700;line-height:1.4;letter-spacing:-0.02em;transition:color .12s;margin-bottom:6px}
+    .rr-item-meta{font-size:11px;color:var(--gray-400)}
+
+    /* Header */
+    .art-header{padding:40px 0 32px}
+    @media(min-width:768px){.art-header{padding:56px 0 40px}}
+    .art-tag{display:inline-block;font-size:12px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:3px 10px;border-radius:5px;margin-bottom:16px}
+    .art-header h1{font-size:28px;font-weight:800;line-height:1.3;letter-spacing:-0.03em;margin-bottom:12px}
+    @media(min-width:768px){.art-header h1{font-size:36px}}
+    .art-header .subtitle{font-size:17px;color:var(--gray-600);line-height:1.6;margin-bottom:20px;max-width:600px}
+    .art-meta{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--gray-500);padding-bottom:24px;border-bottom:1px solid var(--gray-200)}
+    .art-meta span{display:flex;align-items:center;gap:4px}
+
+    /* TOC */
+    .toc{padding:20px 0;margin-bottom:32px;border-bottom:1px solid var(--gray-200)}
+    .toc-label{font-size:12px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px}
+    .toc a{display:block;font-size:14px;font-weight:500;color:var(--gray-600);padding:5px 0;transition:color .12s}
+    .toc a:hover{color:var(--blue)}
+
+    /* Prose */
+    .prose{font-size:16px;line-height:1.8;color:var(--gray-800);letter-spacing:-0.01em}
+    @media(min-width:768px){.prose{font-size:17px}}
+    .prose p{margin-bottom:16px}
+    .prose p+p{margin-top:0}
+    .prose h2{font-size:22px;font-weight:800;letter-spacing:-0.025em;margin:48px 0 16px;color:var(--ink)}
+    @media(min-width:768px){.prose h2{font-size:26px}}
+    .prose h3{font-size:18px;font-weight:700;margin:36px 0 12px;color:var(--ink)}
+    .prose strong{color:var(--ink);font-weight:600}
+    .prose em-blue{color:var(--blue);font-weight:600;font-style:normal}
+
+    /* Step header */
+    .step-head{display:flex;align-items:baseline;gap:10px;margin:48px 0 20px}
+    .step-num{font-size:18px;font-weight:800;color:var(--blue)}
+    .step-label{font-size:15px;color:var(--gray-500)}
+
+    /* Two column: 사람/AI */
+    .role-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:16px}
+    @media(min-width:640px){.role-grid{grid-template-columns:1fr 1fr}}
+    .role-card{padding:16px;background:var(--bg-sub);border-radius:10px}
+    .role-card-label{font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px}
+    .role-card p{font-size:14px;color:var(--gray-800);line-height:1.55}
+
+    /* Prompt block */
+    .prompt-block{position:relative;background:var(--bg-sub);border:1px solid var(--gray-200);border-left:3px solid var(--blue);border-radius:6px;font-family:'SF Mono',Monaco,'Fira Code',monospace;font-size:13px;line-height:1.7;color:var(--ink);padding:16px;padding-top:40px;white-space:pre-wrap;overflow-x:auto;margin-bottom:16px}
+    .copy-btn{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;font-family:'Pretendard',sans-serif;font-size:12px;font-weight:600;color:var(--blue);background:rgba(255,255,255,.7);border:1px solid var(--gray-200);border-radius:5px;cursor:pointer;transition:all .15s}
+    .copy-btn:hover{background:#fff}
+    .copy-btn.copied{color:#fff;background:var(--blue);border-color:var(--blue)}
+
+    /* Result comparison */
+    .result-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:32px}
+    @media(min-width:640px){.result-grid{grid-template-columns:1fr 1fr}}
+    .result{border-radius:8px;padding:14px 16px;font-size:14px;line-height:1.6;border:1px solid}
+    .result-good{background:#fff;border-color:var(--gray-200)}
+    .result-bad{background:var(--bg-sub);border-color:var(--gray-200)}
+    .result-label{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;margin-bottom:6px}
+    .result-good .result-label{color:var(--blue)}
+    .result-bad .result-label{color:var(--gray-500);text-decoration:line-through}
+
+    /* Framework list */
+    .fw-list{list-style:none;margin-bottom:32px}
+    .fw-item{display:flex;gap:16px;padding:12px 0;border-bottom:1px solid var(--gray-100);align-items:flex-start}
+    .fw-num{font-size:20px;font-weight:800;color:var(--gray-200);min-width:32px}
+    .fw-item h4{font-size:15px;font-weight:700;letter-spacing:-0.02em;margin-bottom:2px}
+    .fw-item p{font-size:13px;color:var(--gray-600)}
+
+    /* For who block */
+    .for-who{background:var(--bg-sub);border:1px solid var(--gray-200);border-radius:12px;padding:20px 24px;margin-bottom:32px}
+    .for-who-title{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-0.02em;margin-bottom:12px}
+    .for-who-list{display:flex;flex-direction:column;gap:8px}
+    .for-who-item{display:flex;align-items:flex-start;gap:8px;font-size:14px;color:var(--gray-800);line-height:1.5}
+    .for-who-check{color:var(--blue);font-weight:700;flex-shrink:0;margin-top:1px}
+
+    /* Framework reference */
+    .framework-ref{border:1px solid var(--gray-200);border-radius:12px;overflow:hidden;margin-bottom:32px}
+    .fw-ref-header{display:flex;align-items:center;gap:10px;padding:14px 20px;background:var(--ink);color:#fff}
+    .fw-ref-badge{font-size:10px;font-weight:700;letter-spacing:0.06em;color:var(--blue);background:rgba(49,130,246,.2);padding:3px 8px;border-radius:4px}
+    .fw-ref-title{font-size:14px;font-weight:700}
+    .fw-ref-body{padding:20px}
+    .fw-ref-name{font-size:17px;font-weight:800;letter-spacing:-0.02em;margin-bottom:8px}
+    .fw-ref-desc{font-size:14px;color:var(--gray-600);line-height:1.6;margin-bottom:16px}
+    .fw-ref-source{border-top:1px solid var(--gray-200);padding-top:16px}
+    .fw-ref-link{display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--bg-sub);border-radius:10px;transition:background .12s}
+    .fw-ref-link:hover{background:var(--gray-100)}
+    .fw-ref-link-thumb{width:48px;height:48px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--gray-200)}
+    .fw-ref-link-body{min-width:0}
+    .fw-ref-link-label{font-size:11px;font-weight:600;color:var(--gray-500);margin-bottom:2px}
+    .fw-ref-link-title{font-size:14px;font-weight:700;letter-spacing:-0.02em;margin-bottom:2px}
+    .fw-ref-link-meta{font-size:12px;color:var(--blue);font-weight:500}
+
+    /* Inline edit */
+    [contenteditable]:focus{outline:none;box-shadow:inset 0 -2px 0 var(--blue)}
+
+    /* Comments */
+    .comments{margin:40px 0;padding-top:32px;border-top:1px solid var(--gray-200)}
+    .comments-head{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+    .comments-title{font-size:18px;font-weight:800;letter-spacing:-0.02em}
+    .comments-count{font-size:14px;font-weight:700;color:var(--blue)}
+    .comment-form{margin-bottom:20px}
+    .comment-input{width:100%;padding:14px;font-size:14px;font-family:inherit;border:1px solid var(--gray-200);border-radius:10px;outline:none;resize:vertical;transition:border-color .15s;color:var(--ink);letter-spacing:-0.01em;min-height:80px}
+    .comment-input:focus{border-color:var(--blue)}
+    .comment-input::placeholder{color:var(--gray-400)}
+    .comment-form-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+    .comment-hint{font-size:12px;color:var(--gray-400)}
+    .comment-submit{padding:8px 18px;font-size:13px;font-weight:600;color:#fff;background:var(--blue);border:none;border-radius:8px;cursor:pointer;transition:background .12s}
+    .comment-submit:hover{background:#1b6ef2}
+    .comment-empty{text-align:center;padding:32px 0;font-size:14px;color:var(--gray-400)}
+
+    /* Explore other content */
+    .explore{margin:40px 0 48px;padding-top:32px;border-top:1px solid var(--gray-200)}
+    .explore-title{font-size:18px;font-weight:800;letter-spacing:-0.02em;margin-bottom:16px}
+    .explore-scroll{position:relative}
+    .explore-scroll::after{content:'';position:absolute;top:0;right:0;bottom:4px;width:48px;background:linear-gradient(to right,transparent,var(--bg));pointer-events:none;z-index:1}
+    .explore-grid{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;padding-right:48px;scroll-behavior:smooth}
+    .explore-grid::-webkit-scrollbar{display:none}
+    .explore-arrow{position:absolute;top:50%;right:0;transform:translateY(-50%);z-index:2;width:36px;height:36px;border-radius:50%;background:#fff;border:1px solid var(--gray-200);display:flex;align-items:center;justify-content:center;color:var(--gray-500);box-shadow:0 2px 8px rgba(0,0,0,.08);transition:all .12s;cursor:pointer}
+    .explore-arrow:hover{border-color:var(--gray-400);color:var(--ink)}
+    .explore-arrow svg{width:16px;height:16px}
+    .explore-card{display:flex;align-items:center;gap:12px;padding:14px 18px;border:1px solid var(--gray-200);border-radius:12px;flex-shrink:0;transition:all .12s;min-width:180px}
+    .explore-card:hover{border-color:var(--blue);background:var(--bg-sub)}
+    .explore-icon{font-size:28px;flex-shrink:0}
+    .explore-name{font-size:14px;font-weight:700;letter-spacing:-0.02em}
+    .explore-desc{font-size:11px;color:var(--gray-500)}
+
+    /* Highlight box */
+    .highlight-box{background:var(--blue-bg);border-radius:10px;padding:20px 24px;margin:24px 0;font-size:15px;line-height:1.7;color:var(--ink);border-left:3px solid var(--blue)}
+    .highlight-box strong{color:var(--blue)}
+
+    /* Share section */
+    .share-section{text-align:center;padding:32px 0;margin:40px 0;border-top:1px solid var(--gray-200);border-bottom:1px solid var(--gray-200)}
+    .share-section .share-text{font-size:15px;font-weight:600;color:var(--gray-800);margin-bottom:16px}
+    .share-btns{display:flex;gap:10px;justify-content:center}
+    .share-btn{display:flex;align-items:center;gap:6px;padding:10px 18px;font-size:13px;font-weight:600;border:1px solid var(--gray-200);border-radius:10px;color:var(--gray-600);transition:all .12s}
+    .share-btn:hover{border-color:var(--gray-400);color:var(--ink);background:var(--bg-sub)}
+    .share-btn svg{width:16px;height:16px}
+    .share-btn.kakao{color:#191919;border-color:#FEE500;background:#FEE500}
+    .share-btn.kakao:hover{background:#fdd835}
+    .share-btn.copied{color:#fff;background:var(--blue);border-color:var(--blue)}
+
+    /* Related tools */
+    .rel-tools{margin:32px 0 48px}
+    .rel-tools-title{font-size:16px;font-weight:800;letter-spacing:-0.02em;margin-bottom:14px}
+    .rel-tools-grid{display:flex;gap:10px;overflow-x:auto}
+    .rel-tool{display:flex;align-items:center;gap:10px;padding:12px 16px;border:1px solid var(--gray-200);border-radius:10px;flex-shrink:0;transition:all .12s;min-width:200px}
+    .rel-tool:hover{border-color:var(--blue);background:var(--bg-sub)}
+    .rel-tool-icon{width:36px;height:36px;border-radius:8px;background:var(--gray-100);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+    .rel-tool-name{font-size:14px;font-weight:700;letter-spacing:-0.02em}
+    .rel-tool-desc{font-size:11px;color:var(--gray-500)}
+
+    /* Actions */
+    .actions{display:flex;align-items:center;gap:16px;padding:20px 0;border-top:1px solid var(--gray-200);border-bottom:1px solid var(--gray-200);margin:40px 0}
+    .action-btn{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:var(--gray-600);transition:color .12s;padding:6px 0}
+    .action-btn:hover{color:var(--blue)}
+    .action-btn.active{color:var(--blue)}
+    .action-btn svg{width:18px;height:18px}
+    .action-btn.ml-auto{margin-left:auto}
+
+    /* Related */
+    .related{margin-bottom:64px}
+    .related-title{font-size:16px;font-weight:800;letter-spacing:-0.02em;margin-bottom:16px}
+    .related-item{display:block;padding:14px 0;border-bottom:1px solid var(--gray-200)}
+    .related-item:hover .ri-title{color:var(--blue)}
+    .ri-tag{font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:1px 6px;border-radius:3px;display:inline-block;margin-bottom:4px}
+    .ri-title{font-size:16px;font-weight:700;letter-spacing:-0.02em;transition:color .12s;margin-bottom:2px}
+    .ri-meta{font-size:12px;color:var(--gray-500)}
+
+    /* Footer */
+    .footer{padding:28px 0;border-top:1px solid var(--gray-200)}
+    .footer-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;flex-direction:column;gap:8px}
+    @media(min-width:768px){.footer-inner{flex-direction:row;justify-content:space-between;align-items:center}}
+    .footer-txt{font-size:13px;color:var(--gray-500)}
+    .footer-links{display:flex;gap:16px;font-size:13px;color:var(--gray-500)}
+  </style>
+</head>
+<body>
+
+  <!-- GNB -->
+  <header class="gnb">
+    <div class="gnb-inner">
+      <div style="display:flex;align-items:center;gap:12px">
+        <a href="javascript:history.back()" class="gnb-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </a>
+        <a href="index.html" class="gnb-logo">Caselab</a>
+      </div>
+      <div class="gnb-right">
+        <nav class="gnb-nav">
+          <a href="cases.html">AI 실전케이스</a>
+          <a href="trends.html">AI 트렌드</a>
+          <div class="gnb-dropdown">
+            <a href="#" class="gnb-dropdown-trigger">자료실 <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style="margin-left:2px;vertical-align:middle"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            <div class="mega-menu">
+              <div class="mega-inner">
+                <a href="tools.html" class="mega-card"><div class="mega-card-icon" style="background:linear-gradient(135deg,#e0e7ff,#f5f3ff)">🔧</div><div class="mega-card-body"><div class="mega-card-title">쓸만한 AI 도구</div><div class="mega-card-desc">이 일엔 이런 도구가 있더라</div></div></a>
+                <a href="prompts.html" class="mega-card"><div class="mega-card-icon" style="background:linear-gradient(135deg,#d1fae5,#ecfdf5)">📋</div><div class="mega-card-body"><div class="mega-card-title">바로 쓰는 프롬프트</div><div class="mega-card-desc">복사해서 바로 쓰세요</div></div></a>
+                <a href="guides.html" class="mega-card"><div class="mega-card-icon" style="background:linear-gradient(135deg,#dbeafe,#eff6ff)">📘</div><div class="mega-card-body"><div class="mega-card-title">공식 가이드</div><div class="mega-card-desc">OpenAI, Anthropic 공식 문서 핵심</div></div></a>
+              </div>
+            </div>
+          </div>
+          <a href="ebook.html">ebook</a>
+        </nav>
+        <a href="login.html" class="gnb-icon" title="로그인"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-3col">
+
+    <!-- Left: sticky 목차 -->
+    <nav class="left-toc">
+      <div class="left-toc-inner">
+        <div class="lt-title">목차</div>
+        <a href="#s1" class="lt-link active" data-section="s1">이 일의 본질</a>
+        <a href="#s2" class="lt-link" data-section="s2">일 푸는 순서</a>
+        <a href="#s3" class="lt-link" data-section="s3">단계 × AI 실행</a>
+        <a href="#s4" class="lt-link" data-section="s4">솔직한 후기</a>
+      </div>
+    </nav>
+
+    <!-- Center: 본문 -->
+    <div class="article-wrap">
+
+    <!-- Header -->
+    <div class="art-header">
+      <span class="art-tag" data-content-id="case-01" data-field="tag">실전 케이스 · 기획 · #01</span>
+      <h1 class="keepall" data-content-id="case-01" data-field="title">기획서 첫 페이지가 안 풀릴 때— '의도' 던지는 5단계</h1>
+      <p class="subtitle keepall" data-content-id="case-01" data-field="subtitle">빈 입력칸 앞에서 막막한 이유는 AI가 부족해서가 아니라, 의도가 흐려서다.</p>
+      <div class="art-meta">
+        <span>2026년 5월 22일</span>
+        <span>읽는데 8분</span>
+        <span>적용 30분</span>
+      </div>
+    </div>
+
+    <!-- 이런 분을 위한 글 -->
+    <div class="for-who">
+      <div class="for-who-title">이런 분을 위한 글이에요</div>
+      <div class="for-who-list">
+        <div class="for-who-item">
+          <span class="for-who-check">✓</span>
+          <span>기획서 앞에서 빈 입력칸만 보면 머리가 하얘지는 분</span>
+        </div>
+        <div class="for-who-item">
+          <span class="for-who-check">✓</span>
+          <span>AI에게 뭘 시켜야 할지 모르겠어서 "기획서 써줘" 한 줄로 끝나는 분</span>
+        </div>
+        <div class="for-who-item">
+          <span class="for-who-check">✓</span>
+          <span>AI 결과물이 그럴듯한데 윗사람한테 가져가면 항상 막히는 분</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 적용된 프레임워크 -->
+    <div class="framework-ref">
+      <div class="fw-ref-header">
+        <div class="fw-ref-badge">FRAMEWORK</div>
+        <div class="fw-ref-title">이 글에 적용된 업무 프레임워크</div>
+      </div>
+      <div class="fw-ref-body">
+        <div class="fw-ref-name">가설 기반 기획법 (Hypothesis-Driven Planning)</div>
+        <p class="fw-ref-desc keepall">문제정의 → 가설 → 검증 → 실행 → 측정의 5단계로 기획서를 구조화하는 방법론. 맥킨지·BCG 등 컨설팅펌에서 쓰는 가설 중심 사고법을 기획서 작성에 적용했습니다.</p>
+        <div class="fw-ref-source">
+          <a href="https://youtube.com/watch?v=l-sHPi44l1U" target="_blank" class="fw-ref-link">
+            <div class="fw-ref-link-thumb">
+              <img src="https://i.ytimg.com/vi/l-sHPi44l1U/mqdefault.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:6px" alt="" />
+            </div>
+            <div class="fw-ref-link-body">
+              <div class="fw-ref-link-label">참고 영상 · 생각정리알고리즘</div>
+              <div class="fw-ref-link-title keepall">기획의 정석</div>
+              <div class="fw-ref-link-meta">YouTube에서 보기 →</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="prose keepall">
+
+      <!-- [1] -->
+      <h2 id="s1">이 일의 본질</h2>
+      <p>기획서는 <em-blue>답을 적는 자리가 아니라 질문을 적는 자리</em-blue>입니다. 처음에 빈 화면 앞에서 막히는 이유는, 무엇을 묻고 싶은지가 아직 자기 안에서도 흐리기 때문입니다.</p>
+      <p>AI를 켜기 전, 기획서가 풀어야 하는 건 하나입니다 — "내가 지금 무엇을 모르고 있는가." 이 질문이 또렷해지면 AI는 그 다음부터 무서울 정도로 빨라집니다.</p>
+      <p>그래서 이 케이스의 첫 단계는 AI 프롬프트가 아니라 종이 한 장입니다. 종이에 한 문단을 적고, 그 다음에 AI가 그 문단의 <em>전제</em>를 비춰주게 합니다. 5단계 전체가 이 구조의 반복입니다.</p>
+
+      <!-- [2] -->
+      <h2 id="s2">일 푸는 순서 — Framework</h2>
+      <p>기획서를 푸는 머리 안 순서는 다섯입니다. AI 없이도 이 순서는 같습니다.</p>
+
+      <ol class="fw-list">
+        <li class="fw-item"><span class="fw-num">01</span><div><h4>문제정의</h4><p>우리는 무엇을 모르고 있나.</p></div></li>
+        <li class="fw-item"><span class="fw-num">02</span><div><h4>가설</h4><p>답이 어디 있을 것 같은가.</p></div></li>
+        <li class="fw-item"><span class="fw-num">03</span><div><h4>검증방법</h4><p>어떻게 확인할 것인가.</p></div></li>
+        <li class="fw-item"><span class="fw-num">04</span><div><h4>실행안</h4><p>그래서 무엇을 할 것인가.</p></div></li>
+        <li class="fw-item"><span class="fw-num">05</span><div><h4>측정</h4><p>잘 됐는지 어떻게 알 것인가.</p></div></li>
+      </ol>
+
+      <!-- [3] -->
+      <h2 id="s3">각 단계 × AI 실행</h2>
+      <p>단계마다 사람이 먼저 손으로 만든 입력이 있어야 AI 출력이 쓸 만합니다.</p>
+
+      <!-- Step 1 -->
+      <div class="step-head"><span class="step-num">Step 1</span><span class="step-label">— 문제정의</span></div>
+      <div class="role-grid">
+        <div class="role-card"><div class="role-card-label">사람이 할 일</div><p>현재 알고 있는 것·모르는 것을 <strong>한 문단으로</strong> 적는다.</p></div>
+        <div class="role-card"><div class="role-card-label">AI에게 시킬 것</div><p>그 문단에서 "전제로 깔고 있는 것"을 찾아내게 한다.</p></div>
+      </div>
+      <div class="prompt-block"><button class="copy-btn" data-copy><span class="label">복사</span></button>다음 문단은 [업무 맥락]에 대해 내가 지금 알고 있는 것이다.
+이 문단이 전제로 깔고 있는 가정 5개를 뽑아주세요.
+각 가정은 한 줄로, 의문문 형태로 다시 써주세요.
+
+[문단 붙여넣기]</div>
+      <div class="result-grid">
+        <div class="result result-good"><div class="result-label">✓ 잘된 것</div><div class="keepall">"사용자가 매주 같은 화면에서 막힌다는 게 <em>정말 매주인가, 처음 시작할 때만인가</em>?"</div></div>
+        <div class="result result-bad"><div class="result-label">✗ 별로인 것</div><div class="keepall">"사용자 인터뷰가 필요합니다." — 다음 단계 답을 미리 줌.</div></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-head"><span class="step-num">Step 2</span><span class="step-label">— 가설</span></div>
+      <div class="role-grid">
+        <div class="role-card"><div class="role-card-label">사람이 할 일</div><p>Step 1에서 나온 의문 중 <strong>가장 답답한 것 1개</strong>를 고른다.</p></div>
+        <div class="role-card"><div class="role-card-label">AI에게 시킬 것</div><p>그 질문에 대해 <em>서로 모순되는</em> 답 3가지를 만들게 한다.</p></div>
+      </div>
+      <div class="prompt-block"><button class="copy-btn" data-copy><span class="label">복사</span></button>다음 질문에 대해, 서로 모순되는 답 3개를 만들어주세요.
+각 답이 사실이라면 어떤 데이터로 입증되는지 한 줄로 덧붙여주세요.
+선호하는 답을 고르지 마세요.
+
+질문: [질문 붙여넣기]</div>
+      <div class="result-grid">
+        <div class="result result-good"><div class="result-label">✓ 잘된 것</div><div class="keepall">A "처음 시작할 때만 막힘 → 첫 3분 행동 로그", B "매주 막힘 → 주간 로그 비교"</div></div>
+        <div class="result result-bad"><div class="result-label">✗ 별로인 것</div><div class="keepall">"사용자에게 직접 물어보세요." — 가설 없이 회피.</div></div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-head"><span class="step-num">Step 3</span><span class="step-label">— 검증방법</span></div>
+      <div class="role-grid">
+        <div class="role-card"><div class="role-card-label">사람이 할 일</div><p>가설 중 <strong>가장 빨리 답이 나올 것</strong>을 1개 고른다.</p></div>
+        <div class="role-card"><div class="role-card-label">AI에게 시킬 것</div><p>그 가설을 <em>1주일 안에</em> 검증하는 방법 3가지를 제안하게 한다.</p></div>
+      </div>
+      <div class="prompt-block"><button class="copy-btn" data-copy><span class="label">복사</span></button>다음 가설을 1주일 안에 검증하는 방법 3가지를 제안하세요.
+각 방법은:
+- 무엇을 측정하는가
+- 누구에게 시키는가
+- 시간 비용 (시간 단위)
+- 한계 (이걸로 못 잡는 것)
+
+가설: [가설 붙여넣기]</div>
+
+      <!-- Step 4 -->
+      <div class="step-head"><span class="step-num">Step 4</span><span class="step-label">— 실행안</span></div>
+      <div class="role-grid">
+        <div class="role-card"><div class="role-card-label">사람이 할 일</div><p>검증방법 1개를 골라 <strong>실행 단위</strong>로 쪼갠다.</p></div>
+        <div class="role-card"><div class="role-card-label">AI에게 시킬 것</div><p>각 단위를 "이번 주 안에 할 일"로 다시 써주게 한다.</p></div>
+      </div>
+      <div class="prompt-block"><button class="copy-btn" data-copy><span class="label">복사</span></button>다음 검증방법을 이번 주 안에 끝낼 작업 5개로 쪼개주세요.
+각 작업은:
+- 동사로 시작
+- 산출물 1개
+- 예상 소요시간
+
+검증방법: [검증방법 붙여넣기]</div>
+
+      <!-- Step 5 -->
+      <div class="step-head"><span class="step-num">Step 5</span><span class="step-label">— 측정</span></div>
+      <div class="role-grid">
+        <div class="role-card"><div class="role-card-label">사람이 할 일</div><p>작업이 끝났을 때의 "성공" 기준을 <strong>한 줄</strong>로.</p></div>
+        <div class="role-card"><div class="role-card-label">AI에게 시킬 것</div><p>그 기준이 <em>실패</em>했다는 걸 가장 빨리 알 시그널 3가지를 정의하게 한다.</p></div>
+      </div>
+      <div class="prompt-block"><button class="copy-btn" data-copy><span class="label">복사</span></button>다음 작업의 성공 기준이 [기준]입니다.
+이 기준이 실패했다는 걸 가장 빨리 알 수 있는 시그널 3가지를 정의해주세요.
+
+작업: [작업 붙여넣기]</div>
+
+      <!-- [4] -->
+      <h2 id="s4">솔직한 후기</h2>
+      <p>처음 이 5단계를 만들 때, 저도 Step 1에서 두 시간 멍하니 있었습니다. 결국 종이에 한 문단 쓰는 게 가장 오래 걸렸고, AI는 그 다음부터 빨라졌습니다.</p>
+      <p><em-blue>AI는 Step 1·2(질문 만들기)에서 가장 약했고, Step 3·4(쪼개기·실행안)에서 강했습니다.</em-blue> Step 5는 사실 AI 없이 사람이 하는 게 더 빠릅니다.</p>
+
+      <div class="highlight-box keepall">
+        <strong>핵심 인사이트:</strong> AI를 켜기 전에 종이에 한 문단을 먼저 쓰는 게 가장 빠른 길이었습니다. AI는 질문 만들기(Step 1·2)에서 약하고, 쪼개기·실행안(Step 3·4)에서 강합니다.
+      </div>
+
+      <h3>별로였던 것 (이건 따라하지 마세요)</h3>
+      <p>한 번에 5단계 다 돌리려고 했더니 AI가 가운데부터 헷갈렸습니다. <strong>한 단계씩 끊어서 새 대화창</strong>으로 가야 합니다.</p>
+      <p>프롬프트에 "예시"를 넣었더니 AI가 그 예시만 베껴왔습니다. 예시는 빼는 게 더 잘 나왔습니다.</p>
+
+      <h3>다음에 다시 한다면</h3>
+      <p>Step 1에서 한 시간 정도는 일부러 AI를 안 켤 것 같습니다. 종이와 펜으로 한 문단을 다 쓴 다음에 AI를 켜는 게, 결국 가장 빠른 길이었습니다.</p>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button class="action-btn" type="button" id="likeBtn" onclick="handleLike()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <span id="likeBtnText">좋아요</span> <span id="likeCount" style="color:var(--gray-400)"></span>
+      </button>
+      <button class="action-btn ml-auto" type="button" id="saveBtn" onclick="handleSave()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        <span id="saveBtnText">저장</span>
+      </button>
+    </div>
+
+    <!-- Share -->
+    <div class="share-section">
+      <div class="share-text keepall">이 글이 도움이 됐다면 공유해주세요</div>
+      <div class="share-btns">
+        <button class="share-btn kakao" type="button" onclick="shareKakao()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.477 3 2 6.463 2 10.691c0 2.726 1.8 5.117 4.51 6.473-.145.522-.935 3.367-.968 3.578 0 0-.02.166.088.229.108.063.235.03.235.03.31-.044 3.588-2.342 4.157-2.741.64.09 1.3.14 1.978.14 5.523 0 10-3.463 10-7.709C22 6.463 17.523 3 12 3"/></svg>
+          카카오톡
+        </button>
+        <button class="share-btn" type="button" onclick="shareTwitter()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          X
+        </button>
+        <button class="share-btn" type="button" id="copyLinkBtn" onclick="copyLink()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          링크 복사
+        </button>
+      </div>
+    </div>
+
+    <!-- 댓글 -->
+    <div class="comments">
+      <div class="comments-head">
+        <span class="comments-title">댓글</span>
+        <span class="comments-count">0</span>
+      </div>
+      <form class="comment-form" onsubmit="return false;">
+        <textarea class="comment-input" rows="3" placeholder="이 글에 대한 생각이나 질문을 남겨주세요."></textarea>
+        <div class="comment-form-footer">
+          <span class="comment-hint">로그인하면 댓글을 작성할 수 있습니다.</span>
+          <button type="submit" class="comment-submit">등록</button>
+        </div>
+      </form>
+      <div class="comment-empty">아직 댓글이 없습니다. 첫 댓글을 남겨보세요.</div>
+    </div>
+
+    <!-- 다른 콘텐츠 둘러보기 -->
+    <div class="explore">
+      <div class="explore-title">다른 콘텐츠 둘러보기</div>
+      <div class="explore-scroll">
+        <button class="explore-arrow" type="button" onclick="document.getElementById('exploreGrid').scrollLeft+=200">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+        </button>
+        <div class="explore-grid" id="exploreGrid">
+        <a href="cases.html" class="explore-card">
+          <div class="explore-icon">📝</div>
+          <div class="explore-name">AI 실전케이스</div>
+          <div class="explore-desc">써봤더니 이랬습니다</div>
+        </a>
+        <a href="trends.html" class="explore-card">
+          <div class="explore-icon">📈</div>
+          <div class="explore-name">AI 트렌드</div>
+          <div class="explore-desc">새로 나온 것, 실무자 눈으로</div>
+        </a>
+        <a href="tools.html" class="explore-card">
+          <div class="explore-icon">🔧</div>
+          <div class="explore-name">쓸만한 AI 도구</div>
+          <div class="explore-desc">이 일엔 이런 도구가 있더라</div>
+        </a>
+        <a href="prompts.html" class="explore-card">
+          <div class="explore-icon">📋</div>
+          <div class="explore-name">바로 쓰는 프롬프트</div>
+          <div class="explore-desc">복사해서 바로 쓰세요</div>
+        </a>
+        <a href="guides.html" class="explore-card">
+          <div class="explore-icon">📘</div>
+          <div class="explore-name">공식 가이드</div>
+          <div class="explore-desc">공식 문서 핵심 정리</div>
+        </a>
+      </div></div>
+    </div>
+
+    </div><!-- /article-wrap -->
+
+    <!-- Right: 이어서 읽기 -->
+    <aside class="right-rec">
+      <div class="right-rec-inner">
+        <div class="rr-title">이어서 읽기</div>
+        <a href="#" class="rr-item">
+          <span class="rr-tag">기획</span>
+          <div class="rr-item-title keepall">AI가 정당화만 한다? 반박시키는 4가지 지시법</div>
+          <div class="rr-thumb"><img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&q=80" alt="" /></div>
+          <div class="rr-item-meta">읽는데 8분</div>
+        </a>
+        <a href="#" class="rr-item">
+          <span class="rr-tag">마케팅</span>
+          <div class="rr-item-title keepall">경쟁사 분석, AI가 표면만 긁고 끝나는 이유</div>
+          <div class="rr-thumb"><img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&q=80" alt="" /></div>
+          <div class="rr-item-meta">읽는데 7분</div>
+        </a>
+        <a href="#" class="rr-item">
+          <span class="rr-tag">영업</span>
+          <div class="rr-item-title keepall">윗사람 톤에 안 맞는 결과물 — 3단계</div>
+          <div class="rr-thumb"><img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&q=80" alt="" /></div>
+          <div class="rr-item-meta">읽는데 6분</div>
+        </a>
+      </div>
+    </aside>
+
+  </div><!-- /page-3col -->
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-txt keepall"><strong style="font-family:'Playfair Display',serif;font-style:italic;font-weight:700">Caselab</strong> — 내 일에 AI를 어떻게 쓸지, 실험하며 찾아가는 공간.</div>
+      <nav class="footer-links">
+        <a href="ebook.html">ebook</a>
+        <a href="#">개인정보 처리방침</a>
+        <span style="color:var(--gray-400)">© 2026</span>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    // Sticky TOC — scroll spy
+    var tocLinks = document.querySelectorAll('.lt-link');
+    var sections = ['s1','s2','s3','s4'].map(function(id){return document.getElementById(id)}).filter(Boolean);
+    window.addEventListener('scroll', function(){
+      var scrollPos = window.scrollY + 100;
+      var current = '';
+      sections.forEach(function(sec){
+        if(sec.offsetTop <= scrollPos) current = sec.id;
+      });
+      tocLinks.forEach(function(link){
+        link.classList.toggle('active', link.dataset.section === current);
+      });
+    });
+
+    // Smooth scroll for TOC links
+    tocLinks.forEach(function(link){
+      link.addEventListener('click', function(e){
+        e.preventDefault();
+        var target = document.getElementById(this.dataset.section);
+        if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+      });
+    });
+
+    // Share
+    function shareKakao() {
+      // Kakao SDK 필요 — MVP에서는 모바일 공유 fallback
+      var url = window.location.href;
+      if (navigator.share) {
+        navigator.share({ title: document.title, url: url });
+      } else {
+        window.open('https://story.kakao.com/share?url=' + encodeURIComponent(url), '_blank', 'width=600,height=400');
+      }
+    }
+    function shareTwitter() {
+      var url = window.location.href;
+      var text = document.querySelector('h1').textContent;
+      window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank', 'width=600,height=400');
+    }
+    function copyLink() {
+      navigator.clipboard.writeText(window.location.href).then(function() {
+        var btn = document.getElementById('copyLinkBtn');
+        btn.classList.add('copied');
+        btn.querySelector('span') || btn.append('');
+        var orig = btn.innerHTML;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><polyline points="20 6 9 17 4 12"/></svg> 복사됨';
+        setTimeout(function(){ btn.classList.remove('copied'); btn.innerHTML = orig; }, 2000);
+      });
+    }
+
+    // Copy buttons
+    document.querySelectorAll('[data-copy]').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        var block = this.closest('.prompt-block');
+        if(!block) return;
+        var text = block.innerText.replace(/^\s*복사\s*/m,'').trim();
+        try {
+          await navigator.clipboard.writeText(text);
+          var label = this.querySelector('.label');
+          this.classList.add('copied');
+          if(label) label.textContent='복사됨';
+          setTimeout(function(){btn.classList.remove('copied');if(label)label.textContent='복사'},1600);
+        } catch(e){}
+      });
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-config.js"></script>
+  <script>
+    var CID='case-01-planning-5steps',CTL='기획서 첫 페이지가 안 풀릴 때 — 의도 던지는 5단계';
+    async function initActions(){var l=await isLiked(CID),s=await isSaved(CID),c=await getLikeCount(CID);document.getElementById('likeBtnText').textContent=l?'좋아요 취소':'좋아요';if(l)document.getElementById('likeBtn').classList.add('active');document.getElementById('likeCount').textContent=c>0?c:'';document.getElementById('saveBtnText').textContent=s?'저장됨':'저장';if(s)document.getElementById('saveBtn').classList.add('active')}
+    async function handleLike(){var r=await toggleLike(CID,CTL);if(r===undefined)return;var c=await getLikeCount(CID);document.getElementById('likeBtnText').textContent=r?'좋아요 취소':'좋아요';document.getElementById('likeBtn').classList.toggle('active',r);document.getElementById('likeCount').textContent=c>0?c:''}
+    async function handleSave(){var r=await toggleSave(CID,CTL);if(r===undefined)return;document.getElementById('saveBtnText').textContent=r?'저장됨':'저장';document.getElementById('saveBtn').classList.toggle('active',r)}
+    initActions();
+  </script>
+
+  <!-- 콘텐츠 동기화 (admin만 편집 가능) -->
+  <script src="../js/content-sync.js"></script>
+</body>
+</html>

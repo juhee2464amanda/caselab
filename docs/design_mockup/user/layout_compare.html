@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>레이아웃 비교 — A / B / C</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css" />
+  <style>
+    :root {
+      --ink:#191f28;--gray-800:#333d4b;--gray-600:#6b7684;--gray-500:#8b95a1;
+      --gray-400:#b0b8c1;--gray-300:#d1d6db;--gray-200:#e5e8eb;--gray-100:#f2f4f6;
+      --blue:#3182f6;--blue-bg:#ebf4ff;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Pretendard',-apple-system,sans-serif;background:#e5e8eb;color:var(--ink);line-height:1.5;letter-spacing:-0.02em;padding:32px 24px}
+    .keepall{word-break:keep-all}
+
+    h1{font-size:24px;font-weight:800;text-align:center;margin-bottom:8px;letter-spacing:-0.03em}
+    .page-desc{text-align:center;font-size:14px;color:var(--gray-600);margin-bottom:32px}
+
+    .grid{display:grid;grid-template-columns:1fr;gap:32px;max-width:1200px;margin:0 auto}
+    @media(min-width:1100px){.grid{grid-template-columns:1fr 1fr 1fr}}
+
+    .col{border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.08)}
+    .col-label{padding:14px 20px;font-size:14px;font-weight:800;color:#fff;text-align:center;letter-spacing:-0.02em}
+    .col-label span{font-size:12px;font-weight:500;opacity:.8;display:block;margin-top:2px}
+
+    /* ── shared mock elements ── */
+    .mock{overflow:hidden}
+    .sec{padding:28px 20px}
+    .sec-title{font-size:15px;font-weight:800;letter-spacing:-0.02em;margin-bottom:12px}
+    .hero-mock{display:flex;gap:16px;align-items:center}
+    .hero-text{flex:1}
+    .hero-text .eye{font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:2px 6px;border-radius:3px;display:inline-block;margin-bottom:6px}
+    .hero-text h3{font-size:14px;font-weight:800;line-height:1.3;letter-spacing:-0.02em;margin-bottom:4px}
+    .hero-text p{font-size:11px;color:var(--gray-500)}
+    .hero-thumb{width:120px;height:80px;border-radius:8px;background:#dbeafe;flex-shrink:0}
+    .arrows{display:flex;gap:4px;margin-top:8px}
+    .arr{width:28px;height:28px;border-radius:50%;border:1px solid var(--gray-200);background:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--gray-400)}
+
+    .item{padding:10px 0;border-bottom:1px solid var(--gray-200)}
+    .item:last-child{border-bottom:none}
+    .item .cat{font-size:9px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:1px 5px;border-radius:3px;display:inline-block;margin-bottom:3px}
+    .item h4{font-size:12px;font-weight:700;letter-spacing:-0.02em;margin-bottom:2px}
+    .item p{font-size:10px;color:var(--gray-500)}
+
+    .series-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .s-card{border:1px solid var(--gray-200);border-radius:10px;overflow:hidden}
+    .s-thumb{height:48px;display:flex;align-items:center;justify-content:center;font-size:20px}
+    .s-body{padding:8px 10px}
+    .s-body h4{font-size:11px;font-weight:800;letter-spacing:-0.02em}
+    .s-body p{font-size:9px;color:var(--gray-500);margin-top:1px}
+
+    .vote-line{display:flex;align-items:center;gap:6px;padding:5px 0;font-size:11px}
+    .vote-btn{font-size:10px;font-weight:700;color:var(--gray-400);border:1px solid var(--gray-200);border-radius:4px;padding:2px 6px;background:#fff}
+    .suggest-mock{display:flex;gap:6px;margin-top:8px}
+    .suggest-mock input{flex:1;padding:6px 8px;font-size:10px;border:1px solid var(--gray-200);border-radius:6px;background:#f7f7f7;outline:none;font-family:inherit}
+    .suggest-mock button{padding:6px 10px;font-size:10px;font-weight:600;color:#fff;background:var(--blue);border:none;border-radius:6px}
+
+    .divider{height:1px;background:var(--gray-200);margin:0}
+
+
+    /* ═══ OPTION A specific ═══ */
+    .optA .col-label{background:var(--blue)}
+    .optA .mock{background:#fff}
+    .optA .sec-alt{background:#f7f7f7}
+
+    /* ═══ OPTION B specific ═══ */
+    .optB .col-label{background:#7c3aed}
+    .optB .mock{background:#f2f4f6;padding:16px}
+    .optB .card-wrap{background:#fff;border-radius:12px;padding:20px;margin-bottom:12px;border:1px solid var(--gray-200)}
+    .optB .card-wrap:last-child{margin-bottom:0}
+    .optB .sec{padding:0}
+
+    /* ═══ OPTION C specific ═══ */
+    .optC .col-label{background:var(--ink)}
+    .optC .mock{background:#fff}
+    .optC .sec-gap{padding:32px 20px}
+    .optC .thick-line{height:1px;background:var(--gray-300);margin:0 20px}
+  </style>
+</head>
+<body>
+
+<h1>홈 레이아웃 비교</h1>
+<p class="page-desc">3가지 안을 비교해보세요. 각 안의 섹션 구분 방식이 다릅니다.</p>
+
+<div class="grid">
+
+  <!-- ═══════════════════════════════════ -->
+  <!-- OPTION A: 배경색 교차 -->
+  <!-- ═══════════════════════════════════ -->
+  <div class="col optA">
+    <div class="col-label">안 A — 배경색 교차<span>흰색 ↔ 연회색 번갈아</span></div>
+    <div class="mock">
+
+      <!-- 히어로 -->
+      <div class="sec">
+        <div class="hero-mock">
+          <div class="hero-text">
+            <span class="eye">실전 케이스 · 기획</span>
+            <h3 class="keepall">기획서 첫 페이지가 안 풀릴 때</h3>
+            <p>읽는데 8분</p>
+            <div class="arrows"><span class="arr">&lt;</span><span class="arr">&gt;</span></div>
+          </div>
+          <div class="hero-thumb"></div>
+        </div>
+      </div>
+
+      <!-- 실전 케이스 — 연회색 -->
+      <div class="sec sec-alt">
+        <div class="sec-title">실전 케이스</div>
+        <div class="item"><span class="cat">기획</span><h4 class="keepall">기획서 첫 페이지가 안 풀릴 때 — 5단계</h4><p>읽는데 8분</p></div>
+        <div class="item"><span class="cat">마케팅</span><h4 class="keepall">경쟁사 분석, AI가 표면만 긁고 끝나는 이유</h4><p>읽는데 7분</p></div>
+        <div class="item"><span class="cat">영업</span><h4 class="keepall">윗사람 톤에 안 맞는 결과물</h4><p>읽는데 6분</p></div>
+      </div>
+
+      <!-- 시리즈 — 흰색 -->
+      <div class="sec">
+        <div class="sec-title">시리즈</div>
+        <div class="series-grid">
+          <div class="s-card"><div class="s-thumb" style="background:linear-gradient(135deg,#dbeafe,#eff6ff)">📈</div><div class="s-body"><h4>AI 트렌드</h4><p>아티클 4개</p></div></div>
+          <div class="s-card"><div class="s-thumb" style="background:linear-gradient(135deg,#e0e7ff,#f5f3ff)">🔧</div><div class="s-body"><h4>도구 모음</h4><p>아티클 4개</p></div></div>
+          <div class="s-card"><div class="s-thumb" style="background:linear-gradient(135deg,#d1fae5,#ecfdf5)">📋</div><div class="s-body"><h4>프롬프트 & 템플릿</h4><p>아티클 4개</p></div></div>
+          <div class="s-card"><div class="s-thumb" style="background:linear-gradient(135deg,#191f28,#333d4b)"><span style="color:#fff">📖</span></div><div class="s-body"><h4>ebook</h4><p>ebook 1개</p></div></div>
+        </div>
+      </div>
+
+      <!-- 다뤄주세요 — 연회색 -->
+      <div class="sec sec-alt">
+        <div class="sec-title">이런 거 다뤄주세요</div>
+        <div class="vote-line"><span class="vote-btn">▲ 52</span> 회의록 정리, AI 안 쓰고 더 빠른 방법</div>
+        <div class="vote-line"><span class="vote-btn">▲ 38</span> 보고서 톤, 윗사람 글체에 맞추기</div>
+        <div class="suggest-mock"><input placeholder="주제를 적어주세요" /><button>제안</button></div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════ -->
+  <!-- OPTION B: 카드 컨테이너 -->
+  <!-- ═══════════════════════════════════ -->
+  <div class="col optB">
+    <div class="col-label">안 B — 카드 컨테이너<span>회색 배경 위에 흰색 카드</span></div>
+    <div class="mock">
+
+      <div class="card-wrap">
+        <div class="sec">
+          <div class="hero-mock">
+            <div class="hero-text">
+              <span class="eye">실전 케이스 · 기획</span>
+              <h3 class="keepall">기획서 첫 페이지가 안 풀릴 때</h3>
+              <p>읽는데 8분</p>
+              <div class="arrows"><span class="arr">&lt;</span><span class="arr">&gt;</span></div>
+            </div>
+            <div class="hero-thumb"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-wrap">
+        <div class="sec">
+          <div class="sec-title">실전 케이스</div>
+          <div class="item"><span class="cat">기획</span><h4 class="keepall">기획서 첫 페이지가 안 풀릴 때 — 5단계</h4><p>읽는데 8분</p></div>
+          <div class="item"><span class="cat">마케팅</span><h4 class="keepall">경쟁사 분석, AI가 표면만 긁고 끝나는 이유</h4><p>읽는데 7분</p></div>
+          <div class="item"><span class="cat">영업</span><h4 class="keepall">윗사람 톤에 안 맞는 결과물</h4><p>읽는데 6분</p></div>
+        </div>
+      </div>
+
+      <div class="card-wrap">
+        <div class="sec">
+          <div class="sec-title">시리즈</div>
+          <div class="series-grid">
+            <div class="s-card"><div class="s-thumb" style="background:linear-gradient(135deg,#dbeafe,#eff6ff)">📈</div><div class="s-body"><h4>AI 트렌드</h4><p>아티클 4개</p></div></div>
+            <div class="s-card"><div class="s-thumb" style="background:linear-gradient(135deg,#e0e7ff,#f5f3ff)">🔧</div><div class="s-body"><h4>도구 모음</h4><p>아티클 4개</p></div></div>
+            <div class="s-card"><div class="s-thumb" style="background:linear-gradient(135deg,#d1fae5,#ecfdf5)">📋</div><div class="s-body"><h4>프롬프트 & 템플릿</h4><p>아티클 4개</p></div></div>
+            <div class="s-card"><div class="s-thumb" style="background:linear-gradient(135deg,#191f28,#333d4b)"><span style="color:#fff">📖</span></div><div class="s-body"><h4>ebook</h4><p>ebook 1개</p></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-wrap">
+        <div class="sec">
+          <div class="sec-title">이런 거 다뤄주세요</div>
+          <div class="vote-line"><span class="vote-btn">▲ 52</span> 회의록 정리, AI 안 쓰고 더 빠른 방법</div>
+          <div class="vote-line"><span class="vote-btn">▲ 38</span> 보고서 톤, 윗사람 글체에 맞추기</div>
+          <div class="suggest-mock"><input placeholder="주제를 적어주세요" /><button>제안</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════ -->
+  <!-- OPTION C: 여백 + 구분선 -->
+  <!-- ═══════════════════════════════════ -->
+  <div class="col optC">
+    <div class="col-label">안 C — 여백 + 구분선<span>넓은 간격 + 얇은 선</span></div>
+    <div class="mock">
+
+      <div class="sec-gap">
+        <div class="hero-mock">
+          <div class="hero-text">
+            <span class="eye">실전 케이스 · 기획</span>
+            <h3 class="keepall">기획서 첫 페이지가 안 풀릴 때</h3>
+            <p>읽는데 8분</p>
+            <div class="arrows"><span class="arr">&lt;</span><span class="arr">&gt;</span></div>
+          </div>
+          <div class="hero-thumb"></div>
+        </div>
+      </div>
+
+      <div class="thick-line"></div>
+
+      <div class="sec-gap">
+        <div class="sec-title">실전 케이스</div>
+        <div class="item"><span class="cat">기획</span><h4 class="keepall">기획서 첫 페이지가 안 풀릴 때 — 5단계</h4><p>읽는데 8분</p></div>
+        <div class="item"><span class="cat">마케팅</span><h4 class="keepall">경쟁사 분석, AI가 표면만 긁고 끝나는 이유</h4><p>읽는데 7분</p></div>
+        <div class="item"><span class="cat">영업</span><h4 class="keepall">윗사람 톤에 안 맞는 결과물</h4><p>읽는데 6분</p></div>
+      </div>
+
+      <div class="thick-line"></div>
+
+      <div class="sec-gap">
+        <div class="sec-title">시리즈</div>
+        <div class="series-grid">
+          <div class="s-card"><div class="s-thumb" style="background:linear-gradient(135deg,#dbeafe,#eff6ff)">📈</div><div class="s-body"><h4>AI 트렌드</h4><p>아티클 4개</p></div></div>
+          <div class="s-card"><div class="s-thumb" style="background:linear-gradient(135deg,#e0e7ff,#f5f3ff)">🔧</div><div class="s-body"><h4>도구 모음</h4><p>아티클 4개</p></div></div>
+          <div class="s-card"><div class="s-thumb" style="background:linear-gradient(135deg,#d1fae5,#ecfdf5)">📋</div><div class="s-body"><h4>프롬프트 & 템플릿</h4><p>아티클 4개</p></div></div>
+          <div class="s-card"><div class="s-thumb" style="background:linear-gradient(135deg,#191f28,#333d4b)"><span style="color:#fff">📖</span></div><div class="s-body"><h4>ebook</h4><p>ebook 1개</p></div></div>
+        </div>
+      </div>
+
+      <div class="thick-line"></div>
+
+      <div class="sec-gap">
+        <div class="sec-title">이런 거 다뤄주세요</div>
+        <div class="vote-line"><span class="vote-btn">▲ 52</span> 회의록 정리, AI 안 쓰고 더 빠른 방법</div>
+        <div class="vote-line"><span class="vote-btn">▲ 38</span> 보고서 톤, 윗사람 글체에 맞추기</div>
+        <div class="suggest-mock"><input placeholder="주제를 적어주세요" /><button>제안</button></div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

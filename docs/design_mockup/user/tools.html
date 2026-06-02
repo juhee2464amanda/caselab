@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>쓸만한 AI 도구 — 케이스랩</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--bg:#fff;--bg-sub:#f7f7f7;--ink:#191f28;--gray-800:#333d4b;--gray-600:#6b7684;--gray-500:#8b95a1;--gray-400:#b0b8c1;--gray-300:#d1d6db;--gray-200:#e5e8eb;--gray-100:#f2f4f6;--blue:#3182f6;--blue-bg:#ebf4ff;--green:#03b26c;--green-bg:#e8f8f0}
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{font-size:16px;-webkit-font-smoothing:antialiased}
+    body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;letter-spacing:-0.02em}
+    .keepall{word-break:keep-all;overflow-wrap:break-word}
+    a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer;border:none;background:none}
+
+    .gnb{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--gray-200)}
+    .gnb-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .gnb-logo{font-family:'Playfair Display',serif;font-style:italic;font-size:28px;font-weight:700;letter-spacing:-0.01em}
+    
+    .gnb-right{display:flex;align-items:center;gap:6px}
+    .gnb-nav{display:none;gap:22px;font-size:15px;font-weight:500;color:var(--gray-600);margin-right:16px}
+    .gnb-nav a:hover{color:var(--ink)}.gnb-nav a.on{color:var(--ink);font-weight:700}
+    @media(min-width:768px){.gnb-nav{display:flex}}
+    .gnb-dropdown{position:static}
+    .gnb-dropdown-trigger{display:inline-flex;align-items:center}
+    .mega-menu{display:none;position:absolute;left:0;right:0;top:56px;background:#fff;border-bottom:1px solid var(--gray-200);box-shadow:0 8px 24px rgba(0,0,0,.06);z-index:110}
+    .mega-menu::before{content:'';position:absolute;top:-16px;left:0;right:0;height:16px}
+    .mega-inner{max-width:1100px;margin:0 auto;padding:24px;display:flex;gap:12px;justify-content:center}
+    .mega-card{display:flex;align-items:center;gap:14px;padding:16px 20px;border:1px solid var(--gray-200);border-radius:12px;flex:1;max-width:280px;transition:all .15s}
+    .mega-card:hover{border-color:var(--blue);box-shadow:0 2px 12px rgba(49,130,246,.08)}
+    .mega-card-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+    .mega-card-body{min-width:0}
+    .mega-card-title{font-size:14px;font-weight:700;letter-spacing:-0.02em;margin-bottom:2px}
+    .mega-card-desc{font-size:12px;color:var(--gray-500)}
+    .gnb-dropdown:hover .mega-menu{display:block}
+    .gnb-sub{font-size:14px;font-weight:600;color:#fff;background:var(--blue);padding:7px 16px;border-radius:8px}
+    .gnb-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:var(--gray-600);transition:background .15s}
+    .gnb-icon:hover{background:var(--gray-100)}
+    .gnb-icon svg{width:20px;height:20px}
+
+    .hero{background:#f7f7f7;padding:48px 0 40px;border-bottom:1px solid var(--gray-200)}
+    @media(min-width:768px){.hero{background:#f7f7f7;padding:64px 0 48px}}
+    .hero-inner{max-width:1100px;margin:0 auto;padding:0 24px}
+    .hero h1{font-size:32px;font-weight:800;letter-spacing:-0.03em;margin-bottom:10px}
+    @media(min-width:768px){.hero h1{font-size:40px}}
+    .hero p{font-size:16px;color:var(--gray-600);max-width:480px}
+
+    .page{max-width:1100px;margin:0 auto;padding:40px 24px 80px}
+    .filter-tabs{display:flex;gap:6px;margin-bottom:24px;overflow-x:auto}
+    .filter-tabs::-webkit-scrollbar{display:none}
+    .ftab{padding:7px 16px;font-size:14px;font-weight:500;color:var(--gray-500);border:1px solid var(--gray-200);border-radius:20px;white-space:nowrap;transition:all .12s}
+    .ftab:hover{color:var(--gray-800);border-color:var(--gray-400)}
+    .ftab.on{color:#fff;background:var(--ink);border-color:var(--ink)}
+
+    .tool-grid{display:grid;grid-template-columns:1fr;gap:20px}
+    @media(min-width:640px){.tool-grid{grid-template-columns:1fr 1fr}}
+    @media(min-width:900px){.tool-grid{grid-template-columns:1fr 1fr 1fr}}
+    .tool-card{display:block;padding:0;border:1px solid var(--gray-200);border-radius:14px;overflow:hidden;transition:border-color .15s,box-shadow .15s,transform .15s;background:#fff}
+    .tool-card:hover{border-color:var(--blue);box-shadow:0 6px 20px rgba(49,130,246,.08);transform:translateY(-2px)}
+    .tool-card:hover .tool-thumb img{transform:scale(1.03)}
+    .tool-thumb{aspect-ratio:16/10;background:var(--gray-100);overflow:hidden;position:relative}
+    .tool-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease}
+    .tool-thumb-empty{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f2f4f6,#e5e8eb)}
+    .tool-thumb-emoji{font-size:48px;opacity:.5;filter:grayscale(.2)}
+    .tool-thumb-badge{position:absolute;top:10px;left:10px;font-size:10px;font-weight:700;color:var(--gray-600);background:rgba(255,255,255,.92);padding:3px 8px;border-radius:4px;letter-spacing:0.02em}
+    .tool-body{padding:18px 22px 22px}
+    .tool-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px}
+    .tool-name{font-size:17px;font-weight:800;letter-spacing:-0.02em;color:var(--ink)}
+    .tool-cat-label{font-size:11px;font-weight:600;color:var(--gray-500);text-transform:none}
+    .tool-desc{font-size:13.5px;color:var(--gray-600);line-height:1.55;margin-bottom:14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+    .tool-tags{display:flex;gap:6px;flex-wrap:wrap}
+    .tool-tag{font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px}
+    .tag-free{color:var(--green);background:var(--green-bg)}
+    .tag-paid{color:var(--gray-500);background:var(--gray-100)}
+    .tag-link{color:var(--blue);background:var(--blue-bg)}
+  </style>
+</head>
+<body>
+
+  <header class="gnb">
+    <div class="gnb-inner">
+      <a href="index.html" class="gnb-logo">Caselab</a>
+      <div class="gnb-right">
+        <nav class="gnb-nav">
+          <a href="cases.html">AI 실전케이스</a>
+          <a href="trends.html">AI 트렌드</a>
+          <div class="gnb-dropdown">
+            <a href="#" class="gnb-dropdown-trigger on">자료실 <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style="margin-left:2px;vertical-align:middle"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            <div class="mega-menu">
+              <div class="mega-inner">
+                <a href="tools.html" class="mega-card" style="border-color:var(--blue)"><div class="mega-card-icon" style="background:linear-gradient(135deg,#e0e7ff,#f5f3ff)">🔧</div><div class="mega-card-body"><div class="mega-card-title">쓸만한 AI 도구</div><div class="mega-card-desc">이 일엔 이런 도구가 있더라</div></div></a>
+                <a href="prompts.html" class="mega-card"><div class="mega-card-icon" style="background:linear-gradient(135deg,#d1fae5,#ecfdf5)">📋</div><div class="mega-card-body"><div class="mega-card-title">바로 쓰는 프롬프트</div><div class="mega-card-desc">복사해서 바로 쓰세요</div></div></a>
+                <a href="guides.html" class="mega-card"><div class="mega-card-icon" style="background:linear-gradient(135deg,#dbeafe,#eff6ff)">📘</div><div class="mega-card-body"><div class="mega-card-title">공식 가이드</div><div class="mega-card-desc">OpenAI, Anthropic 공식 문서 핵심</div></div></a>
+              </div>
+            </div>
+          </div>
+          <a href="ebook.html">ebook</a>
+        </nav>
+        <button class="gnb-sub">구독하기</button>
+        <a href="login.html" class="gnb-icon" title="로그인"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a>
+        <a href="#" class="gnb-icon" title="검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></a>
+      </div>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="hero-inner">
+      <h1>쓸만한 AI 도구</h1>
+      <p class="keepall">검증된 AI 도구만 모았습니다. 직접 써보고 정리했어요.</p>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="filter-tabs">
+      <button class="ftab on">전체</button>
+      <button class="ftab">디자인 / UI</button>
+      <button class="ftab">자동화</button>
+      <button class="ftab">리서치</button>
+      <button class="ftab">글쓰기</button>
+      <button class="ftab">프레젠테이션</button>
+      <button class="ftab">코딩</button>
+    </div>
+
+    <div class="tool-grid">
+
+      <a href="tool-snipit.html" class="tool-card">
+        <div class="tool-thumb"><img src="images/tools/snipit.png" alt="Snipit 사용 화면 — 경쟁사 광고 비교 보드" loading="lazy" /></div>
+        <div class="tool-body">
+          <div class="tool-head"><div class="tool-name">Snipit</div><div class="tool-cat-label">리서치</div></div>
+          <p class="tool-desc keepall">경쟁사 메타 광고·레퍼런스를 AI가 알아서 모아주는 마케터·기획자용 도구. 막연한 한 줄만 던져도 됨.</p>
+          <div class="tool-tags"><span class="tool-tag tag-free">무료 플랜</span><span class="tool-tag tag-link">사용기 1편</span></div>
+        </div>
+      </a>
+
+      <a href="tool-proby.html" class="tool-card">
+        <div class="tool-thumb"><img src="images/tools/proby.png" alt="Proby 사용 화면 — AI 심층 인터뷰" loading="lazy" /></div>
+        <div class="tool-body">
+          <div class="tool-head"><div class="tool-name">Proby</div><div class="tool-cat-label">리서치</div></div>
+          <p class="tool-desc keepall">AI가 사용자에게 꼬리질문까지 던지는 심층 인터뷰 도구. 다국어 인터뷰도 자동 번역·요약·페르소나 도출.</p>
+          <div class="tool-tags"><span class="tool-tag tag-paid">유료</span><span class="tool-tag tag-link">사용기 1편</span></div>
+        </div>
+      </a>
+
+      <a href="tool-screenflow.html" class="tool-card">
+        <div class="tool-thumb"><img src="images/tools/screenflow.png" alt="ScreenFlow 사용 화면 — URL 한 줄로 화면 캡처" loading="lazy" /></div>
+        <div class="tool-body">
+          <div class="tool-head"><div class="tool-name">ScreenFlow</div><div class="tool-cat-label">디자인 / UI</div></div>
+          <p class="tool-desc keepall">URL 하나 넣으면 웹사이트 전체 플로우를 자동 캡처. 피그마로 바로 복사할 수 있어 화면 설계가 빨라짐.</p>
+          <div class="tool-tags"><span class="tool-tag tag-paid">유료</span><span class="tool-tag tag-link">사용기 1편</span></div>
+        </div>
+      </a>
+
+      <a href="#" class="tool-card">
+        <div class="tool-thumb tool-thumb-empty"><span class="tool-thumb-badge">이미지 준비 중</span><span class="tool-thumb-emoji">⚡</span></div>
+        <div class="tool-body">
+          <div class="tool-head"><div class="tool-name">v0</div><div class="tool-cat-label">디자인 / UI</div></div>
+          <p class="tool-desc keepall">프롬프트로 UI 컴포넌트를 바로 만들어주는 Vercel의 AI 도구. 와이어프레임 단계에서 특히 유용.</p>
+          <div class="tool-tags"><span class="tool-tag tag-free">무료 플랜</span></div>
+        </div>
+      </a>
+
+      <a href="#" class="tool-card">
+        <div class="tool-thumb tool-thumb-empty"><span class="tool-thumb-badge">이미지 준비 중</span><span class="tool-thumb-emoji">🔗</span></div>
+        <div class="tool-body">
+          <div class="tool-head"><div class="tool-name">Make</div><div class="tool-cat-label">자동화</div></div>
+          <p class="tool-desc keepall">앱 간 자동화 워크플로우. 구글시트 → 슬랙 알림 같은 반복 작업을 코드 없이 연결.</p>
+          <div class="tool-tags"><span class="tool-tag tag-free">무료 플랜</span></div>
+        </div>
+      </a>
+
+      <a href="#" class="tool-card">
+        <div class="tool-thumb tool-thumb-empty"><span class="tool-thumb-badge">이미지 준비 중</span><span class="tool-thumb-emoji">🔍</span></div>
+        <div class="tool-body">
+          <div class="tool-head"><div class="tool-name">Perplexity</div><div class="tool-cat-label">리서치</div></div>
+          <p class="tool-desc keepall">검색 + AI 답변이 합쳐진 리서치 도구. 출처가 달려있어서 사실 확인이 빠름.</p>
+          <div class="tool-tags"><span class="tool-tag tag-free">무료 플랜</span></div>
+        </div>
+      </a>
+
+      <a href="#" class="tool-card">
+        <div class="tool-thumb tool-thumb-empty"><span class="tool-thumb-badge">이미지 준비 중</span><span class="tool-thumb-emoji">📊</span></div>
+        <div class="tool-body">
+          <div class="tool-head"><div class="tool-name">Gamma</div><div class="tool-cat-label">프레젠테이션</div></div>
+          <p class="tool-desc keepall">프롬프트로 발표 자료를 만들어주는 도구. PPT 디자인 시간을 크게 줄여줌.</p>
+          <div class="tool-tags"><span class="tool-tag tag-free">무료 플랜</span></div>
+        </div>
+      </a>
+
+      <a href="#" class="tool-card">
+        <div class="tool-thumb tool-thumb-empty"><span class="tool-thumb-badge">이미지 준비 중</span><span class="tool-thumb-emoji">✍️</span></div>
+        <div class="tool-body">
+          <div class="tool-head"><div class="tool-name">DeepL Write</div><div class="tool-cat-label">글쓰기</div></div>
+          <p class="tool-desc keepall">영문 이메일·보고서 톤을 자연스럽게 다듬어주는 AI 교정 도구. 번역기보다 정확한 뉘앙스.</p>
+          <div class="tool-tags"><span class="tool-tag tag-free">무료 플랜</span></div>
+        </div>
+      </a>
+
+      <a href="#" class="tool-card">
+        <div class="tool-thumb tool-thumb-empty"><span class="tool-thumb-badge">이미지 준비 중</span><span class="tool-thumb-emoji">💻</span></div>
+        <div class="tool-body">
+          <div class="tool-head"><div class="tool-name">Cursor</div><div class="tool-cat-label">코딩</div></div>
+          <p class="tool-desc keepall">AI가 코드를 같이 짜주는 에디터. 비개발자도 간단한 자동화 스크립트 만들 때 유용.</p>
+          <div class="tool-tags"><span class="tool-tag tag-free">무료 플랜</span><span class="tool-tag tag-paid">Pro $20/월</span></div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+</body>
+</html>

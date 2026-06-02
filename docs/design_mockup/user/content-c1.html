@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>외국인 고객 멤버십이 묻혀버린 이유 — AI한테 다시 풀게 한 5줄 · Caselab</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--bg:#fff;--bg-sub:#f7f7f7;--ink:#191f28;--gray-800:#333d4b;--gray-600:#6b7684;--gray-500:#8b95a1;--gray-400:#b0b8c1;--gray-300:#d1d6db;--gray-200:#e5e8eb;--gray-100:#f2f4f6;--blue:#3182f6;--blue-bg:#ebf4ff;--green:#03b26c;--red:#f04452}
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{font-size:16px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+    body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;letter-spacing:-0.02em}
+    .keepall{word-break:keep-all;overflow-wrap:break-word}
+    a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer;border:none;background:none}
+
+    .gnb{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--gray-200)}
+    .gnb-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .gnb-logo{font-family:'Playfair Display',serif;font-style:italic;font-size:24px;font-weight:700;letter-spacing:-0.01em}
+    .gnb-right{display:flex;align-items:center;gap:16px}
+    .gnb-back{font-size:14px;font-weight:500;color:var(--gray-600);display:flex;align-items:center;gap:4px}
+    .gnb-back:hover{color:var(--ink)}
+    .gnb-back svg{width:16px;height:16px}
+    .gnb-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:var(--gray-600);transition:background .15s}
+    .gnb-icon:hover{background:var(--gray-100)}
+    .gnb-icon svg{width:20px;height:20px}
+
+    .page-3col{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;gap:0}
+
+    .left-toc{display:none}
+    @media(min-width:1080px){
+      .left-toc{display:block;width:200px;flex-shrink:0;padding:40px 0;padding-right:24px}
+    }
+    .left-toc-inner{position:sticky;top:72px}
+    .lt-title{font-size:12px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:12px}
+    .lt-link{display:block;font-size:13px;font-weight:500;color:var(--gray-500);padding:6px 0;padding-left:12px;border-left:2px solid transparent;transition:all .12s}
+    .lt-link:hover{color:var(--ink)}
+    .lt-link.active{color:var(--blue);border-left-color:var(--blue);font-weight:600}
+
+    .article-wrap{flex:1;min-width:0;max-width:720px;padding:0 24px}
+    @media(min-width:1080px){.article-wrap{padding:0 40px}}
+
+    .right-rec{display:none}
+    @media(min-width:1080px){
+      .right-rec{display:block;width:240px;flex-shrink:0;padding:40px 0;padding-left:24px;border-left:1px solid var(--gray-200)}
+    }
+    .right-rec-inner{position:sticky;top:72px}
+    .rr-title{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-0.02em;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--ink)}
+    .rr-item{display:block;padding:12px 0;border-bottom:1px solid var(--gray-100)}
+    .rr-item:hover .rr-item-title{color:var(--blue)}
+    .rr-item:hover .rr-thumb img{transform:scale(1.05)}
+    .rr-thumb{width:100%;aspect-ratio:16/10;border-radius:8px;overflow:hidden;margin-bottom:6px;background:var(--gray-100)}
+    .rr-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s ease}
+    .rr-tag{font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:1px 6px;border-radius:3px;display:inline-block;margin-bottom:4px}
+    .rr-item-title{font-size:14px;font-weight:700;line-height:1.4;letter-spacing:-0.02em;transition:color .12s;margin-bottom:6px}
+    .rr-item-meta{font-size:11px;color:var(--gray-400)}
+
+    .art-header{padding:40px 0 32px}
+    @media(min-width:768px){.art-header{padding:56px 0 40px}}
+    .art-tag{display:inline-block;font-size:12px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:3px 10px;border-radius:5px;margin-bottom:16px}
+    .art-header h1{font-size:28px;font-weight:800;line-height:1.3;letter-spacing:-0.03em;margin-bottom:12px}
+    @media(min-width:768px){.art-header h1{font-size:36px}}
+    .art-header .subtitle{font-size:17px;color:var(--gray-600);line-height:1.6;margin-bottom:20px;max-width:600px}
+    .art-meta{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--gray-500);padding-bottom:24px;border-bottom:1px solid var(--gray-200)}
+    .art-meta span{display:flex;align-items:center;gap:4px}
+
+    .toc{padding:20px 0;margin-bottom:32px;border-bottom:1px solid var(--gray-200)}
+    .toc-label{font-size:12px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px}
+    .toc a{display:block;font-size:14px;font-weight:500;color:var(--gray-600);padding:5px 0;transition:color .12s}
+    .toc a:hover{color:var(--blue)}
+
+    .prose{font-size:16px;line-height:1.8;color:var(--gray-800);letter-spacing:-0.01em}
+    @media(min-width:768px){.prose{font-size:17px}}
+    .prose p{margin-bottom:16px}
+    .prose p+p{margin-top:0}
+    .prose h2{font-size:22px;font-weight:800;letter-spacing:-0.025em;margin:48px 0 16px;color:var(--ink)}
+    @media(min-width:768px){.prose h2{font-size:26px}}
+    .prose h3{font-size:18px;font-weight:700;margin:36px 0 12px;color:var(--ink)}
+    .prose strong{color:var(--ink);font-weight:600}
+    .prose em-blue{color:var(--blue);font-weight:600;font-style:normal}
+
+    .step-head{display:flex;align-items:baseline;gap:10px;margin:48px 0 20px}
+    .step-num{font-size:18px;font-weight:800;color:var(--blue)}
+    .step-label{font-size:15px;color:var(--gray-500)}
+
+    .role-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:16px}
+    @media(min-width:640px){.role-grid{grid-template-columns:1fr 1fr}}
+    .role-card{padding:16px;background:var(--bg-sub);border-radius:10px}
+    .role-card-label{font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px}
+    .role-card p{font-size:14px;color:var(--gray-800);line-height:1.55}
+
+    .prompt-block{position:relative;background:var(--bg-sub);border:1px solid var(--gray-200);border-left:3px solid var(--blue);border-radius:6px;font-family:'SF Mono',Monaco,'Fira Code',monospace;font-size:13px;line-height:1.7;color:var(--ink);padding:16px;padding-top:40px;white-space:pre-wrap;overflow-x:auto;margin-bottom:16px}
+    .copy-btn{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;font-family:'Pretendard',sans-serif;font-size:12px;font-weight:600;color:var(--blue);background:rgba(255,255,255,.7);border:1px solid var(--gray-200);border-radius:5px;cursor:pointer;transition:all .15s}
+    .copy-btn:hover{background:#fff}
+    .copy-btn.copied{color:#fff;background:var(--blue);border-color:var(--blue)}
+
+    .result-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:32px}
+    @media(min-width:640px){.result-grid{grid-template-columns:1fr 1fr}}
+    .result{border-radius:8px;padding:14px 16px;font-size:14px;line-height:1.6;border:1px solid}
+    .result-good{background:#fff;border-color:var(--gray-200)}
+    .result-bad{background:var(--bg-sub);border-color:var(--gray-200)}
+    .result-label{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;margin-bottom:6px}
+    .result-good .result-label{color:var(--blue)}
+    .result-bad .result-label{color:var(--gray-500);text-decoration:line-through}
+
+    .fw-list{list-style:none;margin-bottom:32px}
+    .fw-item{display:flex;gap:16px;padding:12px 0;border-bottom:1px solid var(--gray-100);align-items:flex-start}
+    .fw-num{font-size:20px;font-weight:800;color:var(--gray-200);min-width:32px}
+    .fw-item h4{font-size:15px;font-weight:700;letter-spacing:-0.02em;margin-bottom:2px}
+    .fw-item p{font-size:13px;color:var(--gray-600)}
+
+    .for-who{background:var(--bg-sub);border:1px solid var(--gray-200);border-radius:12px;padding:20px 24px;margin-bottom:32px}
+    .for-who-title{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-0.02em;margin-bottom:12px}
+    .for-who-list{display:flex;flex-direction:column;gap:8px}
+    .for-who-item{display:flex;align-items:flex-start;gap:8px;font-size:14px;color:var(--gray-800);line-height:1.5}
+    .for-who-check{color:var(--blue);font-weight:700;flex-shrink:0;margin-top:1px}
+
+    .framework-ref{border:1px solid var(--gray-200);border-radius:12px;overflow:hidden;margin-bottom:32px}
+    .fw-ref-header{display:flex;align-items:center;gap:10px;padding:14px 20px;background:var(--ink);color:#fff}
+    .fw-ref-badge{font-size:10px;font-weight:700;letter-spacing:0.06em;color:var(--blue);background:rgba(49,130,246,.2);padding:3px 8px;border-radius:4px}
+    .fw-ref-title{font-size:14px;font-weight:700}
+    .fw-ref-body{padding:20px}
+    .fw-ref-name{font-size:17px;font-weight:800;letter-spacing:-0.02em;margin-bottom:8px}
+    .fw-ref-desc{font-size:14px;color:var(--gray-600);line-height:1.6;margin-bottom:16px}
+    .fw-ref-source{border-top:1px solid var(--gray-200);padding-top:16px}
+    .fw-ref-link{display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--bg-sub);border-radius:10px;transition:background .12s}
+    .fw-ref-link:hover{background:var(--gray-100)}
+    .fw-ref-link-thumb{width:48px;height:48px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--gray-200);font-family:'Playfair Display',serif;font-style:italic;font-weight:700;font-size:16px;color:var(--ink)}
+    .fw-ref-link-body{min-width:0}
+    .fw-ref-link-label{font-size:11px;font-weight:600;color:var(--gray-500);margin-bottom:2px}
+    .fw-ref-link-title{font-size:14px;font-weight:700;letter-spacing:-0.02em;margin-bottom:2px}
+    .fw-ref-link-meta{font-size:12px;color:var(--blue);font-weight:500}
+
+    [contenteditable]:focus{outline:none;box-shadow:inset 0 -2px 0 var(--blue)}
+
+    .comments{margin:40px 0;padding-top:32px;border-top:1px solid var(--gray-200)}
+    .comments-head{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+    .comments-title{font-size:18px;font-weight:800;letter-spacing:-0.02em}
+    .comments-count{font-size:14px;font-weight:700;color:var(--blue)}
+    .comment-form{margin-bottom:20px}
+    .comment-input{width:100%;padding:14px;font-size:14px;font-family:inherit;border:1px solid var(--gray-200);border-radius:10px;outline:none;resize:vertical;transition:border-color .15s;color:var(--ink);letter-spacing:-0.01em;min-height:80px}
+    .comment-input:focus{border-color:var(--blue)}
+    .comment-input::placeholder{color:var(--gray-400)}
+    .comment-form-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+    .comment-hint{font-size:12px;color:var(--gray-400)}
+    .comment-submit{padding:8px 18px;font-size:13px;font-weight:600;color:#fff;background:var(--blue);border:none;border-radius:8px;cursor:pointer;transition:background .12s}
+    .comment-submit:hover{background:#1b6ef2}
+    .comment-empty{text-align:center;padding:32px 0;font-size:14px;color:var(--gray-400)}
+
+    .explore{margin:40px 0 48px;padding-top:32px;border-top:1px solid var(--gray-200)}
+    .explore-title{font-size:18px;font-weight:800;letter-spacing:-0.02em;margin-bottom:16px}
+    .explore-scroll{position:relative}
+    .explore-scroll::after{content:'';position:absolute;top:0;right:0;bottom:4px;width:48px;background:linear-gradient(to right,transparent,var(--bg));pointer-events:none;z-index:1}
+    .explore-grid{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;padding-right:48px;scroll-behavior:smooth}
+    .explore-grid::-webkit-scrollbar{display:none}
+    .explore-arrow{position:absolute;top:50%;right:0;transform:translateY(-50%);z-index:2;width:36px;height:36px;border-radius:50%;background:#fff;border:1px solid var(--gray-200);display:flex;align-items:center;justify-content:center;color:var(--gray-500);box-shadow:0 2px 8px rgba(0,0,0,.08);transition:all .12s;cursor:pointer}
+    .explore-arrow:hover{border-color:var(--gray-400);color:var(--ink)}
+    .explore-arrow svg{width:16px;height:16px}
+    .explore-card{display:flex;align-items:center;gap:12px;padding:14px 18px;border:1px solid var(--gray-200);border-radius:12px;flex-shrink:0;transition:all .12s;min-width:180px}
+    .explore-card:hover{border-color:var(--blue);background:var(--bg-sub)}
+    .explore-icon{font-size:24px;flex-shrink:0}
+    .explore-name{font-size:14px;font-weight:700;letter-spacing:-0.02em}
+    .explore-desc{font-size:11px;color:var(--gray-500)}
+
+    .highlight-box{background:var(--blue-bg);border-radius:10px;padding:20px 24px;margin:24px 0;font-size:15px;line-height:1.7;color:var(--ink);border-left:3px solid var(--blue)}
+    .highlight-box strong{color:var(--blue)}
+
+    .share-section{text-align:center;padding:32px 0;margin:40px 0;border-top:1px solid var(--gray-200);border-bottom:1px solid var(--gray-200)}
+    .share-section .share-text{font-size:15px;font-weight:600;color:var(--gray-800);margin-bottom:16px}
+    .share-btns{display:flex;gap:10px;justify-content:center}
+    .share-btn{display:flex;align-items:center;gap:6px;padding:10px 18px;font-size:13px;font-weight:600;border:1px solid var(--gray-200);border-radius:10px;color:var(--gray-600);transition:all .12s}
+    .share-btn:hover{border-color:var(--gray-400);color:var(--ink);background:var(--bg-sub)}
+    .share-btn svg{width:16px;height:16px}
+    .share-btn.kakao{color:#191919;border-color:#FEE500;background:#FEE500}
+    .share-btn.kakao:hover{background:#fdd835}
+    .share-btn.copied{color:#fff;background:var(--blue);border-color:var(--blue)}
+
+    .rel-tools{margin:32px 0 48px}
+    .rel-tools-title{font-size:16px;font-weight:800;letter-spacing:-0.02em;margin-bottom:14px}
+    .rel-tools-grid{display:flex;gap:10px;overflow-x:auto}
+    .rel-tool{display:flex;align-items:center;gap:10px;padding:12px 16px;border:1px solid var(--gray-200);border-radius:10px;flex-shrink:0;transition:all .12s;min-width:200px}
+    .rel-tool:hover{border-color:var(--blue);background:var(--bg-sub)}
+    .rel-tool-icon{width:36px;height:36px;border-radius:8px;background:var(--gray-100);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+    .rel-tool-name{font-size:14px;font-weight:700;letter-spacing:-0.02em}
+    .rel-tool-desc{font-size:11px;color:var(--gray-500)}
+
+    .actions{display:flex;align-items:center;gap:16px;padding:20px 0;border-top:1px solid var(--gray-200);border-bottom:1px solid var(--gray-200);margin:40px 0}
+    .action-btn{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:var(--gray-600);transition:color .12s;padding:6px 0}
+    .action-btn:hover{color:var(--blue)}
+    .action-btn.active{color:var(--blue)}
+    .action-btn svg{width:18px;height:18px}
+    .action-btn.ml-auto{margin-left:auto}
+
+    .related{margin-bottom:64px}
+    .related-title{font-size:16px;font-weight:800;letter-spacing:-0.02em;margin-bottom:16px}
+    .related-item{display:block;padding:14px 0;border-bottom:1px solid var(--gray-200)}
+    .related-item:hover .ri-title{color:var(--blue)}
+    .ri-tag{font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:1px 6px;border-radius:3px;display:inline-block;margin-bottom:4px}
+    .ri-title{font-size:16px;font-weight:700;letter-spacing:-0.02em;transition:color .12s;margin-bottom:2px}
+    .ri-meta{font-size:12px;color:var(--gray-500)}
+
+    .footer{padding:28px 0;border-top:1px solid var(--gray-200)}
+    .footer-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;flex-direction:column;gap:8px}
+    @media(min-width:768px){.footer-inner{flex-direction:row;justify-content:space-between;align-items:center}}
+    .footer-txt{font-size:13px;color:var(--gray-500)}
+    .footer-links{display:flex;gap:16px;font-size:13px;color:var(--gray-500)}
+  </style>
+</head>
+<body>
+
+  <header class="gnb">
+    <div class="gnb-inner">
+      <a href="index.html" class="gnb-logo">Caselab</a>
+      <div class="gnb-right">
+        <a href="cases.html" class="gnb-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          실전 케이스
+        </a>
+        <a href="login.html" class="gnb-icon" title="로그인"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-3col">
+
+    <nav class="left-toc">
+      <div class="left-toc-inner">
+        <div class="lt-title">목차</div>
+        <a href="#s1" class="lt-link active" data-section="s1">같은 일을 두 번 풀었다</a>
+        <a href="#s2" class="lt-link" data-section="s2">다섯 가지 재료</a>
+        <a href="#s3" class="lt-link" data-section="s3">케이스에 적용한 5줄</a>
+        <a href="#s4" class="lt-link" data-section="s4">통째로 쓰는 템플릿</a>
+        <a href="#s5" class="lt-link" data-section="s5">솔직한 후기</a>
+      </div>
+    </nav>
+
+    <div class="article-wrap">
+
+    <div class="art-header">
+      <span class="art-tag" data-content-id="case-02" data-field="tag">실전 케이스 · 마케팅 · #02</span>
+      <h1 class="keepall" data-content-id="case-02" data-field="title">외국인 고객 멤버십이 묻혀버린 이유 — AI한테 다시 풀게 한 5줄</h1>
+      <p class="subtitle keepall" data-content-id="case-02" data-field="subtitle">프롬프트가 약했던 게 아니라, 던질 문제가 흐렸다. AI 켜기 전에 다섯 줄만 적었더니 결과가 바뀌었다.</p>
+      <div class="art-meta">
+        <span>2026년 5월 27일</span>
+        <span>읽는데 7분</span>
+        <span>적용 30분</span>
+      </div>
+    </div>
+
+    <div class="for-who">
+      <div class="for-who-title">이런 분을 위한 글이에요</div>
+      <div class="for-who-list">
+        <div class="for-who-item">
+          <span class="for-who-check">✓</span>
+          <span>멤버십·CRM 캠페인을 돌렸는데 반응이 안 나오는 분</span>
+        </div>
+        <div class="for-who-item">
+          <span class="for-who-check">✓</span>
+          <span>AI한테 "기획안 다시 짜줘" 했더니 어디서 본 듯한 답만 나오는 분</span>
+        </div>
+        <div class="for-who-item">
+          <span class="for-who-check">✓</span>
+          <span>같은 문제를 두 번 풀고 있는데 처음과 결과가 거의 같은 분</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="framework-ref">
+      <div class="fw-ref-header">
+        <div class="fw-ref-badge">FRAMEWORK</div>
+        <div class="fw-ref-title">이 글에 적용된 업무 프레임워크</div>
+      </div>
+      <div class="fw-ref-body">
+        <div class="fw-ref-name">프로젝트 정의 5가지 (Project Definition 5)</div>
+        <p class="fw-ref-desc keepall">문제 · 배경 · 목적 · 현황 · 목표 — 프로젝트를 시작하기 전에 이 다섯 가지를 한 문서에 적어두는 방법입니다. AI한테 일을 시킬 때마다 이 문서를 먼저 읽히면, 매번 처음부터 설명할 필요가 없어집니다. Anthropic이 권장하는 <strong>CLAUDE.md 프로젝트 컨텍스트</strong> 패턴에서 가져와, 코드 외 일반 업무에 옮겨 적용했습니다.</p>
+        <div class="fw-ref-source">
+          <a href="https://www.instagram.com/justopen.ai/" target="_blank" class="fw-ref-link">
+            <div class="fw-ref-link-thumb">jo</div>
+            <div class="fw-ref-link-body">
+              <div class="fw-ref-link-label">참고 · justopen.ai (Instagram)</div>
+              <div class="fw-ref-link-title keepall">AI한테 일 시키는 법 EP.01 — 프로젝트 정의</div>
+              <div class="fw-ref-link-meta">원본 카드뉴스 보기 →</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="prose keepall">
+
+      <h2 id="s1">같은 일을 두 번 풀었다</h2>
+      <p>외국인 고객을 위한 통신 멤버십 혜택이 있었습니다. 카페·편의점·관광 할인까지 꽤 두툼하게 깔려 있는데, 정작 가입한 사람의 절반 이상이 한 번도 안 썼습니다. 분명 알리긴 알렸는데, "써본 사람"이 거의 없었어요.</p>
+      <p>처음엔 AI한테 바로 던졌습니다. <strong>"외국인 고객 멤버십 활성화 캠페인 기획안 짜줘."</strong> 결과는 깔끔했지만, 어디서 본 듯한 답이었습니다 — 안내 문자 다시 보내기, 푸시 알림, SNS 광고, 인플루언서. 작년에 이미 다 해본 것들.</p>
+      <p><em-blue>같은 답이 나온 건 AI가 약해서가 아니라, 내가 던진 문제가 흐려서였습니다.</em-blue> "활성화"라는 단어 안에 — 왜 안 쓰는지, 무엇을 바꿀 건지, 어디까지 와 있는지 — 아무것도 없었어요. AI는 그 빈칸을 "흔한 답"으로 채울 수밖에 없습니다.</p>
+      <p>그래서 AI를 끄고, 종이에 다섯 줄을 적었습니다. 그 다섯 줄이 이 글에서 풀 이야기입니다.</p>
+
+      <h2 id="s2">다섯 가지 재료</h2>
+      <p>AI한테 일을 시키기 전에, 프로젝트 자체를 정의하는 다섯 가지. 한 줄씩이면 충분합니다.</p>
+
+      <ol class="fw-list">
+        <li class="fw-item"><span class="fw-num">01</span><div><h4>문제</h4><p>지금 무엇이 안 되고 있는가.</p></div></li>
+        <li class="fw-item"><span class="fw-num">02</span><div><h4>배경</h4><p>왜 이 일을 시작하게 됐는가.</p></div></li>
+        <li class="fw-item"><span class="fw-num">03</span><div><h4>목적</h4><p>이 일로 무엇을 바꾸고 싶은가.</p></div></li>
+        <li class="fw-item"><span class="fw-num">04</span><div><h4>현황</h4><p>지금 어디까지 와 있는가.</p></div></li>
+        <li class="fw-item"><span class="fw-num">05</span><div><h4>목표</h4><p>잘 됐다는 걸 무엇으로 알 수 있는가.</p></div></li>
+      </ol>
+
+      <p>이 다섯 가지가 없으면 AI는 추측으로 빈칸을 채웁니다. 그 추측이 "흔한 답"의 정체입니다.</p>
+
+      <h2 id="s3">케이스에 적용한 5줄</h2>
+      <p>외국인 멤버십 케이스에 그대로 채워보겠습니다. 각 단계는 사람이 손으로 한 줄을 만들고, AI가 그 줄에서 빠진 걸 캐묻게 하는 식으로 풀었습니다.</p>
+
+      <div class="step-head"><span class="step-num">Step 1</span><span class="step-label">— 문제</span></div>
+      <div class="role-grid">
+        <div class="role-card"><div class="role-card-label">사람이 할 일</div><p>"무엇이 안 되고 있나"를 <strong>측정 가능한 한 줄</strong>로.</p></div>
+        <div class="role-card"><div class="role-card-label">AI에게 시킬 것</div><p>그 한 줄에서 <em>덜 구체적인 단어</em>를 골라 다시 묻게 한다.</p></div>
+      </div>
+      <div class="prompt-block"><button class="copy-btn" data-copy><span class="label">복사</span></button>다음 한 줄은 내가 풀려는 문제입니다.
+이 안에서 "구체적이지 않은 단어" 3개를 골라
+각각을 무엇으로 바꿔 측정할 수 있는지 한 줄씩 되물어주세요.
+답을 주지 마세요. 질문만.
+
+문제: [한 줄 붙여넣기]</div>
+      <div class="result-grid">
+        <div class="result result-good"><div class="result-label">✓ 잘된 것</div><div class="keepall">"가입자 중 첫 사용까지 가는 비율이 한 자릿수다. — '첫 사용'은 어디 시점인가? 앱 진입? 쿠폰 클릭? 매장 결제?"</div></div>
+        <div class="result result-bad"><div class="result-label">✗ 별로인 것</div><div class="keepall">"외국인 고객 멤버십이 활성화가 안 되고 있다." — '활성화'가 뭔지 아무도 모름.</div></div>
+      </div>
+
+      <div class="step-head"><span class="step-num">Step 2</span><span class="step-label">— 배경</span></div>
+      <div class="role-grid">
+        <div class="role-card"><div class="role-card-label">사람이 할 일</div><p>이 일이 <strong>왜 지금</strong> 시작됐는지 한 줄.</p></div>
+        <div class="role-card"><div class="role-card-label">AI에게 시킬 것</div><p>그 줄 안에서 <em>당연하게 깔린 가정</em>을 끄집어내게 한다.</p></div>
+      </div>
+      <div class="prompt-block"><button class="copy-btn" data-copy><span class="label">복사</span></button>다음 한 줄은 이 일이 시작된 배경입니다.
+이 줄이 "당연하게 깔고 있는 가정" 3개를 의문문으로 다시 써주세요.
+답을 주지 마세요.
+
+배경: [한 줄 붙여넣기]</div>
+      <div class="result-grid">
+        <div class="result result-good"><div class="result-label">✓ 잘된 것</div><div class="keepall">"몰라서 못 쓰는 거라고 가정 — 알면 정말 쓸 만한 혜택인가? 알리는 채널이 닿고는 있나? 한국어 안내라 못 읽는 건 아닌가?"</div></div>
+        <div class="result result-bad"><div class="result-label">✗ 별로인 것</div><div class="keepall">"외국인 고객이 한국 서비스에 익숙하지 않아서요." — 너무 일반론, 가정이 보이지 않음.</div></div>
+      </div>
+
+      <div class="step-head"><span class="step-num">Step 3</span><span class="step-label">— 목적</span></div>
+      <div class="role-grid">
+        <div class="role-card"><div class="role-card-label">사람이 할 일</div><p>이 일로 <strong>무엇이 달라지면</strong> 됐다고 할 건지 한 줄.</p></div>
+        <div class="role-card"><div class="role-card-label">AI에게 시킬 것</div><p>그 목적이 진짜 끝이 맞는지 — <em>그 다음에 뭘 할 건지</em> 묻게 한다.</p></div>
+      </div>
+      <div class="prompt-block"><button class="copy-btn" data-copy><span class="label">복사</span></button>다음은 이 프로젝트의 목적입니다.
+"이게 달성되면 그 다음엔 무엇을 할 건가요?"를
+점점 더 멀리 3번 물어주세요.
+3번째 답이 정말 우리가 원하는 끝인지 보고 싶습니다.
+
+목적: [한 줄 붙여넣기]</div>
+      <div class="result-grid">
+        <div class="result result-good"><div class="result-label">✓ 잘된 것</div><div class="keepall">"혜택 안내 문자가 아니라, <em>한 번 써본 경험</em>을 만들고 싶다 — 그 경험이 두 번째 사용으로 이어지게."</div></div>
+        <div class="result result-bad"><div class="result-label">✗ 별로인 것</div><div class="keepall">"멤버십 활성화율을 올린다." — 숫자만 있고 손에 잡히는 끝 그림이 없음.</div></div>
+      </div>
+
+      <div class="step-head"><span class="step-num">Step 4</span><span class="step-label">— 현황</span></div>
+      <div class="role-grid">
+        <div class="role-card"><div class="role-card-label">사람이 할 일</div><p>지금까지 <strong>이미 한 것·있는 것</strong>을 사실만 적는다.</p></div>
+        <div class="role-card"><div class="role-card-label">AI에게 시킬 것</div><p>그 안에서 <em>아직 안 본 데이터</em>가 무엇인지 묻게 한다.</p></div>
+      </div>
+      <div class="prompt-block"><button class="copy-btn" data-copy><span class="label">복사</span></button>다음은 이 프로젝트의 현황입니다.
+"이 안에서 아직 우리가 안 들여다본 데이터" 3가지를 짚어주세요.
+짐작이 아니라 실제로 확인 가능한 지표여야 합니다.
+
+현황: [붙여넣기]</div>
+      <div class="result-grid">
+        <div class="result result-good"><div class="result-label">✓ 잘된 것</div><div class="keepall">"앱 진입 후 첫 쿠폰 클릭까지의 이탈 구간, 한국어/영어 화면 비율, 가입 직후 7일 내 알림 오픈율."</div></div>
+        <div class="result result-bad"><div class="result-label">✗ 별로인 것</div><div class="keepall">"사용자 인터뷰가 더 필요합니다." — 늘 같은 답. 사실 진단이 아님.</div></div>
+      </div>
+
+      <div class="step-head"><span class="step-num">Step 5</span><span class="step-label">— 목표</span></div>
+      <div class="role-grid">
+        <div class="role-card"><div class="role-card-label">사람이 할 일</div><p>"잘 됐다"의 기준 <strong>한 줄</strong>. 가능하면 숫자.</p></div>
+        <div class="role-card"><div class="role-card-label">AI에게 시킬 것</div><p>그 기준이 <em>실패</em>했다는 걸 가장 빨리 알 시그널 3개.</p></div>
+      </div>
+      <div class="prompt-block"><button class="copy-btn" data-copy><span class="label">복사</span></button>다음은 이 프로젝트의 성공 기준입니다.
+이 기준이 실패했다는 걸 가장 빨리 알 수 있는 시그널 3가지를
+"무엇이 / 언제까지 / 어떤 값을 넘으면" 형태로 정의해주세요.
+
+목표: [한 줄 붙여넣기]</div>
+
+      <h2 id="s4">통째로 쓰는 템플릿</h2>
+      <p>5단계를 다 돌렸으면, 한 문서에 합쳐두는 게 핵심입니다. 다음 AI 세션을 열 때 이 문서를 먼저 읽히면, 같은 설명을 반복할 필요가 없습니다.</p>
+      <p>아래를 복사해서 <strong>CLAUDE.md</strong>(Claude Code) 또는 ChatGPT의 <strong>커스텀 인스트럭션</strong> 가장 위에 붙여두세요. 일반 채팅이라면 새 대화 첫 메시지에 통째로 넣으면 됩니다.</p>
+      <div class="prompt-block"><button class="copy-btn" data-copy><span class="label">복사</span></button># 프로젝트 정의
+
+## 문제 (Problem)
+[지금 무엇이 안 되고 있는가 — 측정 가능한 한 줄로]
+
+## 배경 (Why now)
+[왜 이 일을 시작하게 됐는가 — 깔린 가정이 보이게]
+
+## 목적 (What for)
+[이 일로 무엇을 바꾸고 싶은가 — 손에 잡히는 끝 그림으로]
+
+## 현황 (Where am I)
+[이미 한 것 · 있는 것 · 아직 안 본 데이터]
+
+## 목표 (How to measure)
+[잘 됐다는 걸 무엇으로 알 수 있는가 — 가능하면 숫자]
+
+---
+지시:
+새 작업을 시작할 때마다 위 5가지를 먼저 읽고,
+빠진 정보가 있으면 작업 시작 전에 나에게 되물어주세요.</div>
+
+      <h2 id="s5">솔직한 후기</h2>
+      <p>다섯 줄 쓰는 데 30분이 걸렸습니다. 30분 동안 AI는 한 번도 안 켰어요. 종이에 줄을 긋고, 지우고, 다시 썼습니다.</p>
+      <p>그 다섯 줄을 CLAUDE.md에 붙여 넣은 다음 같은 질문을 다시 던졌습니다 — "이 프로젝트에서 다음 한 주에 해볼 실험 3가지 제안해줘." 답이 완전히 달라졌습니다. <em-blue>지난번처럼 "안내 문자 다시 보내기"가 아니라, "가입 직후 7일 내 첫 쿠폰 클릭까지의 이탈 구간을 찍어서 가장 큰 구간 한 곳만 손본다"가 나왔습니다.</em-blue></p>
+
+      <div class="highlight-box keepall">
+        <strong>핵심 인사이트:</strong> AI 결과물이 흔한 이유는 AI가 약해서가 아니라, 우리가 던지는 문제가 흐려서다. 다섯 줄(문제·배경·목적·현황·목표)을 먼저 적으면, 같은 AI가 다른 답을 줍니다.
+      </div>
+
+      <h3>별로였던 것 (이건 따라하지 마세요)</h3>
+      <p>처음엔 다섯 줄을 한 번에 다 적으려 했더니, 결국 "활성화한다" 같은 일반론으로 다시 돌아갔습니다. <strong>한 줄씩 끊어서, 사이에 5분씩 쉬어가며</strong> 적는 게 결과가 훨씬 좋았습니다.</p>
+      <p>AI한테 "이 다섯 줄 다 채워줘"라고 시켜본 적도 있는데, 결과가 그럴듯한 거짓말이었습니다. <strong>다섯 줄은 사람이 채우고, AI는 그 줄에서 빠진 걸 캐묻는 역할</strong>만 시키는 게 맞습니다.</p>
+
+      <h3>다음에 다시 한다면</h3>
+      <p>이 다섯 줄을 프로젝트 시작 첫날 회의실 벽에 붙여둘 것 같습니다. 일주일 뒤 다시 보면 문제·배경·목적은 거의 안 바뀌는데, 현황·목표가 계속 업데이트됩니다. <em>그 변화 자체가 프로젝트 진척의 기록</em>이 됩니다.</p>
+    </div>
+
+    <div class="actions">
+      <button class="action-btn" type="button" id="likeBtn" onclick="handleLike()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <span id="likeBtnText">좋아요</span> <span id="likeCount" style="color:var(--gray-400)"></span>
+      </button>
+      <button class="action-btn ml-auto" type="button" id="saveBtn" onclick="handleSave()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        <span id="saveBtnText">저장</span>
+      </button>
+    </div>
+
+    <div class="share-section">
+      <div class="share-text keepall">이 글이 도움이 됐다면 공유해주세요</div>
+      <div class="share-btns">
+        <button class="share-btn kakao" type="button" onclick="shareKakao()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.477 3 2 6.463 2 10.691c0 2.726 1.8 5.117 4.51 6.473-.145.522-.935 3.367-.968 3.578 0 0-.02.166.088.229.108.063.235.03.235.03.31-.044 3.588-2.342 4.157-2.741.64.09 1.3.14 1.978.14 5.523 0 10-3.463 10-7.709C22 6.463 17.523 3 12 3"/></svg>
+          카카오톡
+        </button>
+        <button class="share-btn" type="button" onclick="shareTwitter()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          X
+        </button>
+        <button class="share-btn" type="button" id="copyLinkBtn" onclick="copyLink()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          링크 복사
+        </button>
+      </div>
+    </div>
+
+    <div class="comments">
+      <div class="comments-head">
+        <span class="comments-title">댓글</span>
+        <span class="comments-count">0</span>
+      </div>
+      <form class="comment-form" onsubmit="return false;">
+        <textarea class="comment-input" rows="3" placeholder="이 글에 대한 생각이나 질문을 남겨주세요."></textarea>
+        <div class="comment-form-footer">
+          <span class="comment-hint">로그인하면 댓글을 작성할 수 있습니다.</span>
+          <button type="submit" class="comment-submit">등록</button>
+        </div>
+      </form>
+      <div class="comment-empty">아직 댓글이 없습니다. 첫 댓글을 남겨보세요.</div>
+    </div>
+
+    <div class="explore">
+      <div class="explore-title">다른 콘텐츠 둘러보기</div>
+      <div class="explore-scroll">
+        <button class="explore-arrow" type="button" onclick="document.getElementById('exploreGrid').scrollLeft+=200">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+        </button>
+        <div class="explore-grid" id="exploreGrid">
+        <a href="cases.html" class="explore-card">
+          <div class="explore-icon">📝</div>
+          <div class="explore-name">실전 케이스</div>
+          <div class="explore-desc">써봤더니 이랬습니다</div>
+        </a>
+        <a href="trends.html" class="explore-card">
+          <div class="explore-icon">📈</div>
+          <div class="explore-name">AI 트렌드</div>
+          <div class="explore-desc">새로 나온 것, 실무자 눈으로</div>
+        </a>
+        <a href="tools.html" class="explore-card">
+          <div class="explore-icon">🔧</div>
+          <div class="explore-name">도구 모음</div>
+          <div class="explore-desc">이 일엔 이런 도구가 있더라</div>
+        </a>
+        <a href="prompts.html" class="explore-card">
+          <div class="explore-icon">📋</div>
+          <div class="explore-name">프롬프트 & 템플릿</div>
+          <div class="explore-desc">복사해서 바로 쓰세요</div>
+        </a>
+        <a href="guides.html" class="explore-card">
+          <div class="explore-icon">📘</div>
+          <div class="explore-name">공식 가이드</div>
+          <div class="explore-desc">공식 문서 핵심 정리</div>
+        </a>
+      </div></div>
+    </div>
+
+    </div>
+
+    <aside class="right-rec">
+      <div class="right-rec-inner">
+        <div class="rr-title">이어서 읽기</div>
+        <a href="content.html" class="rr-item">
+          <span class="rr-tag">기획</span>
+          <div class="rr-item-title keepall">기획서 첫 페이지가 안 풀릴 때 — '의도' 던지는 5단계</div>
+          <div class="rr-thumb"><img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&q=80" alt="" /></div>
+          <div class="rr-item-meta">읽는데 8분</div>
+        </a>
+        <a href="#" class="rr-item">
+          <span class="rr-tag">마케팅</span>
+          <div class="rr-item-title keepall">경쟁사 분석, AI가 표면만 긁고 끝나는 이유</div>
+          <div class="rr-thumb"><img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&q=80" alt="" /></div>
+          <div class="rr-item-meta">읽는데 7분</div>
+        </a>
+        <a href="#" class="rr-item">
+          <span class="rr-tag">프롬프트</span>
+          <div class="rr-item-title keepall">CLAUDE.md 5줄 — 같은 AI에서 다른 답을 끌어내는 법</div>
+          <div class="rr-thumb"><img src="https://images.unsplash.com/photo-1456324504439-367cee3b3c32?w=400&q=80" alt="" /></div>
+          <div class="rr-item-meta">읽는데 5분</div>
+        </a>
+      </div>
+    </aside>
+
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-txt keepall"><strong style="font-family:'Playfair Display',serif;font-style:italic;font-weight:700">Caselab</strong> — 내 일에 AI를 어떻게 쓸지, 실험하며 찾아가는 공간.</div>
+      <nav class="footer-links">
+        <a href="ebook.html">ebook</a>
+        <a href="#">개인정보 처리방침</a>
+        <span style="color:var(--gray-400)">© 2026</span>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    var tocLinks = document.querySelectorAll('.lt-link');
+    var sections = ['s1','s2','s3','s4','s5'].map(function(id){return document.getElementById(id)}).filter(Boolean);
+    window.addEventListener('scroll', function(){
+      var scrollPos = window.scrollY + 100;
+      var current = '';
+      sections.forEach(function(sec){
+        if(sec.offsetTop <= scrollPos) current = sec.id;
+      });
+      tocLinks.forEach(function(link){
+        link.classList.toggle('active', link.dataset.section === current);
+      });
+    });
+
+    tocLinks.forEach(function(link){
+      link.addEventListener('click', function(e){
+        e.preventDefault();
+        var target = document.getElementById(this.dataset.section);
+        if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+      });
+    });
+
+    function shareKakao() {
+      var url = window.location.href;
+      if (navigator.share) {
+        navigator.share({ title: document.title, url: url });
+      } else {
+        window.open('https://story.kakao.com/share?url=' + encodeURIComponent(url), '_blank', 'width=600,height=400');
+      }
+    }
+    function shareTwitter() {
+      var url = window.location.href;
+      var text = document.querySelector('h1').textContent;
+      window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank', 'width=600,height=400');
+    }
+    function copyLink() {
+      navigator.clipboard.writeText(window.location.href).then(function() {
+        var btn = document.getElementById('copyLinkBtn');
+        btn.classList.add('copied');
+        var orig = btn.innerHTML;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><polyline points="20 6 9 17 4 12"/></svg> 복사됨';
+        setTimeout(function(){ btn.classList.remove('copied'); btn.innerHTML = orig; }, 2000);
+      });
+    }
+
+    document.querySelectorAll('[data-copy]').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        var block = this.closest('.prompt-block');
+        if(!block) return;
+        var text = block.innerText.replace(/^\s*복사\s*/m,'').trim();
+        try {
+          await navigator.clipboard.writeText(text);
+          var label = this.querySelector('.label');
+          this.classList.add('copied');
+          if(label) label.textContent='복사됨';
+          setTimeout(function(){btn.classList.remove('copied');if(label)label.textContent='복사'},1600);
+        } catch(e){}
+      });
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-config.js"></script>
+  <script>
+    var CID='case-02-foreign-membership-5lines',CTL='외국인 고객 멤버십이 묻혀버린 이유 — AI한테 다시 풀게 한 5줄';
+    async function initActions(){var l=await isLiked(CID),s=await isSaved(CID),c=await getLikeCount(CID);document.getElementById('likeBtnText').textContent=l?'좋아요 취소':'좋아요';if(l)document.getElementById('likeBtn').classList.add('active');document.getElementById('likeCount').textContent=c>0?c:'';document.getElementById('saveBtnText').textContent=s?'저장됨':'저장';if(s)document.getElementById('saveBtn').classList.add('active')}
+    async function handleLike(){var r=await toggleLike(CID,CTL);if(r===undefined)return;var c=await getLikeCount(CID);document.getElementById('likeBtnText').textContent=r?'좋아요 취소':'좋아요';document.getElementById('likeBtn').classList.toggle('active',r);document.getElementById('likeCount').textContent=c>0?c:''}
+    async function handleSave(){var r=await toggleSave(CID,CTL);if(r===undefined)return;document.getElementById('saveBtnText').textContent=r?'저장됨':'저장';document.getElementById('saveBtn').classList.toggle('active',r)}
+    initActions();
+  </script>
+
+  <script src="../js/content-sync.js"></script>
+</body>
+</html>

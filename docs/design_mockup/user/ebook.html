@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ebook — Caselab</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--bg:#fff;--bg-sub:#f7f7f7;--ink:#191f28;--gray-800:#333d4b;--gray-600:#6b7684;--gray-500:#8b95a1;--gray-400:#b0b8c1;--gray-300:#d1d6db;--gray-200:#e5e8eb;--gray-100:#f2f4f6;--blue:#3182f6;--blue-bg:#ebf4ff;--green:#03b26c;--green-bg:#e8f8f0}
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{font-size:16px;-webkit-font-smoothing:antialiased}
+    body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;letter-spacing:-0.02em}
+    .keepall{word-break:keep-all;overflow-wrap:break-word}
+    a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer;border:none;background:none}
+
+    /* GNB */
+    .gnb{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--gray-200)}
+    .gnb-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .gnb-logo{font-family:'Playfair Display',serif;font-style:italic;font-size:28px;font-weight:700;letter-spacing:-0.01em}
+    .gnb-right{display:flex;align-items:center;gap:6px}
+    .gnb-nav{display:none;gap:22px;font-size:15px;font-weight:500;color:var(--gray-600);margin-right:16px}
+    .gnb-nav a:hover{color:var(--ink)}.gnb-nav a.on{color:var(--ink);font-weight:700}
+    @media(min-width:768px){.gnb-nav{display:flex}}
+    .gnb-dropdown{position:static}
+    .gnb-dropdown-trigger{display:inline-flex;align-items:center}
+    .mega-menu{display:none;position:absolute;left:0;right:0;top:56px;background:#fff;border-bottom:1px solid var(--gray-200);box-shadow:0 8px 24px rgba(0,0,0,.06);z-index:110}
+    .mega-menu::before{content:'';position:absolute;top:-16px;left:0;right:0;height:16px}
+    .mega-inner{max-width:1100px;margin:0 auto;padding:24px;display:flex;gap:12px;justify-content:center}
+    .mega-card{display:flex;align-items:center;gap:14px;padding:16px 20px;border:1px solid var(--gray-200);border-radius:12px;flex:1;max-width:280px;transition:all .15s}
+    .mega-card:hover{border-color:var(--blue);box-shadow:0 2px 12px rgba(49,130,246,.08)}
+    .mega-card-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+    .mega-card-body{min-width:0}
+    .mega-card-title{font-size:14px;font-weight:700;letter-spacing:-0.02em;margin-bottom:2px}
+    .mega-card-desc{font-size:12px;color:var(--gray-500)}
+    .gnb-dropdown:hover .mega-menu{display:block}
+    .gnb-sub{font-size:14px;font-weight:600;color:#fff;background:var(--blue);padding:7px 16px;border-radius:8px}
+    .gnb-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:var(--gray-600);transition:background .15s}
+    .gnb-icon:hover{background:var(--gray-100)}
+    .gnb-icon svg{width:20px;height:20px}
+
+    /* Free banner */
+    .free-banner{background:linear-gradient(135deg,#1e3a5f,#2563eb);color:#fff}
+    .free-banner-inner{max-width:1100px;margin:0 auto;padding:28px 24px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+    .free-tag{display:inline-block;font-size:11px;font-weight:700;background:rgba(255,255,255,.2);padding:4px 12px;border-radius:20px;margin-bottom:8px;backdrop-filter:blur(4px)}
+    .free-banner-text h2{font-size:22px;font-weight:800;letter-spacing:-0.03em;margin-bottom:4px}
+    @media(min-width:768px){.free-banner-text h2{font-size:26px}}
+    .free-banner-text p{font-size:14px;color:rgba(255,255,255,.7)}
+    .free-banner-cta{display:inline-flex;padding:12px 28px;font-size:15px;font-weight:700;color:var(--ink);background:#fff;border-radius:10px;transition:background .15s;white-space:nowrap;flex-shrink:0;letter-spacing:-0.02em}
+    .free-banner-cta:hover{background:var(--gray-100)}
+
+    /* Hero */
+    .hero{background:var(--bg-sub);padding:48px 0 40px;border-bottom:1px solid var(--gray-200)}
+    @media(min-width:768px){.hero{padding:64px 0 48px}}
+    .hero-inner{max-width:1100px;margin:0 auto;padding:0 24px}
+    .hero h1{font-size:32px;font-weight:800;letter-spacing:-0.03em;margin-bottom:10px;color:var(--ink)}
+    @media(min-width:768px){.hero h1{font-size:40px}}
+    .hero p{font-size:16px;color:var(--gray-600);max-width:480px}
+
+    /* Book grid */
+    .page{max-width:1100px;margin:0 auto;padding:48px 24px 80px}
+    .book-grid{display:grid;grid-template-columns:1fr;gap:32px}
+    @media(min-width:768px){.book-grid{grid-template-columns:1fr 1fr 1fr}}
+
+    /* Book card */
+    .book-card{border:1px solid var(--gray-200);border-radius:16px;overflow:hidden;transition:border-color .15s,box-shadow .15s;position:relative;display:flex;flex-direction:column}
+    .book-card:hover{border-color:var(--gray-300);box-shadow:0 8px 24px rgba(0,0,0,.06)}
+    .book-card.coming-soon{opacity:.7}
+
+    /* 3D Book */
+    .book-3d-wrap{display:flex;justify-content:center;padding:48px 24px 36px;background:var(--bg-sub)}
+    .book-3d{width:180px;height:260px;position:relative;transform-style:preserve-3d;transform:perspective(1000px) rotateY(-12deg);transition:transform .4s ease}
+    .book-card:hover .book-3d{transform:perspective(1000px) rotateY(-4deg)}
+    /* 책 앞면 */
+    .book-cover{width:100%;height:100%;border-radius:2px 10px 10px 2px;display:flex;flex-direction:column;position:relative;overflow:hidden;box-shadow:8px 8px 20px rgba(0,0,0,.25),2px 0 4px rgba(0,0,0,.1)}
+    /* 측면 (등) */
+    .book-cover::before{content:'';position:absolute;left:-12px;top:0;bottom:0;width:12px;background:linear-gradient(to right,rgba(0,0,0,.15),rgba(0,0,0,.05));transform:rotateY(90deg);transform-origin:right center}
+    .book-cover::after{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(to right,rgba(255,255,255,.1),transparent)}
+    /* 커버 내부 구조 */
+    .cover-top{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:20px 16px;text-align:center;position:relative;z-index:1}
+    .cover-top .cover-eyebrow{font-size:8px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;opacity:.6;margin-bottom:8px}
+    .cover-top .cover-main-title{font-size:20px;font-weight:900;line-height:1.2;letter-spacing:-0.03em;margin-bottom:6px}
+    .cover-top .cover-sub-title{font-size:11px;font-weight:600;line-height:1.4;opacity:.7}
+    .cover-bottom{padding:12px 16px;position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between}
+    .cover-bottom .cover-author{font-size:9px;font-weight:600;opacity:.5}
+    .cover-bottom .cover-logo{font-family:'Playfair Display',serif;font-style:italic;font-size:11px;font-weight:700;opacity:.5}
+    /* 커버 장식 */
+    .cover-deco{position:absolute;top:0;right:0;width:80px;height:80px;opacity:.08;z-index:0}
+    .cover-line{position:absolute;bottom:48px;left:16px;right:16px;height:1px;background:rgba(255,255,255,.15);z-index:0}
+
+    /* Book info */
+    .book-info{padding:24px;flex:1;display:flex;flex-direction:column}
+    .book-badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:5px;margin-bottom:12px;width:fit-content}
+    .badge-free{color:var(--green);background:var(--green-bg)}
+    .badge-paid{color:var(--blue);background:var(--blue-bg)}
+    .badge-soon{color:var(--gray-500);background:var(--gray-100)}
+    .book-title{font-size:18px;font-weight:800;letter-spacing:-0.02em;margin-bottom:6px;line-height:1.35}
+    .book-desc{font-size:14px;color:var(--gray-600);line-height:1.55;margin-bottom:16px;flex:1}
+    .book-price{font-size:14px;color:var(--gray-500);margin-bottom:16px}
+    .book-price strong{font-size:22px;font-weight:800;color:var(--ink)}
+    .book-price .original{text-decoration:line-through;color:var(--gray-400);margin-right:6px}
+    .book-cta{display:block;width:100%;padding:14px;font-size:15px;font-weight:700;text-align:center;border-radius:10px;transition:all .15s;letter-spacing:-0.02em}
+    .cta-free{color:#fff;background:var(--blue)}
+    .cta-free:hover{background:#1b6ef2}
+    .cta-paid{color:#fff;background:var(--ink)}
+    .cta-paid:hover{background:var(--gray-800)}
+    .cta-soon{color:var(--gray-500);background:var(--gray-100);cursor:default}
+
+    /* Compare table */
+    .compare{margin-top:56px}
+    .compare-title{font-size:24px;font-weight:800;letter-spacing:-0.03em;text-align:center;margin-bottom:8px}
+    .compare-desc{font-size:15px;color:var(--gray-600);text-align:center;margin-bottom:32px}
+    .compare-table-wrap{overflow-x:auto}
+    .compare-table{width:100%;border-collapse:collapse;font-size:14px;min-width:600px}
+    .compare-table th,.compare-table td{padding:14px 16px;text-align:center;border-bottom:1px solid var(--gray-200)}
+    .feature-col{text-align:left!important;font-weight:700;color:var(--ink);width:30%}
+    .feature-name{text-align:left!important;font-weight:500;color:var(--gray-800)}
+    .plan-col{width:23%;vertical-align:bottom;padding-bottom:20px!important}
+    .plan-name{font-size:16px;font-weight:800;letter-spacing:-0.02em;margin-bottom:2px}
+    .plan-price{font-size:14px;color:var(--gray-500);font-weight:600}
+    .plan-best{display:inline-block;font-size:10px;font-weight:700;color:#fff;background:var(--blue);padding:2px 8px;border-radius:4px;margin-bottom:6px}
+    .highlight{background:var(--blue-bg)}
+    .highlight-cell{background:rgba(49,130,246,.04)}
+    .check{color:var(--blue);font-weight:700}
+    .x{color:var(--gray-300)}
+    .compare-table tfoot td{padding-top:20px;border-bottom:none}
+    .table-cta{display:inline-block;padding:10px 24px;font-size:14px;font-weight:700;border-radius:8px;transition:all .12s;letter-spacing:-0.02em}
+    .cta-outline{color:var(--gray-600);border:1px solid var(--gray-200)}.cta-outline:hover{border-color:var(--gray-400)}
+    .cta-fill{color:#fff;background:var(--blue)}.cta-fill:hover{background:#1b6ef2}
+    .cta-disabled{color:var(--gray-400);background:var(--gray-100);cursor:default}
+
+    /* Coming soon overlay */
+    .soon-overlay{position:absolute;top:16px;right:16px;font-size:11px;font-weight:700;color:#fff;background:rgba(0,0,0,.5);padding:4px 12px;border-radius:6px;backdrop-filter:blur(4px);z-index:2}
+  </style>
+</head>
+<body>
+
+  <!-- GNB -->
+  <header class="gnb">
+    <div class="gnb-inner">
+      <a href="index.html" class="gnb-logo">Caselab</a>
+      <div class="gnb-right">
+        <nav class="gnb-nav">
+          <a href="cases.html">AI 실전케이스</a>
+          <a href="trends.html">AI 트렌드</a>
+          <div class="gnb-dropdown">
+            <a href="#" class="gnb-dropdown-trigger">자료실 <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style="margin-left:2px;vertical-align:middle"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            <div class="mega-menu">
+              <div class="mega-inner">
+                <a href="tools.html" class="mega-card"><div class="mega-card-icon" style="background:linear-gradient(135deg,#e0e7ff,#f5f3ff)">🔧</div><div class="mega-card-body"><div class="mega-card-title">쓸만한 AI 도구</div><div class="mega-card-desc">검증된 AI 도구만 모았습니다</div></div></a>
+                <a href="prompts.html" class="mega-card"><div class="mega-card-icon" style="background:linear-gradient(135deg,#d1fae5,#ecfdf5)">📋</div><div class="mega-card-body"><div class="mega-card-title">바로 쓰는 프롬프트</div><div class="mega-card-desc">복사 한 번이면 끝</div></div></a>
+                <a href="guides.html" class="mega-card"><div class="mega-card-icon" style="background:linear-gradient(135deg,#dbeafe,#eff6ff)">📘</div><div class="mega-card-body"><div class="mega-card-title">공식 가이드</div><div class="mega-card-desc">볼 곳만 짚어줍니다</div></div></a>
+              </div>
+            </div>
+          </div>
+          <a href="ebook.html" class="on">ebook</a>
+        </nav>
+        <button class="gnb-sub">구독하기</button>
+        <a href="login.html" class="gnb-icon" title="로그인"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a>
+        <a href="#" class="gnb-icon" title="검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-inner">
+      <h1>ebook</h1>
+      <p class="keepall">실무에서 검증된 AI 워크플로우를 한 권에 담았습니다.</p>
+    </div>
+  </div>
+
+  <!-- 무료 배포 배너 -->
+  <div class="free-banner">
+    <div class="free-banner-inner">
+      <div class="free-banner-text">
+        <span class="free-tag">무료 배포 중</span>
+        <h2 class="keepall">AI, 누구나 쉽게 시작할 수 있도록</h2>
+        <p class="keepall">첫 번째 ebook을 무료로 드립니다. 다운로드 후 바로 읽어보세요.</p>
+      </div>
+      <a href="ebook-free.html" class="free-banner-cta">무료로 받기 →</a>
+    </div>
+  </div>
+
+  <!-- Books -->
+  <div class="page">
+    <div class="book-grid">
+
+      <!-- Book 1: 무료 -->
+      <div class="book-card">
+        <div class="book-3d-wrap">
+          <div class="book-3d">
+            <div class="book-cover" style="background:linear-gradient(160deg,#0f172a 0%,#1e3a5f 40%,#2563eb 100%);color:#fff">
+              <svg class="cover-deco" viewBox="0 0 80 80" fill="white"><circle cx="40" cy="40" r="35" stroke="white" fill="none" stroke-width=".5"/><circle cx="40" cy="40" r="25" stroke="white" fill="none" stroke-width=".3"/><circle cx="40" cy="40" r="15" stroke="white" fill="none" stroke-width=".2"/></svg>
+              <div class="cover-top">
+                <div class="cover-eyebrow">Caselab ebook</div>
+                <div class="cover-main-title">AI,<br>다들 쓰는데<br>나만 못 쓰는 것<br>같다면</div>
+                <div class="cover-sub-title">1주 실험 노트</div>
+              </div>
+              <div class="cover-line"></div>
+              <div class="cover-bottom">
+                <span class="cover-author">워크플로우 12개 수록</span>
+                <span class="cover-logo">Caselab</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="book-info">
+          <span class="book-badge badge-free">FREE</span>
+          <h2 class="book-title keepall">AI, 다들 쓰는데 나만 못 쓰는 것 같다면</h2>
+          <p class="book-desc keepall">기획·마케팅·영업 직무에서 1주 동안 직접 써본 AI 워크플로우 12개. 잘된 것·별로인 것 그대로.</p>
+          <div class="book-price"><strong>무료</strong></div>
+          <a href="ebook-free.html" class="book-cta cta-free">자세히 보기</a>
+        </div>
+      </div>
+
+      <!-- Book 2: 유료 -->
+      <div class="book-card">
+        <div class="book-3d-wrap">
+          <div class="book-3d">
+            <div class="book-cover" style="background:linear-gradient(160deg,#0a0a0a 0%,#1a1a2e 50%,#312e81 100%);color:#fff">
+              <svg class="cover-deco" viewBox="0 0 80 80" fill="none"><rect x="10" y="10" width="60" height="60" stroke="white" stroke-width=".5" rx="4"/><rect x="20" y="20" width="40" height="40" stroke="white" stroke-width=".3" rx="2"/><line x1="10" y1="10" x2="70" y2="70" stroke="white" stroke-width=".3"/></svg>
+              <div class="cover-top">
+                <div class="cover-eyebrow">Caselab Premium</div>
+                <div class="cover-main-title">AI<br>프롬프트<br>실전 바이블</div>
+                <div class="cover-sub-title">직무별 검증 프롬프트 50선</div>
+              </div>
+              <div class="cover-line"></div>
+              <div class="cover-bottom">
+                <span class="cover-author">Before/After 수록</span>
+                <span class="cover-logo">Caselab</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="book-info">
+          <span class="book-badge badge-paid">PREMIUM</span>
+          <h2 class="book-title keepall">AI 프롬프트 실전 바이블</h2>
+          <p class="book-desc keepall">기획·마케팅·영업·1인사업 직무별 검증된 프롬프트 50개 + Before/After 결과물 + 활용 가이드.</p>
+          <div class="book-price"><span class="original">29,000원</span> <strong>19,000원</strong></div>
+          <a href="ebook-premium.html" class="book-cta cta-paid">자세히 보기</a>
+        </div>
+      </div>
+
+      <!-- Book 3: Coming Soon -->
+      <div class="book-card coming-soon">
+        <span class="soon-overlay">COMING SOON</span>
+        <div class="book-3d-wrap">
+          <div class="book-3d">
+            <div class="book-cover" style="background:linear-gradient(160deg,#374151 0%,#6b7684 50%,#9ca3af 100%);color:#fff">
+              <svg class="cover-deco" viewBox="0 0 80 80" fill="none"><polygon points="40,5 75,65 5,65" stroke="white" stroke-width=".5" fill="none"/><polygon points="40,20 62,55 18,55" stroke="white" stroke-width=".3" fill="none"/></svg>
+              <div class="cover-top">
+                <div class="cover-eyebrow">Caselab ebook</div>
+                <div class="cover-main-title">AI 도구<br>완전 정복<br>가이드</div>
+                <div class="cover-sub-title">주요 도구 비교 시리즈</div>
+              </div>
+              <div class="cover-line"></div>
+              <div class="cover-bottom">
+                <span class="cover-author">ChatGPT · Claude · Gemini</span>
+                <span class="cover-logo">Caselab</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="book-info">
+          <span class="book-badge badge-soon">COMING SOON</span>
+          <h2 class="book-title keepall">AI 도구 완전 정복 가이드</h2>
+          <p class="book-desc keepall">ChatGPT, Claude, Perplexity, Notion AI 등 주요 AI 도구를 직무별로 비교하고 최적 조합을 제안합니다.</p>
+          <div class="book-price"><strong style="color:var(--gray-400)">가격 미정</strong></div>
+          <span class="book-cta cta-soon">출간 알림 받기</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 비교 테이블 -->
+    <div class="compare">
+      <h2 class="compare-title">어떤 ebook이 맞을까요?</h2>
+      <p class="compare-desc keepall">각 ebook에 포함된 내용을 비교해보세요.</p>
+
+      <div class="compare-table-wrap">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th class="feature-col">포함 내용</th>
+              <th class="plan-col">
+                <div class="plan-name">무료</div>
+                <div class="plan-price">₩0</div>
+              </th>
+              <th class="plan-col highlight">
+                <div class="plan-best">BEST</div>
+                <div class="plan-name">프리미엄</div>
+                <div class="plan-price">₩19,000</div>
+              </th>
+              <th class="plan-col">
+                <div class="plan-name">마스터</div>
+                <div class="plan-price">출간 예정</div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="feature-name">AI 워크플로우 가이드</td>
+              <td><span class="check">✓</span> 12개</td>
+              <td class="highlight-cell"><span class="check">✓</span> 50개</td>
+              <td><span class="check">✓</span> 50+</td>
+            </tr>
+            <tr>
+              <td class="feature-name">직무별 프롬프트</td>
+              <td><span class="check">✓</span> 기본 5개</td>
+              <td class="highlight-cell"><span class="check">✓</span> 50개 전체</td>
+              <td><span class="check">✓</span> 50+</td>
+            </tr>
+            <tr>
+              <td class="feature-name">Before/After 결과 스크린샷</td>
+              <td><span class="x">—</span></td>
+              <td class="highlight-cell"><span class="check">✓</span></td>
+              <td><span class="check">✓</span></td>
+            </tr>
+            <tr>
+              <td class="feature-name">업무 프레임워크 해설</td>
+              <td><span class="check">✓</span> 3개</td>
+              <td class="highlight-cell"><span class="check">✓</span> 10개</td>
+              <td><span class="check">✓</span> 15+</td>
+            </tr>
+            <tr>
+              <td class="feature-name">실전 실패 사례 + 교훈</td>
+              <td><span class="check">✓</span> 일부</td>
+              <td class="highlight-cell"><span class="check">✓</span> 전체 수록</td>
+              <td><span class="check">✓</span> 전체 수록</td>
+            </tr>
+            <tr>
+              <td class="feature-name">AI 도구 비교 가이드</td>
+              <td><span class="x">—</span></td>
+              <td class="highlight-cell"><span class="x">—</span></td>
+              <td><span class="check">✓</span> 8개 도구</td>
+            </tr>
+            <tr>
+              <td class="feature-name">도구별 최적 조합 추천</td>
+              <td><span class="x">—</span></td>
+              <td class="highlight-cell"><span class="x">—</span></td>
+              <td><span class="check">✓</span></td>
+            </tr>
+            <tr>
+              <td class="feature-name">PDF 다운로드</td>
+              <td><span class="check">✓</span></td>
+              <td class="highlight-cell"><span class="check">✓</span></td>
+              <td><span class="check">✓</span></td>
+            </tr>
+            <tr>
+              <td class="feature-name">전자책 뷰어</td>
+              <td><span class="check">✓</span></td>
+              <td class="highlight-cell"><span class="check">✓</span></td>
+              <td><span class="check">✓</span></td>
+            </tr>
+            <tr>
+              <td class="feature-name">업데이트 무료 제공</td>
+              <td><span class="x">—</span></td>
+              <td class="highlight-cell"><span class="check">✓</span> 1년</td>
+              <td><span class="check">✓</span> 평생</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td></td>
+              <td><a href="#" class="table-cta cta-outline" onclick="requireLogin('ebook-detail.html');return false">무료로 받기</a></td>
+              <td class="highlight-cell"><a href="#" class="table-cta cta-fill" onclick="requireLogin('order.html');return false">구매하기</a></td>
+              <td><span class="table-cta cta-disabled">출간 알림</span></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-config.js"></script>
+  <script>
+    async function requireLogin(redirectUrl) {
+      try {
+        var user = await getCurrentUser();
+        if (user) {
+          window.location.href = redirectUrl;
+          return;
+        }
+      } catch(e) {}
+      // 비로그인 또는 Supabase 미연결 → 로그인 페이지로
+      localStorage.setItem('caselab_redirect', redirectUrl);
+      window.location.href = 'login.html';
+    }
+  </script>
+</body>
+</html>

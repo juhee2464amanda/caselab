@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>케이스랩 — AI, 다들 쓰는데 나만 못 쓰는 것 같다면</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #fff; --bg-sub: #f7f7f7;
+      --ink: #191f28; --gray-800: #333d4b; --gray-600: #6b7684; --gray-500: #8b95a1;
+      --gray-400: #b0b8c1; --gray-300: #d1d6db; --gray-200: #e5e8eb; --gray-100: #f2f4f6;
+      --blue: #3182f6; --blue-bg: #ebf4ff; --green: #03b26c; --green-bg: #e8f8f0;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.5; letter-spacing: -0.02em; }
+    .keepall { word-break: keep-all; overflow-wrap: break-word; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; border: none; background: none; }
+
+    /* ── GNB ── */
+    .gnb { position: sticky; top: 0; z-index: 100; background: #fff; border-bottom: 1px solid var(--gray-200); }
+    .gnb-inner { max-width: 1100px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+    .gnb-logo { font-family: 'Playfair Display', serif; font-style: italic; font-size: 28px; font-weight: 700; letter-spacing: -0.01em; outline: none; }
+    .gnb-logo:focus { border-bottom: 2px solid var(--blue); }
+    [contenteditable]:focus { outline: none; box-shadow: inset 0 -2px 0 var(--blue); }
+    .gnb-sub-msg { font-size: 12px; font-weight: 500; color: var(--gray-400); border-left: 1px solid var(--gray-200); padding-left: 12px; display: none; letter-spacing: -0.01em; }
+    @media (min-width: 960px) { .gnb-sub-msg { display: block; } }
+    .gnb-right { display: flex; align-items: center; gap: 6px; }
+    .gnb-nav { display: none; gap: 22px; font-size: 15px; font-weight: 500; color: var(--gray-600); margin-right: 16px; }
+    .gnb-nav a:hover { color: var(--ink); }
+    @media (min-width: 768px) { .gnb-nav { display: flex; } }
+    /* mega dropdown */
+    .gnb-dropdown { position: static; }
+    .gnb-dropdown-trigger { display: inline-flex; align-items: center; }
+    .mega-menu { display: none; position: absolute; left: 0; right: 0; top: 56px; background: #fff; border-bottom: 1px solid var(--gray-200); box-shadow: 0 8px 24px rgba(0,0,0,.06); z-index: 110; padding-top: 0; }
+    .mega-menu::before { content: ''; position: absolute; top: -16px; left: 0; right: 0; height: 16px; }
+    .mega-inner { max-width: 1100px; margin: 0 auto; padding: 24px; display: flex; gap: 12px; justify-content: center; }
+    .mega-card { display: flex; align-items: center; gap: 14px; padding: 16px 20px; border: 1px solid var(--gray-200); border-radius: 12px; flex: 1; max-width: 280px; transition: all .15s; }
+    .mega-card:hover { border-color: var(--blue); box-shadow: 0 2px 12px rgba(49,130,246,.08); }
+    .mega-card-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+    .mega-card-body { min-width: 0; }
+    .mega-card-title { font-size: 14px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 2px; }
+    .mega-card-desc { font-size: 12px; color: var(--gray-500); }
+    .gnb-dropdown:hover .mega-menu { display: block; }
+    .gnb-sub { font-size: 14px; font-weight: 600; color: #fff; background: var(--blue); padding: 7px 16px; border-radius: 8px; transition: background .15s; }
+    .gnb-sub:hover { background: #1b6ef2; }
+    .gnb-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--gray-600); transition: background .15s; }
+    .gnb-icon:hover { background: var(--gray-100); }
+    .gnb-icon svg { width: 20px; height: 20px; }
+    .lang-toggle { font-size: 12px; font-weight: 700; color: var(--gray-500); border: 1px solid var(--gray-200); padding: 4px 10px; border-radius: 6px; transition: all .12s; letter-spacing: 0.02em; }
+    .lang-toggle:hover { border-color: var(--gray-400); color: var(--ink); }
+    .lang-toggle.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+    /* Google Translate 기본 UI 숨김 */
+    .goog-te-banner-frame, .skiptranslate, #goog-gt-tt { display: none !important; }
+    body { top: 0 !important; }
+
+    /* ── hero carousel ── */
+    .hero { background: var(--bg); border-bottom: 1px solid var(--gray-200); }
+    .hero-wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; }
+    .hero-track { overflow: hidden; }
+    .hero-slides { display: flex; transition: transform .35s ease; }
+    .hero-slide { min-width: 100%; }
+    .hero-slide a { display: flex; flex-direction: column; gap: 24px; padding: 40px 0 20px; }
+    @media (min-width: 768px) { .hero-slide a { flex-direction: row; align-items: center; gap: 48px; padding: 56px 0 28px; } }
+    .hero-text { flex: 1; min-width: 0; }
+    .hero-thumb { width: 100%; aspect-ratio: 16/9; border-radius: 16px; overflow: hidden; background: var(--gray-100); flex-shrink: 0; }
+    @media (min-width: 768px) { .hero-thumb { width: 500px; aspect-ratio: 5/3; } }
+    .hero-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .h-eye { display: inline-block; font-size: 12px; font-weight: 700; color: var(--blue); background: var(--blue-bg); padding: 3px 10px; border-radius: 5px; margin-bottom: 14px; }
+    .hero-text h2 { font-size: 24px; font-weight: 800; line-height: 1.3; letter-spacing: -0.03em; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+    @media (min-width: 768px) { .hero-text h2 { font-size: 32px; } }
+    .hero-text .h-desc { font-size: 15px; line-height: 1.6; color: var(--gray-600); margin-bottom: 12px; max-width: 420px; }
+    @media (min-width: 768px) { .hero-text .h-desc { font-size: 16px; } }
+    .meta { font-size: 13px; color: var(--gray-500); display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+    .meta-dot::before { content: '·'; margin: 0 1px; }
+
+    /* arrows — meta 아래에 나란히 */
+    .hero-arrows { display: flex; gap: 8px; margin-top: 16px; }
+    .hero-arrow { width: 44px; height: 44px; border-radius: 50%; background: #fff; border: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: center; color: var(--gray-500); transition: all .15s; }
+    .hero-arrow:hover { border-color: var(--gray-400); color: var(--ink); }
+    .hero-arrow svg { width: 18px; height: 18px; }
+
+    /* ── band (배경색 교차) ── */
+    .band { padding: 40px 0; }
+    @media (min-width: 768px) { .band { padding: 56px 0; } }
+    .band-alt { background: var(--bg-sub); }
+
+    /* ── 2-col layout: main + sidebar ── */
+    .layout { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    .layout-inner { display: flex; flex-direction: column; gap: 0; }
+    @media (min-width: 900px) {
+      .layout-inner { flex-direction: row; gap: 48px; }
+      .layout-main { flex: 1; min-width: 0; }
+      .layout-side { width: 280px; flex-shrink: 0; padding-top: 48px; }
+    }
+
+    /* ── section ── */
+    .sec-head { display: flex; align-items: center; justify-content: space-between; padding-top: 36px; margin-bottom: 0; }
+    @media (min-width: 768px) { .sec-head { padding-top: 48px; } }
+    .sec-title { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; }
+    @media (min-width: 768px) { .sec-title { font-size: 26px; } }
+    .sec-more { font-size: 13px; font-weight: 500; color: var(--blue); }
+    .sec-more:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+    /* ── category tabs ── */
+    .tabs { display: flex; gap: 6px; padding: 14px 0 16px; overflow-x: auto; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab { padding: 7px 16px; font-size: 14px; font-weight: 500; color: var(--gray-500); border: 1px solid var(--gray-200); border-radius: 20px; white-space: nowrap; transition: all .12s; }
+    .tab:hover { color: var(--gray-800); border-color: var(--gray-400); }
+    .tab.on { color: #fff; background: var(--ink); border-color: var(--ink); }
+
+    /* ── article list ── */
+    .a-item { display: block; padding: 18px 0; border-bottom: 1px solid var(--gray-200); }
+    .a-item:hover .a-title { color: var(--blue); }
+    .a-head { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+    .a-cat { font-size: 11px; font-weight: 700; color: var(--blue); background: var(--blue-bg); padding: 2px 7px; border-radius: 4px; }
+    .a-title { font-size: 16px; font-weight: 700; line-height: 1.4; letter-spacing: -0.02em; margin-bottom: 4px; transition: color .12s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    @media (min-width: 768px) { .a-title { font-size: 17px; } }
+    .a-desc { font-size: 14px; color: var(--gray-600); line-height: 1.5; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+
+    /* ── series grid ── */
+    .series-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 16px; }
+    @media (min-width: 768px) { .series-grid { grid-template-columns: repeat(4, 1fr); } }
+    .series-card { display: block; border: 1px solid var(--gray-200); border-radius: 14px; overflow: hidden; transition: border-color .15s, box-shadow .15s; background: #fff; }
+    .series-card:hover { border-color: var(--gray-300); box-shadow: 0 4px 16px rgba(0,0,0,.06); }
+    .series-thumb { aspect-ratio: 4/3; overflow: hidden; position: relative; }
+    .series-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .2s ease; }
+    .series-card:hover .series-thumb img { transform: scale(1.03); }
+    .series-thumb .series-badge { position: absolute; top: 10px; left: 10px; font-size: 11px; font-weight: 700; color: #fff; background: rgba(0,0,0,.55); padding: 3px 8px; border-radius: 5px; backdrop-filter: blur(4px); }
+    .series-body { padding: 16px 16px 18px; }
+    .series-name { font-size: 17px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 5px; }
+    .series-desc { font-size: 13px; color: var(--gray-600); line-height: 1.45; }
+
+    /* ── series preview (최근 올라온 것들) ── */
+    .preview-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 16px; }
+    @media (min-width: 768px) { .preview-grid { grid-template-columns: repeat(4, 1fr); } }
+    .preview-card { display: block; border: 1px solid var(--gray-200); border-radius: 12px; overflow: hidden; background: #fff; transition: border-color .15s, box-shadow .15s; }
+    .preview-card:hover { border-color: var(--gray-300); box-shadow: 0 4px 16px rgba(0,0,0,.06); }
+    .preview-thumb { aspect-ratio: 16/10; overflow: hidden; position: relative; }
+    .preview-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .2s ease; }
+    .preview-card:hover .preview-thumb img { transform: scale(1.03); }
+    .preview-series { position: absolute; bottom: 8px; left: 8px; font-size: 10px; font-weight: 700; color: #fff; background: rgba(0,0,0,.55); padding: 2px 8px; border-radius: 4px; backdrop-filter: blur(4px); }
+    .preview-body { padding: 14px 14px 16px; }
+    .preview-title { font-size: 15px; font-weight: 700; line-height: 1.4; letter-spacing: -0.02em; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+    .preview-meta { font-size: 12px; color: var(--gray-500); }
+
+    /* ── vote compact ── */
+    .vote-compact { margin-top: 12px; }
+    .vc-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--gray-100); }
+    .vc-btn { display: flex; align-items: center; gap: 4px; padding: 4px 10px; border: 1px solid var(--gray-200); border-radius: 6px; background: #fff; font-size: 13px; font-weight: 700; color: var(--gray-500); transition: all .12s; flex-shrink: 0; }
+    .vc-btn:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-bg); }
+    .vc-arrow { font-size: 9px; color: var(--gray-400); }
+    .vc-count { min-width: 18px; text-align: center; }
+    .vc-title { font-size: 14px; font-weight: 500; letter-spacing: -0.02em; color: var(--gray-800); }
+
+    /* ── suggest inline ── */
+    .suggest-inline { display: flex; gap: 8px; margin-top: 12px; }
+    .suggest-inline-input { flex: 1; padding: 10px 14px; font-size: 14px; font-family: inherit; border: 1px solid var(--gray-200); border-radius: 8px; outline: none; background: var(--bg-sub); transition: border-color .15s; letter-spacing: -0.01em; }
+    .suggest-inline-input::placeholder { color: var(--gray-400); }
+    .suggest-inline-input:focus { border-color: var(--blue); background: #fff; }
+    .suggest-inline-btn { padding: 10px 16px; font-size: 14px; font-weight: 600; color: #fff; background: var(--blue); border: none; border-radius: 8px; white-space: nowrap; transition: background .12s; flex-shrink: 0; }
+    .suggest-inline-btn:hover { background: #1b6ef2; }
+
+    /* ── sidebar: popular ── */
+    .side-sec { margin-bottom: 28px; }
+    .pop-wrap { background: #fff; border: 1px solid var(--gray-200); border-radius: 14px; padding: 20px; }
+    .pop-head { font-size: 16px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 16px; }
+    .pop-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--gray-100); align-items: flex-start; }
+    .pop-item:last-child { border-bottom: none; }
+    .pop-item:hover .pop-title { color: var(--blue); }
+    .pop-rank { font-size: 18px; font-weight: 800; color: var(--blue); min-width: 24px; flex-shrink: 0; line-height: 1.2; }
+    .pop-title { font-size: 14px; font-weight: 600; line-height: 1.4; letter-spacing: -0.02em; transition: color .12s; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+    .pop-meta { font-size: 11px; color: var(--gray-500); margin-top: 3px; }
+
+    /* ── sidebar: ebook ── */
+    .side-ebook { padding: 24px 20px; background: var(--ink); border-radius: 12px; color: #fff; }
+    .side-ebook .ebook-label { font-size: 11px; font-weight: 600; color: var(--gray-400); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 8px; }
+    .side-ebook .ebook-title { font-size: 15px; font-weight: 700; line-height: 1.35; letter-spacing: -0.02em; margin-bottom: 6px; }
+    .side-ebook .ebook-desc { font-size: 12px; color: var(--gray-400); line-height: 1.45; margin-bottom: 14px; }
+    .side-ebook .ebook-cta { display: inline-flex; align-items: center; gap: 4px; padding: 8px 16px; font-size: 13px; font-weight: 600; color: var(--ink); background: #fff; border-radius: 8px; transition: background .12s; }
+    .side-ebook .ebook-cta:hover { background: var(--gray-100); }
+
+    /* ── footer ── */
+    .footer { margin-top: 56px; padding: 28px 0; border-top: 1px solid var(--gray-200); }
+    .footer-inner { max-width: 1100px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; gap: 8px; }
+    @media (min-width: 768px) { .footer-inner { flex-direction: row; justify-content: space-between; align-items: center; } }
+    .footer-txt { font-size: 13px; color: var(--gray-500); }
+    .footer-txt strong { color: var(--ink); font-weight: 700; }
+    .footer-links { display: flex; gap: 16px; font-size: 13px; color: var(--gray-500); }
+    .footer-links a:hover { color: var(--gray-800); }
+
+    /* ── subscribe modal ── */
+    .modal-dim { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,.45); justify-content: center; align-items: center; padding: 24px; }
+    .modal-dim.open { display: flex; }
+    .modal { background: #fff; border-radius: 16px; width: 100%; max-width: 480px; padding: 40px 36px 36px; position: relative; animation: modalUp .2s ease; }
+    @keyframes modalUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--gray-500); transition: background .12s; }
+    .modal-close:hover { background: var(--gray-100); }
+    .modal-close svg { width: 18px; height: 18px; }
+    .modal h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 8px; }
+    .modal .modal-desc { font-size: 15px; color: var(--gray-600); line-height: 1.5; margin-bottom: 28px; }
+    .form-label { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 6px; display: block; }
+    .form-input { width: 100%; padding: 12px 14px; font-size: 15px; font-family: inherit; border: 1px solid var(--gray-200); border-radius: 10px; outline: none; transition: border-color .15s; margin-bottom: 20px; color: var(--ink); }
+    .form-input::placeholder { color: var(--gray-400); }
+    .form-input:focus { border-color: var(--blue); }
+    .form-select { width: 100%; padding: 12px 14px; font-size: 15px; font-family: inherit; border: 1px solid var(--gray-200); border-radius: 10px; outline: none; transition: border-color .15s; margin-bottom: 20px; color: var(--gray-400); background: #fff; appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23b0b8c1' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
+    .form-select:focus { border-color: var(--blue); }
+    .form-select.selected { color: var(--ink); }
+    .form-check { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 24px; }
+    .form-check input[type="checkbox"] { width: 20px; height: 20px; margin-top: 1px; accent-color: var(--blue); flex-shrink: 0; }
+    .form-check label { font-size: 13px; color: var(--gray-600); line-height: 1.45; }
+    .form-check label a { color: var(--blue); text-decoration: underline; text-underline-offset: 2px; }
+    .form-submit { width: 100%; padding: 14px; font-size: 16px; font-weight: 700; font-family: inherit; color: #fff; background: var(--blue); border: none; border-radius: 10px; cursor: pointer; transition: background .15s; letter-spacing: -0.02em; }
+    .form-submit:hover { background: #1b6ef2; }
+  </style>
+</head>
+
+<body>
+
+  <!-- ===== GNB ===== -->
+  <header class="gnb">
+    <div class="gnb-inner">
+      <div style="display:flex;align-items:center;gap:12px">
+        <a href="#" class="gnb-logo" contenteditable="true" spellcheck="false">Caselab</a>
+        <span class="gnb-sub-msg">내 일에 AI를 어떻게 쓸지, 실험하며 찾아가는 공간</span>
+      </div>
+      <div class="gnb-right">
+        <nav class="gnb-nav">
+          <a href="cases.html">AI 실전케이스</a>
+          <a href="trends.html">AI 트렌드</a>
+          <div class="gnb-dropdown">
+            <a href="#" class="gnb-dropdown-trigger">자료실 <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style="margin-left:2px;vertical-align:middle"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            <div class="mega-menu">
+              <div class="mega-inner">
+                <a href="tools.html" class="mega-card">
+                  <div class="mega-card-icon" style="background:linear-gradient(135deg,#e0e7ff,#f5f3ff)">🔧</div>
+                  <div class="mega-card-body">
+                    <div class="mega-card-title">쓸만한 AI 도구</div>
+                    <div class="mega-card-desc">이 일엔 이런 도구가 있더라</div>
+                  </div>
+                </a>
+                <a href="prompts.html" class="mega-card">
+                  <div class="mega-card-icon" style="background:linear-gradient(135deg,#d1fae5,#ecfdf5)">📋</div>
+                  <div class="mega-card-body">
+                    <div class="mega-card-title">바로 쓰는 프롬프트</div>
+                    <div class="mega-card-desc">복사해서 바로 쓰세요</div>
+                  </div>
+                </a>
+                <a href="guides.html" class="mega-card">
+                  <div class="mega-card-icon" style="background:linear-gradient(135deg,#dbeafe,#eff6ff)">📘</div>
+                  <div class="mega-card-body">
+                    <div class="mega-card-title">공식 가이드</div>
+                    <div class="mega-card-desc">OpenAI, Anthropic 공식 문서 핵심</div>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+          <a href="ebook.html">ebook</a>
+        </nav>
+        <button class="gnb-sub" onclick="document.getElementById('subModal').classList.add('open')">구독하기</button>
+        <!-- 비로그인 -->
+        <a href="login.html" class="gnb-icon" title="로그인" id="gnbLoginIcon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </a>
+        <!-- 로그인됨 -->
+        <div id="gnbUserMenu" style="display:none;align-items:center;gap:8px">
+          <a href="mypage.html" style="font-size:14px;font-weight:500;color:var(--gray-600)" class="gnb-user-name">사용자</a>
+          <a href="#" style="font-size:13px;color:var(--gray-400)" onclick="signOut()">로그아웃</a>
+        </div>
+        <a href="#" class="gnb-icon" title="검색">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </a>
+        <!-- 언어 토글 -->
+        <button class="lang-toggle" id="langToggle" onclick="toggleLang()">EN</button>
+      </div>
+    </div>
+  </header>
+
+
+  <!-- ===== Hero Carousel ===== -->
+  <section class="hero">
+    <div class="hero-wrap">
+      <div class="hero-track">
+        <div class="hero-slides" id="heroSlides">
+
+          <div class="hero-slide">
+            <a href="content.html">
+              <div class="hero-text">
+                <span class="h-eye">실전 케이스 · 기획</span>
+                <h2 class="keepall" data-content-id="case-01" data-field="title">기획서 첫 페이지, 의도 던지는 5단계</h2>
+                <p class="h-desc keepall" data-content-id="case-01" data-field="subtitle">빈 입력칸 앞에서 막막한 이유는 AI가 부족해서가 아니라, 의도가 흐려서다.</p>
+                <div class="meta"><span>읽는데 8분</span></div>
+                <div class="hero-arrows">
+                  <button class="hero-arrow" type="button" onclick="event.preventDefault();moveSlide(-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+                  <button class="hero-arrow" type="button" onclick="event.preventDefault();moveSlide(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></button>
+                </div>
+              </div>
+              <div class="hero-thumb">
+                <img src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=640&q=80" alt="" />
+              </div>
+            </a>
+          </div>
+
+          <div class="hero-slide">
+            <a href="#">
+              <div class="hero-text">
+                <span class="h-eye">실전 케이스 · 마케팅</span>
+                <h2 class="keepall">경쟁사 분석, 깊이를 만드는 4단계</h2>
+                <p class="h-desc keepall">"경쟁사 5곳 분석해줘"는 거의 모두 실패한다. 사람이 먼저 좁혀야 AI가 깊어진다.</p>
+                <div class="meta"><span>읽는데 7분</span></div>
+                <div class="hero-arrows">
+                  <button class="hero-arrow" type="button" onclick="event.preventDefault();moveSlide(-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+                  <button class="hero-arrow" type="button" onclick="event.preventDefault();moveSlide(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></button>
+                </div>
+              </div>
+              <div class="hero-thumb">
+                <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=640&q=80" alt="" />
+              </div>
+            </a>
+          </div>
+
+          <div class="hero-slide">
+            <a href="#">
+              <div class="hero-text">
+                <span class="h-eye">AI 트렌드 · #21</span>
+                <h2 class="keepall">Claude 메모리 기능, 1주일 써본 결과</h2>
+                <p class="h-desc keepall">"내가 누구인지 기억"한다는 약속이 실제 업무 흐름에서 무엇을 바꾸는가.</p>
+                <div class="meta"><span>읽는데 5분</span></div>
+                <div class="hero-arrows">
+                  <button class="hero-arrow" type="button" onclick="event.preventDefault();moveSlide(-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+                  <button class="hero-arrow" type="button" onclick="event.preventDefault();moveSlide(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></button>
+                </div>
+              </div>
+              <div class="hero-thumb">
+                <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=640&q=80" alt="" />
+              </div>
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===== 실전 케이스 + 사이드바 (연회색 배경) ===== -->
+  <section class="band band-alt">
+    <div class="layout">
+      <div class="layout-inner">
+        <div class="layout-main">
+          <div class="sec-head" style="padding-top:0">
+            <h2 class="sec-title">AI 실전케이스</h2>
+            <a href="cases.html" class="sec-more">전체 보기</a>
+          </div>
+          <div class="tabs">
+            <button class="tab on" data-cat="all">전체</button>
+            <button class="tab" data-cat="기획">기획</button>
+            <button class="tab" data-cat="마케팅">마케팅</button>
+            <button class="tab" data-cat="영업">영업</button>
+            <button class="tab" data-cat="1인사업">1인사업</button>
+          </div>
+          <div id="articleList">
+            <a href="content.html" class="a-item" data-cat="기획">
+              <div class="a-head"><span class="a-cat">기획</span></div>
+              <h3 class="a-title keepall" data-content-id="case-01" data-field="title">기획서 첫 페이지가 안 풀릴 때— '의도' 던지는 5단계</h3>
+              <p class="a-desc keepall" data-content-id="case-01" data-field="subtitle">빈 입력칸 앞에서 막막한 이유는 AI가 부족해서가 아니라 의도가 흐려서다.</p>
+            </a>
+            <a href="#" class="a-item" data-cat="마케팅">
+              <div class="a-head"><span class="a-cat">마케팅</span></div>
+              <h3 class="a-title keepall">경쟁사 분석, AI가 표면만 긁고 끝나는 이유</h3>
+              <p class="a-desc keepall">"경쟁사 5곳 분석해줘"는 거의 모두 실패한다.</p>
+            </a>
+            <a href="#" class="a-item" data-cat="영업">
+              <div class="a-head"><span class="a-cat">영업</span></div>
+              <h3 class="a-title keepall">윗사람 톤에 안 맞는 결과물— AI에게 다시 시키는 3단계</h3>
+              <p class="a-desc keepall">"이거 윗분이 안 좋아할 거 같은데"의 95%는 톤 문제다.</p>
+            </a>
+            <a href="#" class="a-item" data-cat="1인사업">
+              <div class="a-head"><span class="a-cat">1인사업</span></div>
+              <h3 class="a-title keepall">고객 인터뷰 정리— AI에게 시킬 것·시키지 말 것</h3>
+              <p class="a-desc keepall">인터뷰 녹취 20시간을 AI에 통째로 던지면 다 비슷한 요약이 나온다.</p>
+            </a>
+          </div>
+        </div>
+
+        <aside class="layout-side">
+          <div class="side-sec">
+            <div class="pop-wrap">
+              <div class="pop-head">인기 있는 글</div>
+              <a href="content.html" class="pop-item"><span class="pop-rank">1</span><div><div class="pop-title keepall" data-content-id="case-01" data-field="title">기획서 첫 페이지가 안 풀릴 때 — '의도' 던지는 5단계</div><div class="pop-meta">기획</div></div></a>
+              <a href="#" class="pop-item"><span class="pop-rank">2</span><div><div class="pop-title keepall">윗사람 톤에 안 맞는 결과물 — AI에게 다시 시키는 3단계</div><div class="pop-meta">영업</div></div></a>
+              <a href="#" class="pop-item"><span class="pop-rank">3</span><div><div class="pop-title keepall">경쟁사 분석, AI가 표면만 긁고 끝나는 이유</div><div class="pop-meta">마케팅</div></div></a>
+              <a href="#" class="pop-item"><span class="pop-rank">4</span><div><div class="pop-title keepall">고객 인터뷰 정리 — AI에게 시킬 것·시키지 말 것</div><div class="pop-meta">1인사업</div></div></a>
+              <a href="#" class="pop-item"><span class="pop-rank">5</span><div><div class="pop-title keepall">Claude 메모리 기능, 실제로 일에 쓸만한가</div><div class="pop-meta">AI 트렌드</div></div></a>
+            </div>
+          </div>
+          <div class="side-sec">
+            <div class="side-ebook">
+              <div class="ebook-label">free ebook</div>
+              <div class="ebook-title keepall">AI, 다들 쓰는데 나만 못 쓰는 것 같다면 — 1주 실험 노트</div>
+              <div class="ebook-desc keepall">기획·마케팅·영업에서 직접 써본 AI 워크플로우 12개.</div>
+              <a href="ebook.html" class="ebook-cta">자세히 보기 →</a>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 자료실 (흰색 배경) ===== -->
+  <section class="band">
+    <div class="layout">
+      <div class="sec-head" style="padding-top:0">
+        <h2 class="sec-title">일잘러 자료실</h2>
+      </div>
+      <div class="series-grid">
+        <a href="#" class="series-card">
+          <div class="series-thumb">
+            <img src="https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=400&q=80" alt="" />
+            <span class="series-badge">4개</span>
+          </div>
+          <div class="series-body">
+            <h3 class="series-name">AI 트렌드</h3>
+            <p class="series-desc keepall">새로 나온 것, 실무자 눈으로 정리</p>
+          </div>
+        </a>
+        <a href="#" class="series-card">
+          <div class="series-thumb">
+            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&q=80" alt="" />
+            <span class="series-badge">4개</span>
+          </div>
+          <div class="series-body">
+            <h3 class="series-name">쓸만한 AI 도구</h3>
+            <p class="series-desc keepall">이 일엔 이런 도구가 있더라</p>
+          </div>
+        </a>
+        <a href="#" class="series-card">
+          <div class="series-thumb">
+            <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&q=80" alt="" />
+            <span class="series-badge">4개</span>
+          </div>
+          <div class="series-body">
+            <h3 class="series-name">바로 쓰는 프롬프트</h3>
+            <p class="series-desc keepall">복사해서 바로 쓰세요</p>
+          </div>
+        </a>
+        <a href="#" class="series-card">
+          <div class="series-thumb">
+            <img src="https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?w=400&q=80" alt="" />
+            <span class="series-badge">6개</span>
+          </div>
+          <div class="series-body">
+            <h3 class="series-name">공식 가이드</h3>
+            <p class="series-desc keepall">OpenAI, Anthropic 공식 문서 핵심 정리</p>
+          </div>
+        </a>
+        <a href="#" class="series-card">
+          <div class="series-thumb">
+            <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400&q=80" alt="" />
+            <span class="series-badge">1개</span>
+          </div>
+          <div class="series-body">
+            <h3 class="series-name">ebook</h3>
+            <p class="series-desc keepall">실무 케이스를 묶은 무료 전자책</p>
+          </div>
+        </a>
+      </div>
+
+      <!-- 자료실 콘텐츠 미리보기 -->
+      <div class="sec-head" style="padding-top:32px">
+        <h2 class="sec-title">최근 올라온 것들</h2>
+      </div>
+      <div class="preview-grid">
+        <a href="#" class="preview-card">
+          <div class="preview-thumb">
+            <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&q=80" alt="" />
+            <span class="preview-series">AI 트렌드</span>
+          </div>
+          <div class="preview-body">
+            <h3 class="preview-title keepall">Claude 메모리 기능, 실제로 일에 쓸만한가</h3>
+            <p class="preview-meta">읽는데 5분</p>
+          </div>
+        </a>
+        <a href="#" class="preview-card">
+          <div class="preview-thumb">
+            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&q=80" alt="" />
+            <span class="preview-series">쓸만한 AI 도구</span>
+          </div>
+          <div class="preview-body">
+            <h3 class="preview-title keepall">v0 — 프롬프트로 UI를 바로 만드는 도구</h3>
+            <p class="preview-meta">읽는데 3분</p>
+          </div>
+        </a>
+        <a href="#" class="preview-card">
+          <div class="preview-thumb">
+            <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&q=80" alt="" />
+            <span class="preview-series">바로 쓰는 프롬프트</span>
+          </div>
+          <div class="preview-body">
+            <h3 class="preview-title keepall">기획서 전제를 찾아주는 프롬프트</h3>
+            <p class="preview-meta">바로 복사</p>
+          </div>
+        </a>
+        <a href="#" class="preview-card">
+          <div class="preview-thumb">
+            <img src="https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=400&q=80" alt="" />
+            <span class="preview-series">AI 트렌드</span>
+          </div>
+          <div class="preview-body">
+            <h3 class="preview-title keepall">GPT-5 발표, 실무에서 바뀌는 건 딱 두 가지</h3>
+            <p class="preview-meta">읽는데 4분</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 이런 거 다뤄주세요 (연회색 배경) ===== -->
+  <section class="band band-alt">
+    <div class="layout">
+      <div class="sec-head" style="padding-top:0">
+        <h2 class="sec-title">이런 거 다뤄주세요</h2>
+      </div>
+      <div class="vote-compact">
+        <div class="vc-item"><button class="vc-btn" type="button"><span class="vc-arrow">▲</span><span class="vc-count">52</span></button><span class="vc-title keepall">회의록 정리, AI 안 쓰고 더 빠른 방법이 있나</span></div>
+        <div class="vc-item"><button class="vc-btn" type="button"><span class="vc-arrow">▲</span><span class="vc-count">38</span></button><span class="vc-title keepall">보고서 톤, 윗사람 글체에 맞추는 5단계</span></div>
+        <div class="vc-item"><button class="vc-btn" type="button"><span class="vc-arrow">▲</span><span class="vc-count">29</span></button><span class="vc-title keepall">AI가 자꾸 거짓말할 때, 검증 프로세스</span></div>
+      </div>
+      <form class="suggest-inline" onsubmit="return false;">
+        <input class="suggest-inline-input" type="text" placeholder="다뤄줬으면 하는 주제를 적어주세요" />
+        <button type="submit" class="suggest-inline-btn">제안</button>
+      </form>
+    </div>
+  </section>
+
+
+  <!-- ===== Footer ===== -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-txt keepall"><strong>케이스랩</strong> — 내 일에 AI를 어떻게 쓸지, 실험하며 찾아가는 공간.</div>
+      <nav class="footer-links">
+        <a href="ebook.html">ebook</a>
+        <a href="#">개인정보 처리방침</a>
+        <span style="color: var(--gray-400);">© 2026</span>
+      </nav>
+    </div>
+  </footer>
+
+
+  <!-- ===== Subscribe Modal ===== -->
+  <div class="modal-dim" id="subModal">
+    <div class="modal">
+      <button class="modal-close" onclick="document.getElementById('subModal').classList.remove('open')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <h2>콘텐츠 구독하기</h2>
+      <p class="modal-desc keepall">케이스랩 뉴스레터를 구독하고, 관심 직군의 콘텐츠를 받아보세요.</p>
+      <form onsubmit="return false;">
+        <label class="form-label" for="sub-name">이름</label>
+        <input class="form-input" id="sub-name" type="text" placeholder="ex) 김케랩" autocomplete="name" />
+        <label class="form-label" for="sub-email">이메일</label>
+        <input class="form-input" id="sub-email" type="email" placeholder="ex) you@company.com" autocomplete="email" />
+        <label class="form-label" for="sub-category">받고 싶은 소식</label>
+        <select class="form-select" id="sub-category" onchange="this.classList.toggle('selected', this.value !== '')">
+          <option value="">카테고리를 선택해 주세요.</option>
+          <option value="all">전체</option>
+          <option value="plan">기획</option>
+          <option value="marketing">마케팅</option>
+          <option value="sales">영업</option>
+          <option value="solo">1인사업</option>
+          <option value="trend">AI 트렌드</option>
+        </select>
+        <div class="form-check">
+          <input type="checkbox" id="sub-agree" />
+          <label for="sub-agree">(필수) 뉴스레터 수신을 위한 <a href="#">개인정보 수집 및 이용</a>에 동의합니다</label>
+        </div>
+        <button type="submit" class="form-submit">동의하고 구독하기</button>
+      </form>
+    </div>
+  </div>
+
+
+  <script>
+    // Hero Carousel
+    let current = 0;
+    const slides = document.getElementById('heroSlides');
+    const total = slides.children.length;
+    function goSlide(i) {
+      current = (i + total) % total;
+      slides.style.transform = 'translateX(-' + (current * 100) + '%)';
+    }
+    function moveSlide(dir) { goSlide(current + dir); }
+
+    // Category Tab Filter
+    document.querySelectorAll('.tab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('on'); });
+        this.classList.add('on');
+        var cat = this.getAttribute('data-cat');
+        document.querySelectorAll('#articleList .a-item').forEach(function(item) {
+          item.style.display = (cat === 'all' || item.getAttribute('data-cat') === cat) ? '' : 'none';
+        });
+      });
+    });
+
+    // Modal
+    document.getElementById('subModal').addEventListener('click', function(e) {
+      if (e.target === this) this.classList.remove('open');
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') document.getElementById('subModal').classList.remove('open');
+    });
+  </script>
+
+  <!-- Supabase: auth state -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-config.js"></script>
+  <script>updateGnbAuth();</script>
+
+  <!-- Google Translate -->
+  <div id="google_translate_element" style="display:none"></div>
+  <script>
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'ko',
+        includedLanguages: 'en',
+        autoDisplay: false
+      }, 'google_translate_element');
+    }
+
+    var isEn = false;
+    function toggleLang() {
+      var btn = document.getElementById('langToggle');
+      isEn = !isEn;
+      btn.textContent = isEn ? 'KR' : 'EN';
+      btn.classList.toggle('on', isEn);
+
+      // Google Translate 연동 (배포 후 동작)
+      var combo = document.querySelector('.goog-te-combo');
+      if (combo) {
+        combo.value = isEn ? 'en' : '';
+        combo.dispatchEvent(new Event('change'));
+        if (!isEn) {
+          document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + location.hostname;
+          location.reload();
+        }
+      }
+    }
+  </script>
+  <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  <script src="../js/content-sync.js"></script>
+
+
+</body>
+</html>
