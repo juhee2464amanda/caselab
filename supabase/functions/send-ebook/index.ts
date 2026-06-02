@@ -5,33 +5,34 @@
 // 작동:
 // 1. purchase + product 조회
 // 2. Storage signed URL 발급 (유효 7일)
-// 3. Gmail SMTP로 다운로드 링크 이메일 발송 (Gmail App Password 사용)
+// 3. Brevo HTTP API로 다운로드 링크 이메일 발송 (단일 발신자 인증)
 // 4. purchases.status = 'sent', sent_at = now()
 //
 // 필요한 secret (Supabase functions secrets set ...):
-//   GMAIL_USER (예: caselab.kr@gmail.com)
-//   GMAIL_APP_PASSWORD (Google 계정 보안 → 2단계 인증 ON → App passwords에서 발급)
+//   BREVO_API_KEY        (Brevo dashboard → SMTP & API → API Keys에서 발급, 형식: xkeysib-...)
+//   BREVO_SENDER_EMAIL   (예: caselab.kr@gmail.com — Brevo에서 사전 단일 발신자 인증 필수)
+//   BREVO_SENDER_NAME    (예: 케이스랩)
 //   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (자동 주입)
 //   SITE_URL (예: https://caselab.vercel.app)
 //
-// Gmail SMTP 한도: 일 500건. 자체 도메인 없이 무료로 외부 발송 가능한 유일한 옵션.
+// Brevo 무료 한도: 일 300건 / 월 9,000건. 도메인 없이 단일 발신자 인증으로 외부 발송 가능.
 
 // @ts-expect-error - Deno runtime
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
 // @ts-expect-error - Deno runtime
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.1';
-// @ts-expect-error - Deno runtime
-import { SMTPClient } from 'https://deno.land/x/denomailer@1.6.0/mod.ts';
 
 declare const Deno: { env: { get: (k: string) => string | undefined } };
 
-const GMAIL_USER = Deno.env.get('GMAIL_USER')!;
-const GMAIL_APP_PASSWORD = Deno.env.get('GMAIL_APP_PASSWORD')!;
+const BREVO_API_KEY = Deno.env.get('BREVO_API_KEY')!;
+const BREVO_SENDER_EMAIL = Deno.env.get('BREVO_SENDER_EMAIL')!;
+const BREVO_SENDER_NAME = Deno.env.get('BREVO_SENDER_NAME') ?? '케이스랩';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const SITE_URL = Deno.env.get('SITE_URL') ?? 'https://caselab.vercel.app';
 
 const SEVEN_DAYS = 60 * 60 * 24 * 7;
+const BREVO_ENDPOINT = 'https://api.brevo.com/v3/smtp/email';
 
 serve(async (req) => {
   if (req.method !== 'POST') return new Response('method not allowed', { status: 405 });
@@ -70,8 +71,8 @@ serve(async (req) => {
     return new Response('sign error: ' + signErr?.message, { status: 500 });
   }
 
-  // 3. Gmail SMTP 발송
-  const html = `
+  // 3. Brevo HTTP API 발송
+  const htmlContent = `
     <p>안녕하세요 ${purchase.name}님,</p>
     <p>저도 처음에 AI를 적용하기 어려웠어요. 이 책에 그 고민을 정리했어요.</p>
     <p>아래 링크로 7일 동안 다운로드받으실 수 있어요.</p>
@@ -84,28 +85,26 @@ serve(async (req) => {
     </p>
   `;
 
-  const client = new SMTPClient({
-    connection: {
-      hostname: 'smtp.gmail.com',
-      port: 465,
-      tls: true,
-      auth: { username: GMAIL_USER, password: GMAIL_APP_PASSWORD },
+  const brevoRes = await fetch(BREVO_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'accept': 'application/json',
+      'content-type': 'application/json',
+      'api-key': BREVO_API_KEY,
     },
+    body: JSON.stringify({
+      sender: { name: BREVO_SENDER_NAME, email: BREVO_SENDER_EMAIL },
+      to: [{ email: purchase.email, name: purchase.name }],
+      replyTo: { email: BREVO_SENDER_EMAIL, name: BREVO_SENDER_NAME },
+      subject: `[케이스랩] ${product.title} 다운로드 링크`,
+      htmlContent,
+    }),
   });
 
-  try {
-    await client.send({
-      from: `케이스랩 <${GMAIL_USER}>`,
-      to: purchase.email,
-      subject: `[케이스랩] ${product.title} 다운로드 링크`,
-      content: 'auto',
-      html,
-    });
-    await client.close();
-  } catch (e) {
-    await client.close().catch(() => undefined);
+  if (!brevoRes.ok) {
+    const errBody = await brevoRes.text();
     await admin.from('purchases').update({ status: 'failed' }).eq('id', purchase_id);
-    return new Response('smtp error: ' + (e as Error).message, { status: 500 });
+    return new Response(`brevo error ${brevoRes.status}: ${errBody}`, { status: 500 });
   }
 
   // 4. status = sent

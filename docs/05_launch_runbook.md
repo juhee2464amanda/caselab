@@ -22,9 +22,10 @@
 |---|---|---|
 | 도메인 | **Vercel 무료 서브도메인** (예: `caselab.vercel.app`) | Day 10 Vercel 가입 시 결정 |
 | 운영자 메일 | `caselab.kr@gmail.com` | Day 0 (이미 보유) |
-| 사이트 발송 이메일 | **Gmail SMTP** (발신: `caselab.kr@gmail.com`, 일 500건 무료) | Day 9 |
+| 사이트 발송 이메일 | **Brevo HTTP API** (단일 발신자 인증, 발신: `caselab.kr@gmail.com`, 일 300건·월 9,000건 무료) | Day 9 |
 | Cloudflare | **사용 안 함** | — |
-| Resend | **사용 안 함** (Gmail SMTP로 대체) | — |
+| Resend | **사용 안 함** (Brevo로 대체) | — |
+| Brevo | **사용** (단일 발신자 인증, 무료) | Day 9 |
 | Anthropic API (AI 초안) | **출시 후 도입 예정** | — |
 | Supabase | 사용 (Free) | Day 1 |
 | Vercel | 사용 (Hobby 무료) | Day 10 |
@@ -61,12 +62,13 @@
 ### 📋 체크리스트
 - [ ] [Supabase Sign up](https://supabase.com/dashboard) — Google 로그인 가능
 - [ ] [Vercel Sign up](https://vercel.com/signup) — GitHub 로그인 권장 (Day 10에 GitHub 연결 필요하니 미리 연결)
-- [ ] 둘 다 무료 플랜으로 가입. 결제 카드 등록 안 해도 됨.
+- [ ] [Brevo Sign up](https://www.brevo.com/) — Day 9 발신자 인증·API Key 생성용 (지금 가입만 해두면 Day 9 빠름)
+- [ ] 모두 무료 플랜으로 가입. 결제 카드 등록 안 해도 됨.
 
 ### 건너뛰는 가입 (이번 모드)
 - ❌ Cloudflare — 도메인 사용 안 하니까 가입 X
 - ❌ Anthropic — AI 초안 출시 후 도입
-- ❌ Resend — 이메일 발송 출시 후 도입
+- ❌ Resend — Brevo로 대체. Brevo 한도 도달 + 도메인 도입 시 재검토
 - ❌ Kakao 디벨로퍼스 (Day 2 결정에 따라 가입)
 - ❌ Google Cloud Console (Day 2)
 
@@ -274,25 +276,35 @@ open http://localhost:3000/sitemap.xml
 
 ---
 
-## Day 9 — Gmail SMTP + 전자책 발송 ([Issue #5](https://github.com/juhee2464amanda/caselab/issues/5))
+## Day 9 — Brevo + 전자책 발송 ([Issue #5](https://github.com/juhee2464amanda/caselab/issues/5))
+
+> 2026-06-02 결정 변경: Gmail SMTP → Brevo HTTP API. 사유는 `docs/04_dev_plan.md` §18.5 참조.
 
 ### ✅ 끝났을 때
-- Gmail App Password 발급 + Supabase secrets 등록 완료
-- `send-ebook` Edge Function 배포
+- Brevo 가입 + `caselab.kr@gmail.com` 단일 발신자 인증 완료
+- Brevo API Key 발급 + Supabase secrets 3종 등록 완료
+- `send-ebook` Edge Function 배포 (Brevo HTTP API 사용)
 - 본인 이메일로 전자책 주문 → 1분 내 PDF 다운로드 링크 도착
 
-### 📋 Gmail App Password 발급 (~3분)
-1. [myaccount.google.com/security](https://myaccount.google.com/security) → 본인 Gmail(`caselab.kr@gmail.com`) 로그인
-2. **2단계 인증 ON** (이미 ON이면 패스)
-3. 동일 페이지에서 검색 또는 [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
-4. App name: `Caselab` → Create
-5. 16자리 비밀번호 표시됨 → **반드시 복사·메모** (한 번만 표시)
+### 📋 Brevo 단일 발신자 인증 (~5분)
+1. [brevo.com](https://www.brevo.com/) 가입 (Google 로그인 가능). Day 0에 이미 가입했으면 패스.
+2. Dashboard → **Senders, Domains & Dedicated IPs** → **Senders** → **Add a sender**
+   - From name: `케이스랩`
+   - From email: `caselab.kr@gmail.com`
+3. 등록 즉시 `caselab.kr@gmail.com`으로 인증 메일 도착 → **Confirm** 클릭
+4. Senders 목록에 `Verified ✓` 표시되면 완료
+
+### 📋 Brevo API Key 발급 (~2분)
+1. Dashboard 우상단 프로필 → **SMTP & API** → **API Keys** 탭
+2. **Generate a new API key** → name: `caselab-edge` → Generate
+3. **`xkeysib-...`로 시작하는 키 복사·메모** (한 번만 표시)
 
 ### 📋 Supabase Edge Function 배포 (~5분)
 ```bash
 # Day 1에서 supabase login + link 이미 했다는 전제
-supabase secrets set GMAIL_USER=caselab.kr@gmail.com
-supabase secrets set GMAIL_APP_PASSWORD=xxxxxxxxxxxxxxxx
+supabase secrets set BREVO_API_KEY=xkeysib-xxxxxxxxxxxxxxxx
+supabase secrets set BREVO_SENDER_EMAIL=caselab.kr@gmail.com
+supabase secrets set BREVO_SENDER_NAME=케이스랩
 supabase secrets set SITE_URL=https://<your>.vercel.app   # Day 10 후 갱신
 supabase functions deploy send-ebook
 ```
@@ -317,21 +329,22 @@ supabase functions deploy send-ebook
      -H "Content-Type: application/json" \
      -d '{"purchase_id": "<위 row의 id>"}'
    ```
-4. 본인 메일함에서 1분 내 도착 확인 (**스팸 폴더도 꼭 확인**). 발신: `caselab.kr@gmail.com`
+4. 본인 메일함에서 1분 내 도착 확인 (**스팸/프로모션 탭도 꼭 확인**). 발신: `케이스랩 <caselab.kr@gmail.com>` (`via brevo.com` 꼬리표 표시될 수 있음)
 5. PDF 다운로드 링크 클릭 → 다운로드 성공
 6. Supabase Studio에서 row `status='sent'`, `sent_at` 채워짐 확인
 
 ### 🛠️ 자주 막히는 지점
-- **App Password 발급 안 됨**: 2단계 인증 먼저 ON. 개인 Gmail이면 OK (업무용 Workspace는 관리자 정책 따라 막힐 수 있음)
-- **smtp.gmail.com 인증 실패**: App Password 16자리 정확히 입력 (공백 X). 일반 Gmail 비밀번호 X
-- **스팸 폴더로 빠짐**: 본인 inbox에서 “스팸 아님” 표시 + 발신주소 주소록 추가. 첫 발송은 흔함
-- **일 500건 한도 초과**: 첫해엔 안 부딪힐 가능성 높지만, 도달 시 자체 도메인 + Resend로 전환 검토
+- **단일 발신자 인증 메일 안 옴**: Gmail 모든 폴더(받은편지함·소셜·프로모션·스팸) 검색. 5분 지나도 없으면 Brevo Senders 화면에서 Resend 클릭
+- **`api-key` 401**: 키 복사 시 앞뒤 공백·줄바꿈 포함 여부 확인. `xkeysib-`로 시작하는지
+- **Brevo 응답 400 `Invalid sender`**: 단일 발신자 인증 완료 후 `BREVO_SENDER_EMAIL`이 인증된 주소와 정확히 동일한지 확인
+- **스팸/프로모션 탭으로 빠짐**: 본인 inbox에서 "스팸 아님" 표시 + 발신주소 주소록 추가. 첫 발송은 흔함. 도메인 도입 시(§18.3) DKIM/SPF 추가하면 격감
+- **일 300건 한도 초과**: 운영자 1인 + 출시 직후엔 도달 안 함. 도달 시 도메인 구입 + Brevo 도메인 인증(DKIM/SPF)으로 격상
 
-### Gmail SMTP의 트레이드오프 (인지하고 진행)
-- 발신: `caselab.kr@gmail.com` (도메인 발신이 아니라 “개인 메일” 느낌)
-- 사용자 inbox에 “외부 발송” 또는 “이 메일은 처음 받는 발신자” 알림 표시 가능
-- 일부 회사 메일 서버(outlook)에서 스팸 폴더로 분류될 수 있음
-- → 대신 **연 운영비 $0** + 즉시 사용 가능. 첫해 운영 데이터 보고 도메인 전환 결정.
+### Brevo 단일 발신자 인증의 트레이드오프 (인지하고 진행)
+- 발신: `caselab.kr@gmail.com` (도메인 인증이 아니라 단일 발신자 인증 → 인박스에 `via brevo.com` 꼬리표 표시 가능)
+- 일부 수신자(특히 기업 outlook·국내 daum/naver 일부 정책)에서 프로모션/스팸 탭으로 분류 가능 (~20%)
+- → 대신 **연 운영비 $0** + 도메인 없이 즉시 사용 + 일 300건/월 9k 무료 + 뉴스레터 캠페인 UI 동봉
+- **전환 트리거** (§18.3): 구독자 500명 / 월 발송 8k / 스팸 불만 / 딜리버러빌리티 < 80% 도달 시 → 도메인 구입 + Brevo 도메인 인증(DKIM/SPF)으로 격상
 
 ---
 
@@ -358,7 +371,7 @@ supabase functions deploy send-ebook
    DRAFT_PREVIEW_SECRET            # openssl rand -hex 32
    NEXT_PUBLIC_GA_MEASUREMENT_ID
    ```
-   (Resend·Anthropic·Kakao 변수는 등록 안 함 — 출시 후)
+   (Brevo·Anthropic·Kakao 변수는 Vercel에 등록 안 함 — Supabase Edge Function secret로만 등록)
 5. Deploy → 2~3분
 6. Settings → Domains → 기본 `xxx.vercel.app` 도메인 확인. 마음에 안 들면 프로젝트 rename
 7. **`NEXT_PUBLIC_SITE_URL`은 최종 서브도메인으로 업데이트** → Redeploy
@@ -427,7 +440,8 @@ https://<your>.vercel.app/sitemap.xml  # 200
 |---|---|
 | Kakao OAuth | 한국 사용자 비중 70%↑ 확인 시 |
 | 커스텀 도메인 | 인스타 유입 안정화 + 브랜드 강화 필요 시 |
-| Resend 이메일 발송 | 전자책 신청 누적 30건 이상 |
+| Brevo 도메인 인증(DKIM/SPF 격상) | 구독자 500명 / 월 발송 8k / 스팸 불만 / 딜리버러빌리티 < 80% 도달 시 (도메인 구입 동반) |
+| Resend 전환 검토 | Brevo 월 9k 한도 초과 + 도메인 도입 후 추가 인프라 필요 시 |
 | Anthropic AI 초안 | 콘텐츠 월 5건 이상 + Max 복붙 피로 |
 | Lighthouse 90+ 폴리싱 | 데이터로 사용자 이탈 지점 확인 후 |
 | 카드뉴스 자동 생성 | 출시 +1개월 |
@@ -447,8 +461,9 @@ https://<your>.vercel.app/sitemap.xml  # 200
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | GA4 | Day 8 | 선택 |
 | `KAKAO_REST_API_KEY` (Edge Function secret) | Kakao 디벨로퍼스 | Day 2 (선택) | Kakao 도입 시 |
 | `KAKAO_CLIENT_SECRET` (Edge Function secret) | Kakao 디벨로퍼스 | Day 2 (선택) | 동일 |
-| `GMAIL_USER` (Edge Function secret) | `caselab.kr@gmail.com` | Day 9 | 필수 (전자책 발송) |
-| `GMAIL_APP_PASSWORD` (Edge Function secret) | Google 계정 → 보안 → 앱 비밀번호 | Day 9 | 필수 |
+| `BREVO_API_KEY` (Edge Function secret) | Brevo → SMTP & API → API Keys (`xkeysib-...`) | Day 9 | 필수 (전자책 발송) |
+| `BREVO_SENDER_EMAIL` (Edge Function secret) | `caselab.kr@gmail.com` (Brevo 단일 발신자 인증 완료한 주소) | Day 9 | 필수 |
+| `BREVO_SENDER_NAME` (Edge Function secret) | `케이스랩` | Day 9 | 필수 |
 | `ANTHROPIC_API_KEY` | Anthropic Console | **출시 후** | 보류 |
 | `NEXT_PUBLIC_AI_DRAFT_ENABLED` | `true` | **출시 후** | 보류 (AI 초안 버튼 토글) |
 

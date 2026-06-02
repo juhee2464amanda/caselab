@@ -503,7 +503,7 @@ caselab/
 |---|---|---|---|
 | 도메인 | `caselab.kr` 또는 `caselab.co` | **Vercel 무료 서브도메인** (`caselab.vercel.app`) | 운영자 1년 운영비 $0 달성. 사이트 자리잡으면 그때 도메인 검토 |
 | Cloudflare | 사용 (Registrar+DNS) | **사용 안 함** | 도메인 없으니 불필요 |
-| Resend (이메일 발송) | Phase 2 도입 | **사용 안 함** → **Gmail SMTP로 대체** (Day 9) | 자체 도메인 없이 Resend 사용 불가. Gmail SMTP가 무료로 외부 발송 가능한 유일한 옵션 |
+| Resend (이메일 발송) | Phase 2 도입 | **사용 안 함** → **Brevo 단일 발신자 인증으로 대체** (Day 9) | 자체 도메인 없이 Resend 사용 불가. Brevo는 단일 발신자 인증으로 도메인 없이 외부 발송 가능 + 트랜잭션/캠페인 통합 + 무료 9k/월 |
 | Anthropic Claude API (AI 초안) | Phase 1 포함 (§9 11번 항목) | **비활성** (`NEXT_PUBLIC_AI_DRAFT_ENABLED='true'` 시만 활성) | 운영자가 Claude Max 구독 보유. Max에서 직접 초안 작성 → admin 폼 복붙 워크플로우로 대체 |
 | 발신 메일 | `official@<도메인>` | (없음) | Resend 미사용 |
 | 답신·문의 메일 | `official@<도메인>` reply-to | **`caselab.kr@gmail.com`** (직접 표기) | 운영자 보유한 유일한 메일. Privacy/Footer에도 직접 노출 |
@@ -527,7 +527,8 @@ caselab/
 | 항목 | 도입 시점 |
 |---|---|
 | 커스텀 도메인 (Cloudflare 또는 가비아) | 인스타 유입 안정화 + 브랜드 강화 필요 시 |
-| Resend (이메일 발송 인프라 강화) | Gmail SMTP 한도 도달 또는 스팸 폴더 빈도 ↑ |
+| Brevo 도메인 인증 (DKIM/SPF로 격상) | 구독자 500명 / 월 발송 8,000건 / 스팸 불만 / 딜리버러빌리티 < 80% 도달 시 (도메인 구입 동반) |
+| Resend (이메일 발송 인프라 강화) | Brevo 한도(월 9k) 초과 + 도메인 도입 후 추가 전환 검토 |
 | Anthropic Claude API (AI 초안) | 콘텐츠 월 5건+ 안정화 + Max 복붙 피로 누적 |
 | 카드뉴스·외부 채널 (Brunch·LinkedIn) | 출시 +1~6개월, 인스타 채널 안정화 후 |
 | Lighthouse 90+ 폴리싱 | 출시 +1주, GA4·events 데이터 보고 |
@@ -547,6 +548,8 @@ caselab/
 - 2026-05-30~31: Phase 0+1 코드 작성 완료, GitHub Issue #1~#10 등록, 런북 `docs/05_launch_runbook.md` 작성
 - 2026-06-01: 도메인 caselab.kr → caselab.co → Vercel 무료 서브도메인. Cloudflare 사용 안 함. Anthropic 비활성. 운영비 $0 모드 확정
 - 2026-06-02: Resend → Gmail SMTP로 교체 (전자책 1건이라도 발송되도록). 인스타 `@caselab_ai_` 핸들 확정 + 사이트 노출
+- 2026-06-02: **Gmail SMTP → Brevo로 재전환**. 사유: 약관(개인 Gmail 자동 발송 회색지대) + 딜리버러빌리티(Gmail은 자기 도메인 DKIM 못 박음). Brevo 단일 발신자 인증으로 caselab.kr@gmail.com 발신 유지, 일 300건/월 9k 무료, Edge Function 아키텍처 유지(denomailer → Brevo HTTP API fetch)
+- 2026-06-02: **자료실(`/admin/tools`) CRUD 우선 진행 결정** — §18.7 참조
 
 ### 18.6 다른 세션에서 컨텍스트 파악 시 우선순위
 
@@ -556,3 +559,17 @@ caselab/
 4. **GitHub Issue #1~#10** — 외부 콘솔 작업 체크리스트 + 변경 코멘트
 5. `lib/constants.ts` — 인스타 핸들·문의 메일 등 외부 상수 중앙 관리
 6. `.env.example` — 환경변수 템플릿 (출시 결정 반영)
+
+### 18.7 자료실 (`/admin/tools`) CRUD 우선 진행 결정
+
+**결정 일자**: 2026-06-02
+
+**배경**: §12 Phase 3에 "자료실 CRUD"가 포함되어 있으나, 원래 페이지 자체가 빈 스켈레톤(`app/admin/tools/page.tsx` 코드 주석 "Phase 3에서 추가")이라 운영자는 Supabase Studio에서 직접 행 편집해야 했음. 출시 전 콘텐츠 작성(Day 3~7) 흐름과 병행해서 도구·프롬프트·가이드를 등록할 수 없으면 출시 초기 자료실이 비어 있는 채로 노출됨.
+
+**결정**: Phase 3에서 다루기로 한 자료실 CRUD를 **출시 전(Day 3~7 콘텐츠 작성과 병행)**으로 당김. 작업 범위:
+- `components/admin/ToolForm.tsx` (신설) — Case/Trend 패턴 축약 폼
+- `app/admin/tools/new/page.tsx` + `app/admin/tools/[id]/page.tsx` (신설)
+- `app/admin/tools/page.tsx` (수정) — "+ 새 자료" 링크 + 행 클릭 이동
+- `app/api/revalidate/route.ts` (수정) — `kind: 'tool'` 분기 추가
+
+**미포함**: 사용자 패널 슬라이드(`/admin/users`), 댓글 모더레이션 풀세트, ISR 결과 가시화 등 §12의 나머지는 출시 후 진행.

@@ -1,4 +1,7 @@
+import Link from 'next/link';
+import { Plus } from 'lucide-react';
 import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
+import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
 
 export default async function AdminTools() {
@@ -11,7 +14,14 @@ export default async function AdminTools() {
 
   return (
     <div className="p-8">
-      <h1 className="font-serif text-2xl font-semibold mb-6">자료실 (tools/prompts/guides/맥락 카드)</h1>
+      <header className="mb-6 flex items-center justify-between">
+        <h1 className="font-serif text-2xl font-semibold">자료실 (tools/prompts/guides/맥락 카드)</h1>
+        <Button asChild variant="accent">
+          <Link href="/admin/tools/new">
+            <Plus className="h-4 w-4" /> 새 자료
+          </Link>
+        </Button>
+      </header>
       <div className="card overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-muted text-left text-xs uppercase tracking-wider text-ink/50">
@@ -25,20 +35,29 @@ export default async function AdminTools() {
           </thead>
           <tbody className="divide-y divide-border">
             {(data ?? []).map((t) => (
-              <tr key={t.id}>
-                <td className="px-4 py-3 font-medium">{t.name}<div className="text-xs text-ink/40">/{t.slug}</div></td>
+              <tr key={t.id} className="hover:bg-muted/40">
+                <td className="px-4 py-3 font-medium">
+                  <Link href={`/admin/tools/${t.id}`} className="block">
+                    {t.name}
+                    <div className="text-xs text-ink/40">/{t.slug}</div>
+                  </Link>
+                </td>
                 <td className="px-4 py-3"><span className="badge">{t.category}</span></td>
                 <td className="px-4 py-3 text-xs">{t.pricing_tier}</td>
                 <td className="px-4 py-3"><span className="badge">{t.status}</span></td>
                 <td className="px-4 py-3 text-xs text-ink/50">{formatDate(t.updated_at)}</td>
               </tr>
             ))}
+            {!data?.length && (
+              <tr>
+                <td colSpan={5} className="px-4 py-12 text-center text-sm text-ink/40">
+                  아직 등록된 자료가 없어요. 우상단 "새 자료"로 시작하세요.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
-      <p className="mt-4 text-xs text-ink/40">
-        ※ CRUD 폼은 Phase 3에서 추가. 지금은 Supabase Studio에서 직접 편집.
-      </p>
     </div>
   );
 }

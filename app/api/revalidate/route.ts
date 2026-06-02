@@ -12,11 +12,16 @@ export async function POST(req: NextRequest) {
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (profile?.role !== 'admin') return NextResponse.json({ error: 'forbidden' }, { status: 403 });
 
-  const { id, track } = await req.json();
+  const { id, track, kind, slug } = await req.json();
   if (id) revalidateTag(`content-${id}`);
   if (track) {
     revalidateTag(`list-${track}`);
     revalidatePath(track === 'case' ? '/cases' : '/trends');
+  }
+  if (kind === 'tool') {
+    revalidateTag('tools');
+    revalidatePath('/tools');
+    if (slug) revalidatePath(`/tools/${slug}`);
   }
   revalidatePath('/');
   return NextResponse.json({ ok: true });
