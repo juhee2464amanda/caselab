@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss';
+import { userTokens, adminTokens } from './lib/tokens';
 
 const config: Config = {
   content: [
@@ -14,22 +15,46 @@ const config: Config = {
     },
     extend: {
       colors: {
-        bg: '#FAFAF7',
-        ink: '#0A0A0A',
+        // 기존 토큰 — admin default 의미 유지 (점진 마이그레이션)
+        bg: adminTokens.bgBase,
+        ink: adminTokens.ink,
         accent: {
-          DEFAULT: '#1E40AF',
+          DEFAULT: adminTokens.accent,
           50: '#EEF2FF',
           100: '#E0E7FF',
           500: '#6366F1',
           600: '#4F46E5',
           700: '#4338CA',
           900: '#1E1B4B',
+          hover: adminTokens.accentHover,
         },
         muted: {
-          DEFAULT: '#F4F4F0',
-          foreground: '#737373',
+          DEFAULT: adminTokens.bgSubtle,
+          foreground: adminTokens.inkMuted,
         },
-        border: '#E5E5E0',
+        border: adminTokens.border,
+
+        // user set (D46) — user 페이지 전용 (`bg-user-base`, `text-user-accent` 등)
+        user: {
+          base: userTokens.bgBase,
+          subtle: userTokens.bgSubtle,
+          ink: userTokens.ink,
+          'ink-muted': userTokens.inkMuted,
+          accent: userTokens.accent,
+          'accent-hover': userTokens.accentHover,
+          border: userTokens.border,
+        },
+
+        // admin set (D46) — admin 페이지 전용 (`bg-admin-base`, `text-admin-accent` 등)
+        admin: {
+          base: adminTokens.bgBase,
+          subtle: adminTokens.bgSubtle,
+          ink: adminTokens.ink,
+          'ink-muted': adminTokens.inkMuted,
+          accent: adminTokens.accent,
+          'accent-hover': adminTokens.accentHover,
+          border: adminTokens.border,
+        },
       },
       fontFamily: {
         serif: ['"Noto Serif KR"', 'serif'],
