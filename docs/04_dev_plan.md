@@ -588,3 +588,163 @@ caselab/
 - `components/admin/{TrackForm,ToolForm}.tsx` — 동일 패턴 적용
 
 **미포함**: 모바일 전용 UI/UX 재설계(컬럼 우선순위 조정, 행 액션 메뉴 등)는 출시 후 데이터 보고 점진 개선.
+
+### 18.9 Analytics 보강 — GA4 명시 매핑 + Consent Mode v2 + Speed Insights
+
+**결정 일자**: 2026-06-02
+
+**배경**: §14 페르소나 검증·§4 콘텐츠 액션(`prompt_copy`, `deep_read`, `save`, 전자책 주문)이 자체 `events` 테이블로만 적재되고 GA4 event name 매핑이 코드 곳곳에 흩어져 있음 (`lib/analytics/deep-read.ts` 안에 `track('deep_read', ...)` 인라인). GA4 표준 ecommerce 매핑·Consent Mode v2·Lighthouse 실측 보강이 출시 전 비어 있음.
+
+**결정 표 (4건)**:
+
+| # | 결정 | 슬롯 | 영향 |
+|---|---|---|---|
+| **D21** | events 적재 wrapper(`lib/analytics/track.ts`)에 GA4 event name 매핑을 한 곳에 정의. `prompt_copy → 'prompt_copy'`, `ebook_order → 'purchase'` (Phase 4부터), `deep_read → 'deep_read'`, `cta_click → 'cta_click'`, `scroll_25/50/100 → 'scroll'` | **P0 (Day 2-B)** | 기존 `deep-read.ts`의 인라인 `track()` 호출을 wrapper 경유로 점진 이전. cross-cutting (`scroll_25/50/100` EventType 신설) |
+| **D22** | Vercel Web Analytics 도입 **보류** (출시 후 재검토) | P1 (검토만) | GA4와 ~80% 중복. Hobby 2,500 events/월 한도가 트래픽 1,000 DAU만 넘어도 초과. Consent Mode v2가 GA4 cookieless modeling을 보강해줘서 별도 도입 효용 낮음 |
+| **D23** | GA4 ecommerce `purchase` event fire 시점 = **Phase 4 (PG 도입)** | Phase 4 | 현재 전자책은 price=0 무료라 'purchase' 의미가 약함. PG 도입 시점에 `value`, `currency`, `transaction_id` 정식 매핑 |
+| **D24** | Vercel Speed Insights **P0 도입** (`<SpeedInsights />` 1줄) | **P0 (Day 2-B, 1줄)** | Lighthouse(`§18.3`)는 합성 측정, Speed Insights는 실 사용자 측정. 운영자 "사이트 느림" 신호 자체 감지 |
+
+**미포함**:
+- D23 ecommerce는 Phase 4 PG 도입 시 다시 다룸. 출시 시점엔 전자책 주문이 events.ebook_order로만 적재됨
+- GA4 server-side measurement (Measurement Protocol)은 검토 안 함
+
+**영향받는 파일**:
+- `lib/analytics/track.ts` (신설)
+- `lib/analytics/utm.ts` (신설, [[D25]]와 연동)
+- `lib/analytics/scroll-tracker.ts` (신설)
+- `components/analytics/GA4Provider.tsx` (Consent Mode v2 패치 — default denied → update granted)
+- `app/layout.tsx` (`<SpeedInsights />` 추가)
+- `package.json` (`@vercel/speed-insights` 추가)
+- `lib/analytics/deep-read.ts` (점진 — wrapper 경유로 변경, 이번 세션엔 보류)
+
+### 18.10 UTM Builder + 채널 마스터 (categories 테이블 신설)
+
+**결정 일자**: 2026-06-02
+
+**배경**: 운영자가 인스타·뉴스레터·카카오톡 등에 URL을 뿌릴 때 매번 UTM 파라미터를 손으로 조합하면 표기 불일치(`Instagram`/`instagram`/`IG`)로 GA4 통계가 분산됨. 또한 `/admin/analytics`에서 채널별 conversion rate 분석이 불가능. 한편 §3 라우팅 맵에 `categories` 테이블이 명시적으로 없고, 콘텐츠/도구 카테고리는 `tools.category text` 컬럼으로 분산되어 있음.
+
+**결정 표 (2건)**:
+
+| # | 결정 | 슬롯 | 영향 |
+|---|---|---|---|
+| **D25** | UTM Builder admin 페이지 **중간 수준** (생성 폼 + 히스토리 + 클릭 수) 신설 — `/admin/utm` | **P1 (1일)** | `utm_links` 테이블 + Server Action + 히스토리 테이블 + 클릭 수 = `events.metadata->>'utm_campaign'` GROUP BY. QR 코드/시각화/conversion rate는 P2 |
+| **D26** | 채널 마스터 = **`categories` 테이블 신설** + `type='utm_channel'` + `metadata jsonb`에 `{source, medium, content_template}` 매핑. 초기 10건 seed | **0003 마이그레이션** | `categories` 테이블 자체는 신설 (현재 코드 0001/0002에 없음). type 컬럼으로 향후 확장 가능 (`'content'`, `'tool'` 등으로 D13 자유도 통합 여지) |
+
+**미포함 (P2 / 향후)**:
+- QR 코드 생성 (`qrcode.react`)
+- 채널별 시각화 차트
+- conversion rate 계산 (`utm_campaign` → `ebook_order` funnel)
+- `tools.category` → `categories` 마이그레이션 (현재 enum text 그대로 유지. D13 작업 시점에 이관)
+
+**영향받는 파일**:
+- `supabase/migrations/0003_utm.sql` (신설)
+- `app/admin/utm/page.tsx` (신설)
+- `app/admin/utm/UtmBuilderForm.tsx` (신설, Client Component)
+- `app/admin/utm/actions.ts` (신설, Server Action `createUtmLink`)
+- `lib/utm/build-url.ts` (신설, pure function)
+- `lib/supabase/middleware.ts` (`ADMIN_ONLY_PREFIXES` 또는 editor 허용 분기 — 자료실 운영자 권한 결정)
+- `docs/05_launch_runbook.md` Day 1 Step 3 (0003 적용 라인 추가)
+
+**핵심 파이프라인 (자동 연결)**:
+
+1. 운영자 → `/admin/utm` 채널 선택 → 캠페인 입력 → [링크 생성]
+2. `utm_links` row 저장 + 완성 URL 복사
+3. 운영자 → 인스타/뉴스레터에 URL 뿌림
+4. 사용자 URL 클릭 → 사이트 진입 → `utm.ts`가 URL 파싱 → sessionStorage 저장
+5. 사용자 액션(view/copy/save) → `track.ts` wrapper가 `events.metadata`에 `utm_source/medium/campaign` 자동 병합 적재
+6. `/admin/utm` 히스토리 → `events` GROUP BY `metadata->>'utm_campaign'` → 클릭 수 자동 표시
+7. `/admin/analytics`에서 채널별 conversion 분석 가능
+
+---
+
+## 19. Admin 풀스택 결정 매트릭스 (D1~D20)
+
+**결정 일자**: 2026-05-28 ~ 2026-06-02 (점진)
+
+> **본 §19의 위상**: 출시 전 admin 영역 전체에 들어가야 할 결정 20개를 통합한 매트릭스. 단, 이 결정 매트릭스 자체가 별도 문서로 정리된 적이 없어 본 세션에서 `0002_admin_p0.sql` 주석(`-- 계획 §D ...`) + `docs/design_mockup/admin/ADMIN_SESSION_NOTES.md`(2026-05-28) + 이전 세션 대화 캡처를 **역추출**해 1차 박았음. 추가 결정(D21~D26)은 §18.9 / §18.10. 새 admin 결정은 본 §19 또는 §18 새 subsection으로 추가.
+>
+> **신뢰도 표기**:
+> - ✅ = 0002 SQL 또는 코드에 결정 결과 살아있음 (high confidence)
+> - 📋 = 0002_SETUP.md roadmap 또는 캡처에 흐름만 (medium confidence)
+> - ⚠️ = 본 세션에서 단서 못 찾음 (사용자 확인 필요)
+
+### 19.1 결정표 D1~D20
+
+| # | 영역 | 결정 | 슬롯 | 신뢰도 / 출처 |
+|---|---|---|---|---|
+| D1 | 댓글 | `comments.moderation_note` 컬럼 + 모더레이션 UI (admin/comments) | P0 | ✅ 0002 §1-1 |
+| D2 | 의견함 | `/admin/opinions` Brevo 답장 발송 흐름 (Edge Function 또는 admin 폼) | P0 (Day 6) | 📋 0002_SETUP roadmap |
+| D3 | 의견함 | `opinions.reply_email_id` Brevo messageId 추적 | P0 | ✅ 0002 §1-2 |
+| D4 | 사용자 | `profiles.admin_note` (운영자 메모) + `analytics_consent` (분석 동의 토글) | P0 (UI는 P1) | ✅ 0002 §1-3 |
+| D5 | 분석 | 북극성 = 주간 prompt_copy UV. KPI 5종 view/RPC (`weekly_kpi` view, `get_north_star()`, `get_daily_trend()`) | P0 (Day 3~4) | ✅ 0002 §5 |
+| D6 | 사용자 | 사용자 슬라이드 패널 (`/admin/users/[id]`) — 행동·구매·동의 한눈에 | P1 (Day 5) | 📋 0002_SETUP roadmap |
+| D7 | 콘텐츠 | 콘텐츠 폼 안전망 6개 (자동 저장 / 슬러그 충돌 체크 / 미리보기 / 발행 게이트 시각화 / ??? × 2) | P0 (Day 7~8) | ⚠️ 세부 6개 확인 필요 |
+| D8 | 전자책 | DB Trigger 전자책 자동 발송 (`purchases` insert → `send-ebook` Edge Function `pg_net.http_post`) | P0 | ✅ 0002 §6 |
+| D9 | 폴리시 | 댓글 폴리시 (RLS + 운영자 비공개 처리 + 신고 처리) | P0 (Day 9~10) | 📋 0002_SETUP roadmap |
+| D10 | 폴리시 | 후보 카드 (`/admin/topics`) / 자료실 (`/admin/tools`) / 전자책 (`/admin/ebooks`) 폴리시 — RLS + 모더레이션 + 워크플로우 | P0 (Day 9~10) | 📋 §18.7 (tools) + roadmap |
+| D11 | 운영 | Day 11 1회 DB 설정 (`alter database postgres set app.send_ebook_url = ...` × 3) | P0 (Day 11) | ✅ 0002 §끝 |
+| D12 | 출시 | Day 12 출시 게이트 = 페르소나 검증 12개 + 자동 6 / 수동 3 게이트 | P0 (Day 12) | ✅ §14 + runbook Day 12 |
+| D13 | 콘텐츠/도구 | 메뉴·카테고리 자유도 — `categories` 테이블로 통합 (content/tool/utm_channel) | P1 | 📋 D26으로 utm_channel만 0003에 선행. 나머지는 P1 |
+| D14 | 결제 | `purchases` PG 결제 hook 컬럼 미리 (`payment_method`, `payment_id`, `refund_status`, `refund_at`) | P0 (Phase 4 PG 대비) | ✅ 0002 §1-4 |
+| D15 | 운영 | `featured_contents` Hero 큐레이션 테이블 + 슬롯 12개 (1: hero, 2~4: highlight, 5~12: 일반) | P0 (Day 5) | ✅ 0002 §3 |
+| D16 | 운영 | `admin_notifications` view — 사이드바 배지 + 종 드롭다운 원천 (의견 미답·신고 댓글·실패 결제·열린 후보) | P0 | ✅ 0002 §4 |
+| D17 | 권한 | `role` enum 확장: `user | editor | admin`. editor = 콘텐츠/자료실/토픽 운영. admin = 전체 + 분석/사용자/매출/설정. middleware `ADMIN_ONLY_PREFIXES` 분기 | P0 | ✅ 0002 §2 + `lib/supabase/middleware.ts` |
+| D18 | (불명) | ⚠️ 본 세션에서 단서 발견 못함 — 사용자 확인 필요 | ? | ⚠️ |
+| D19 | 메일 | DB Trigger Brevo Contact 자동 동기화 (`profiles.newsletter=true` 사용자 → Brevo Contact API 등록) | P0 (Day 9 연계) | ✅ 0002 §7 |
+| D20 | (불명) | ⚠️ 본 세션에서 단서 발견 못함 — 사용자 확인 필요 | ? | ⚠️ |
+
+### 19.2 누락 / 불명 — 보강 필요
+
+- **D18, D20**: 본 세션에서 결정 내용 단서 0건. 다음 세션 사용자 확인 필요. 임시 자리 잡음
+- **D7 세부 6개**: "자동 저장 / 슬러그 충돌 / 미리보기 / 발행 게이트 시각화"는 §7 + admin/new 코드에서 추정 가능. 나머지 2개 미상 — 사용자 확인 또는 D7 작업 시점 확정
+- **D2 답장 발송 메커니즘**: Edge Function 호출 vs admin 폼 mailto. Brevo Transactional API 호출 패턴은 0002 §6 (send-ebook trigger)과 유사하게 갈지 미정
+
+### 19.3 ADMIN_SESSION_NOTES §5 추가 결정 필요 (D27~)
+
+`docs/design_mockup/admin/ADMIN_SESSION_NOTES.md` §5에 다음 결정이 미확정 상태:
+
+| 참조 | 항목 | 현재 상태 |
+|---|---|---|
+| §5-1 | 콘텐츠 타입 확장 (`guide`/`prompt` → contents 통합 vs 별도 테이블) | tools 별도 테이블로 일부 결정됨 (`tools.category` enum). 그 외 미정 |
+| §5-2 | 도구 관리 데이터 모델 (`tools` 테이블 신설 vs contents 통합) | tools 별도 테이블로 결정됨 (§18.7 + admin/tools 코드) |
+| §5-3 | 프롬프트 모음 — 자동 추출 vs 수동 등록 vs 둘 다 | 수동 등록(`tools.category='prompt'`)으로 일부 결정. 자동 추출 미정 |
+| §5-4 | 온보딩 데이터 (직업/직무/관심주제/AI도구) — DB 컬럼 + 분석 반영 | profiles.job_category만 결정. 나머지 미정 |
+| §5-5 | admin 분석 유입 패널 (GA4 콘솔만 vs admin 통합) | D25 UTM Builder로 일부 보강. admin 내 GA4 Data API 통합은 미정 |
+| §5-6 | 풀 설정 페이지 (계정 페이지 확장 vs 최소 유지) | 최소 유지(D17 setting은 admin only)로 일부 결정. 사용자측 미정 |
+| §5-7 | admin 콘텐츠 폼 발행자 필드 (제거 vs DB 유지/UI 숨김) | 이번 세션 ADMIN_SESSION_NOTES 시점에 "삭제" 결정. 확정 필요 |
+| §5-8 | user↔admin 컬러 토큰 분리 (의도적 분리 vs 통일) | ADMIN_SESSION_NOTES에 의도적 분리(인디고 #1E40AF)로 결정. 토큰 파일에 반영 여부 미정 |
+
+→ 인터뷰(A-0.2)로 확정된 항목은 §19 끝에 D27, D28… 으로 추가.
+
+### 19.4 영향받는 파일 / 페이지 (이미 디스크 반영분)
+
+**Migration**:
+- `supabase/migrations/0002_admin_p0.sql` — D1, D3, D4, D5, D8, D11, D14, D15, D16, D17, D19 SQL 반영
+
+**Middleware**:
+- `lib/supabase/middleware.ts` — D17 role-aware `ADMIN_ONLY_PREFIXES`
+
+**Admin 페이지** (`app/admin/`):
+- `layout.tsx`, `page.tsx` (대시보드)
+- `analytics/` — D5 KPI 표시
+- `comments/` — D1 모더레이션 (UI 일부)
+- `contents/`, `tools/`, `ebooks/`, `opinions/`, `topics/`, `users/` — 일부 구현
+- `components/admin/AdminSidebar.tsx` + `TrackForm`, `ToolForm` — §18.8 모바일 반영
+
+**디자인 원형**:
+- `docs/design_mockup/admin/ADMIN_SESSION_NOTES.md` — Linear 사이드바 구조, 인디고 `#1E40AF`, 배경 `#FAFAF7`, KPI 5종 / 가드레일 5종 정의
+
+### 19.5 다음 세션 액션 (보강)
+
+- D18, D20 의미 확인 (사용자 메모/캡처 보존돼 있으면 확인)
+- D7 콘텐츠 폼 안전망 6개 세부 확정
+- D2 의견함 답장 발송 메커니즘 결정 → Day 6 작업 명세
+- D6 사용자 슬라이드 패널 P1 작업 (Day 5 또는 출시 직후)
+- §5-1~§5-8 결정 → D27+ 추가
+- §19 → 다음 세션부터 admin 결정의 정본. 코드/SQL 변경 전 본 표 업데이트
+
+### 19.6 §18.10 D26 ↔ D13 연동 메모
+
+§18.10 D26은 `categories` 테이블 신설 + `type='utm_channel'` seed 10건만 0003 마이그레이션에 선행 포함. D13의 "content/tool 카테고리 자유도 통합"은 P1 별도 작업으로 분리 (`tools.category` enum은 0003 시점엔 그대로 유지). D13 작업 시점에 다음 두 가지를 같이 결정:
+1. `tools.category` enum → `categories` 테이블 FK 이관 방식
+2. `contents.content_type` enum (`case|trend`) → categories 통합 또는 유지
