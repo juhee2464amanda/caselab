@@ -74,51 +74,129 @@
 
 ---
 
-## Day 1 — Supabase 셋업 ([Issue #1](https://github.com/juhee2464amanda/caselab/issues/1))
+## Day 1 — Supabase 풀 셋업 (2026-06-02 갱신: 0001~0004 + Storage 7 + Auth)
 
 ### ✅ 끝났을 때
-- 프로젝트 URL/Key 3종 확보 → `.env.local`에 등록
-- 12개 테이블 + RLS + 뷰 2개 모두 생성됨
-- `ebooks` Storage 버킷 비공개로 존재 (출시 후 PDF 업로드 예정)
-- `npm run dev`에서 로그인 시도 시 Supabase 응답 옴 (아직 OAuth 미설정이라 실패하지만 “연결 자체는 됨”)
+- 새 프로젝트 `Caselab-prod` 생성 + API 키 3종 → `.env.local`
+- 마이그레이션 4개 적용: `0001_init.sql` + `0002_admin_p0.sql` + `0003_categories_tags_utm.sql` + `0004_storage_policies.sql`
+- DB 객체: 테이블 ~20개 / view 2개 / 함수 ~10개 / 트리거 ~22개 / Storage 정책 ~19개
+- Storage 버킷 7개: `thumbnails` `ebooks` `avatars` `content-images` `newsletter-assets` `support-files` `audit-exports`
+- Authentication: Email 가입 ON + **Confirm email OFF** ([[project_auth_confirm_off]] 영구 정책)
+- `.env.local`에 `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` 박힘
 
-### 📋 체크리스트
-1. [supabase.com/dashboard](https://supabase.com/dashboard) → New Project
-   - Project name: `caselab-prod`
-   - Database password: **반드시 비밀번호 관리자에 저장**
-   - Region: **Northeast Asia (Seoul)** ⚠️
-   - Plan: Free
-2. 프로젝트 생성 후 2~3분 대기 → Settings → API에서:
-   - **Project URL** → `.env.local`의 `NEXT_PUBLIC_SUPABASE_URL`
-   - **anon public** key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - **service_role secret** → `SUPABASE_SERVICE_ROLE_KEY` ⚠️ 클라이언트 노출 금지
-3. SQL Editor → New query → `supabase/migrations/0001_init.sql` 전체 복붙 → Run
-4. Storage → New bucket
-   - Name: `ebooks`
-   - Public: **OFF**
-5. (선택, Day 2에 Kakao 가는 경우) Supabase CLI:
-   ```bash
-   brew install supabase/tap/supabase
-   supabase login
-   supabase link --project-ref <your-ref>
-   ```
+### 📋 Step 1~10 (90~120분 예상)
 
-### 🔍 검증
-SQL Editor:
-```sql
-select count(*) from public.profiles;      -- 0
-select count(*) from public.contents;      -- 0
-select count(*) from public.admin_stats;   -- 1행
+#### Step 1 — 새 프로젝트 생성 (~5분)
+[supabase.com/dashboard](https://supabase.com/dashboard) → New Project
+- Project name: `Caselab-prod`
+- Database password: 강한 비밀번호 → **반드시 비밀번호 관리자에 저장** (재발급 불가)
+- Region: **Northeast Asia (Seoul, ap-northeast-2)** ⚠️
+- Plan: Free
+- Security: **`Enable automatic RLS` 체크 ON** (안전 마진)
+- Create new project → 2~3분 프로비저닝 대기
+
+#### Step 2 — API 키 3종 (~2분)
+Settings → API:
+- **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
+- **anon public** key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- **service_role secret** ("Reveal" 클릭) → `SUPABASE_SERVICE_ROLE_KEY` ⚠️ 채팅·git에 절대 노출 금지
+
+#### Step 3 — `.env.local` 갱신 (~3분)
+```bash
+cp .env.example .env.local      # 없으면 생성
+open -a "TextEdit" .env.local   # 또는 cursor/code/nano
 ```
-로컬: `npm run dev` → http://localhost:3000 200
+3개 키 박고 저장. 다른 변수(`NEXT_PUBLIC_SITE_URL` 등)는 그대로.
+
+#### Step 4 — `pg_net` Extension 활성화 (~1분)
+Database → Extensions → `pg_net` 검색 → 토글 ON
+
+> 0002의 `pg_net.http_post()` 함수 호출이 trigger 안에 있어서 미리 활성화 권장. 함수 생성 자체는 활성화 없어도 통과하지만 Day 11 실제 trigger 발동 시 필요.
+
+#### Step 5 — `0001_init.sql` 적용 (~3분)
+SQL Editor → `+` New query → 0001 전체 복붙 → Run → "Success. No rows returned"
+
+**검증 SQL** (별도 query):
+```sql
+select table_name from information_schema.tables
+where table_schema='public' order by table_name;
+```
+→ 12 테이블 + 2 view (admin_stats, content_stats) = **14 row** 나와야 함
+
+#### Step 6 — `0002_admin_p0.sql` 적용 (~3분)
+SQL Editor → `+` New query → 0002 전체 복붙 → Run → "Success"
+
+**검증**:
+```sql
+select public.get_north_star();   -- (0,0,0) 정상 (데이터 없음)
+```
+
+#### Step 7 — `0003_categories_tags_utm.sql` 적용 (~5분)
+SQL Editor → `+` New query → 0003 전체 복붙 (560줄) → Run → "Success"
+
+**검증**:
+```sql
+select
+  (select count(*) from public.categories where type='utm_channel') as utm_seed,
+  (select count(*) from information_schema.columns
+   where table_name='profiles' and column_name in ('job_title','interests','ai_tools','persona')) as new_cols,
+  (select count(*) from information_schema.triggers
+   where trigger_schema='public' and trigger_name like 'trg_audit_%') as audit_triggers;
+```
+→ 기대 결과: **utm_seed=10 / new_cols=4 / audit_triggers=37** (37 = 13 trigger 정의 × INSERT·UPDATE·DELETE 이벤트 row 분리)
+
+#### Step 8 — Storage 버킷 7개 생성 (~10분)
+Storage → New bucket × 5번 (`thumbnails` `ebooks`는 이미 만들었거나 0002 후 자동, 아래 표는 추가 5개):
+
+| Bucket name | Public | 용도 |
+|---|---|---|
+| `thumbnails` | **ON** | 콘텐츠·도구·전자책 썸네일 |
+| `ebooks` | **OFF** | 전자책 PDF (Signed URL 발급) |
+| `avatars` | **ON** | 사용자 프로필 사진 |
+| `content-images` | **ON** | 콘텐츠 본문 안 이미지 |
+| `newsletter-assets` | **ON** | 뉴스레터 본문 이미지·배너 |
+| `support-files` | **OFF** | 1:1 문의·FAQ 첨부 (admin only) |
+| `audit-exports` | **OFF** | audit_logs 백업 export (admin only) |
+
+→ Storage 화면에 **7개 버킷** 보이면 OK.
+
+#### Step 9 — `0004_storage_policies.sql` 적용 (~3분)
+SQL Editor → `+` New query → 0004 전체 복붙 (206줄) → Run → "Success"
+
+**검증**:
+```sql
+select count(*) as total_storage_policies
+from pg_policies where schemaname='storage' and tablename='objects';
+```
+→ 약 **15~25개** (0002의 ebooks/thumbnails 4 + 0004의 신규 15)
+
+#### Step 10 — Authentication 설정 (~5분)
+Authentication → **Providers** → Email:
+- Enabled ON ✅
+- **Confirm email OFF** ⛔ ([[project_auth_confirm_off]] 영구 정책)
+- Save changes
+
+Authentication → **URL Configuration**:
+- Site URL: `http://localhost:3000` (출시 후 `https://caselab.vercel.app`로 변경)
+- Redirect URLs: `http://localhost:3000/**` (와일드카드)
+- Save changes
+
+> Google/Kakao OAuth는 Day 2-A에서 처리.
+
+### 🔍 최종 검증
+- 로컬: `npm run dev` → http://localhost:3000 진입 (200 응답)
+- DB: 위 Step 5/6/7/9의 검증 SQL 모두 기대치 일치
 
 ### 🛠️ 막히는 곳
-- **migration 중 ERROR**: 0001_init.sql 전체를 한 번에 실행해야 trigger 의존성 OK
-- **Region 잘못 선택**: Free는 1프로젝트라 신중히
+- **0003 적용 시 `column does not exist` 에러**: 0001/0002의 실제 컬럼명과 0003의 가정이 다른 경우 (예: `profiles.job` ≠ `job_category`). 디스크 SQL을 정정 후 fresh 파일로 재시도
+- **TextEdit 옛 버전 캐시**: 0003 수정 후에도 TextEdit이 옛 내용 표시 → 종료 후 fresh copy(`cp 0003.sql 0003_FRESH.sql`)를 다시 open
+- **클립보드 pbcopy 실패**: `pbpaste | wc -c`가 너무 작은 숫자면 TextEdit에서 직접 Cmd+A + Cmd+C 권장
+- **Run 안 누름**: SQL Editor에 붙여넣은 다음 우측 하단 초록색 **Run** 버튼 확실히 클릭. 결과 영역에 "Success" 보이는지 확인
+- **옛 query 탭 재사용**: Supabase SQL Editor가 query 탭마다 내용 자동 저장. 새 SQL은 반드시 **`+` New query**로 빈 탭에서 시작
 
 ---
 
-## Day 2 — Google + Kakao 인증 ([Issue #2](https://github.com/juhee2464amanda/caselab/issues/2), [#3](https://github.com/juhee2464amanda/caselab/issues/3))
+## Day 2-A — Google + Kakao 인증 ([Issue #2](https://github.com/juhee2464amanda/caselab/issues/2), [#3](https://github.com/juhee2464amanda/caselab/issues/3))
 
 ### ✅ 끝났을 때
 - `/login`에서 Google 버튼 → 본인 계정 → `/onboarding` 강제
@@ -145,6 +223,44 @@ Issue #3 본문 참고 + Edge Function 배포 필요. Day 0에서 Cloudflare 안
 ### 🔍 검증
 - `npm run dev` → `/login` → Google 로그인 → `/onboarding`
 - Supabase Studio → profiles → 본인 row ✓
+
+---
+
+## Day 2-B — Analytics 인프라 + events.search 적재 + editor 초대 (2026-06-02 신설)
+
+### ✅ 끝났을 때
+- `lib/analytics/track.ts` wrapper (events 테이블 + GA4 매핑)
+- `lib/analytics/utm.ts` (URL 파싱 → sessionStorage)
+- `lib/analytics/scroll-tracker.ts` (25/50/100% scroll → GA4 fire)
+- `components/analytics/GA4Provider.tsx` Consent Mode v2 패치 (default denied → update granted)
+- `app/layout.tsx`에 `<SpeedInsights />` 추가 (D24)
+- EventType에 `search` 추가 (D55 인기 검색어 적재)
+- `/admin/users/invite` 페이지 + Supabase `inviteUserByEmail` + role=editor 자동 (D47)
+- `package.json`에 `@vercel/speed-insights` 추가
+
+### 🎯 결정 출처
+§18.9 (D21~D24) + §19 (D47 editor 초대 격상) + 영역 1 (§5-5 인기 검색어 P0)
+
+### 📋 체크리스트
+1. `npm i @vercel/speed-insights pdfjs-dist react-pdf` (Speed Insights + Day 12~13 web reader 라이브러리 미리 설치)
+2. `lib/analytics/track.ts` 신설 — EventType union + GA4_MAP + track() wrapper
+3. `lib/analytics/utm.ts` 신설 — parseUtmFromUrl / saveUtmToSession / getUtm / attachUtmToMetadata
+4. `lib/analytics/scroll-tracker.ts` 신설 — useScrollTracker hook (IntersectionObserver)
+5. `components/analytics/GA4Provider.tsx` 패치 — `gtag('consent', 'default', { all: 'denied' })` 먼저 호출, CookieConsent 동의 시 update granted
+6. `app/layout.tsx` — `<SpeedInsights />` 1줄 추가
+7. EventType에 `search` 케이스 추가 + `/search` 페이지에서 `track('search', { keyword, results_count, filter })` 발화
+8. `app/admin/users/invite/page.tsx` + `actions.ts` 신설 — Supabase Auth `inviteUserByEmail` + Brevo 발송 + handle_new_user 트리거 수정해서 `raw_user_meta_data.invite_role` 읽기
+
+### 🔍 검증
+- `npm run build` 타입 에러 0
+- `npm run dev` → DevTools Network에 GA4 collect 요청 (denied 모드로 modeling)
+- URL에 `?utm_source=test&utm_medium=test&utm_campaign=test` 붙이고 진입 → DevTools Application → sessionStorage → `caselab_utm` 키 JSON 저장
+- 콘텐츠 페이지 스크롤 → gtag debug에 scroll event
+- `/admin/users/invite`에서 본인 다른 이메일로 초대 → 메일 수신 → 가입 후 `profiles.role='editor'` 확인
+
+### 🛠️ 막히는 곳
+- **gtag undefined**: GA4Provider 마운트 전에 track() 호출. 동적 로드 또는 client-only 컴포넌트로 격리
+- **PDF.js worker URL**: `pdfjs-dist`의 worker는 별도 setup 필요. `react-pdf` 가이드 참조
 
 ---
 
