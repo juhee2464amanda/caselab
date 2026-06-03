@@ -97,13 +97,13 @@ export default async function AdminDashboard() {
       </header>
 
       {/* 북극성 카드 — 주간 prompt_copy UV */}
-      <section className="card p-6 bg-admin-base border border-admin-border">
+      <section className="card p-6 bg-user-base border border-user-border">
         <div className="flex items-baseline justify-between gap-4">
           <div>
-            <div className="text-xs uppercase tracking-wider text-admin-ink-muted">
+            <div className="text-xs uppercase tracking-wider text-user-ink-muted">
               북극성 — 주간 prompt_copy UV
             </div>
-            <div className="mt-2 font-serif text-4xl sm:text-5xl font-bold text-admin-accent">
+            <div className="mt-2 font-serif text-4xl sm:text-5xl font-bold text-user-accent">
               {fmt(ns?.weekly_uv)}
             </div>
             <div className="mt-1 text-xs text-ink/60">
@@ -199,7 +199,7 @@ export default async function AdminDashboard() {
       {/* 운영 알림 종 — D16 발화 7건 */}
       <section>
         <h2 className="font-serif text-base font-semibold mb-3">운영 알림</h2>
-        <div className="card divide-y divide-admin-border">
+        <div className="card divide-y divide-user-border">
           <NotiRow
             href="/admin/opinions"
             label="미답 의견"
@@ -260,13 +260,13 @@ function KpiCard({
   return (
     <div
       className={`card p-4 ${
-        accent ? 'border-admin-accent border-2' : ''
+        accent ? 'border-user-accent border-2' : ''
       }`}
     >
-      <div className="text-xs text-admin-ink-muted">{label}</div>
+      <div className="text-xs text-user-ink-muted">{label}</div>
       <div
         className={`mt-2 font-serif text-2xl font-semibold tabular-nums ${
-          accent ? 'text-admin-accent' : 'text-admin-ink'
+          accent ? 'text-user-accent' : 'text-user-ink'
         }`}
       >
         {value}
@@ -297,7 +297,7 @@ function GuardrailCard({
     status === 'warning' ? '⚠️ 임계 초과' : status === 'ok' ? '✓ 양호' : '데이터 수집 중';
   return (
     <div className="card p-4">
-      <div className="text-xs text-admin-ink-muted">{label}</div>
+      <div className="text-xs text-user-ink-muted">{label}</div>
       <div className="mt-2 font-serif text-xl font-semibold tabular-nums">
         {value}
       </div>
@@ -323,7 +323,7 @@ function NotiRow({
   return (
     <Link
       href={href}
-      className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-admin-subtle/40 transition-colors"
+      className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-user-subtle/40 transition-colors"
     >
       <div className="flex items-center gap-3">
         <span

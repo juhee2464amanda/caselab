@@ -199,6 +199,57 @@ export const JOB_LABELS: Record<JobTag, string> = {
   analysis: '데이터/분석',
 };
 
+// ─── §5-4 온보딩 4종 추가 (D38) ───
+// profiles.interests[], profiles.ai_tools[]에 저장. 영문 슬러그.
+
+export const INTERESTS = [
+  'prompt_engineering',
+  'data_analysis',
+  'workflow_automation',
+  'customer_insight',
+  'ai_trends',
+  'content_strategy',
+  'product_planning',
+  'ai_ethics',
+] as const;
+export type Interest = (typeof INTERESTS)[number];
+
+export const INTEREST_LABELS: Record<Interest, string> = {
+  prompt_engineering: '프롬프트 엔지니어링',
+  data_analysis: '데이터 분석',
+  workflow_automation: '워크플로우 자동화',
+  customer_insight: '고객 인사이트',
+  ai_trends: 'AI 트렌드',
+  content_strategy: '콘텐츠 전략',
+  product_planning: '제품 기획',
+  ai_ethics: 'AI 윤리·보안',
+};
+
+export const AI_TOOLS = [
+  'chatgpt',
+  'claude',
+  'gemini',
+  'perplexity',
+  'notion_ai',
+  'cursor',
+  'github_copilot',
+  'midjourney',
+  'other',
+] as const;
+export type AiTool = (typeof AI_TOOLS)[number];
+
+export const AI_TOOL_LABELS: Record<AiTool, string> = {
+  chatgpt: 'ChatGPT',
+  claude: 'Claude',
+  gemini: 'Gemini',
+  perplexity: 'Perplexity',
+  notion_ai: 'Notion AI',
+  cursor: 'Cursor',
+  github_copilot: 'GitHub Copilot',
+  midjourney: 'Midjourney',
+  other: '기타',
+};
+
 export const PERSONA_LABELS: Record<Persona, string> = {
   A: '기획자',
   B: '전략팀',

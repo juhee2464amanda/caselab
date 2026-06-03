@@ -1,11 +1,13 @@
 import type { Config } from 'tailwindcss';
-import { userTokens, adminTokens } from './lib/tokens';
+import { userTokens } from './lib/tokens';
 
 const config: Config = {
   content: [
     './app/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
     './lib/**/*.{ts,tsx}',
+    // D61 (2026-06-03) — Tremor 시각화 컴포넌트 스타일 인식
+    './node_modules/@tremor/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     container: {
@@ -15,26 +17,26 @@ const config: Config = {
     },
     extend: {
       colors: {
-        // 기존 토큰 — admin default 의미 유지 (점진 마이그레이션)
-        bg: adminTokens.bgBase,
-        ink: adminTokens.ink,
+        // 표준 토큰 (D59 통일) — 모든 페이지 user mockup index 정합
+        bg: userTokens.bgBase,
+        ink: userTokens.ink,
         accent: {
-          DEFAULT: adminTokens.accent,
-          50: '#EEF2FF',
-          100: '#E0E7FF',
-          500: '#6366F1',
-          600: '#4F46E5',
-          700: '#4338CA',
-          900: '#1E1B4B',
-          hover: adminTokens.accentHover,
+          DEFAULT: userTokens.accent,
+          50: '#EFF6FF',
+          100: '#DBEAFE',
+          500: '#3B82F6',
+          600: '#2563EB',
+          700: '#1D4ED8',
+          900: '#1E3A8A',
+          hover: userTokens.accentHover,
         },
         muted: {
-          DEFAULT: adminTokens.bgSubtle,
-          foreground: adminTokens.inkMuted,
+          DEFAULT: userTokens.bgSubtle,
+          foreground: userTokens.inkMuted,
         },
-        border: adminTokens.border,
+        border: userTokens.border,
 
-        // user set (D46) — user 페이지 전용 (`bg-user-base`, `text-user-accent` 등)
+        // user namespace (`bg-user-base` 등) — 명시적 토큰
         user: {
           base: userTokens.bgBase,
           subtle: userTokens.bgSubtle,
@@ -45,19 +47,21 @@ const config: Config = {
           border: userTokens.border,
         },
 
-        // admin set (D46) — admin 페이지 전용 (`bg-admin-base`, `text-admin-accent` 등)
+        // admin namespace (D59 하위호환 alias, 신규 코드는 user-* 사용) — D46 폐기
         admin: {
-          base: adminTokens.bgBase,
-          subtle: adminTokens.bgSubtle,
-          ink: adminTokens.ink,
-          'ink-muted': adminTokens.inkMuted,
-          accent: adminTokens.accent,
-          'accent-hover': adminTokens.accentHover,
-          border: adminTokens.border,
+          base: userTokens.bgBase,
+          subtle: userTokens.bgSubtle,
+          ink: userTokens.ink,
+          'ink-muted': userTokens.inkMuted,
+          accent: userTokens.accent,
+          'accent-hover': userTokens.accentHover,
+          border: userTokens.border,
         },
       },
       fontFamily: {
-        serif: ['"Noto Serif KR"', 'serif'],
+        // D58 (2026-06-03) — Noto Serif KR 폐기. font-serif도 Pretendard로 매핑 (mockup 정합).
+        // 기존 font-serif 사용처는 하위 호환 유지, 신규는 font-sans + font-bold/extrabold 권장.
+        serif: ['Pretendard', 'system-ui', 'sans-serif'],
         sans: ['Pretendard', 'system-ui', 'sans-serif'],
       },
       borderRadius: {

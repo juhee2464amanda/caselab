@@ -2,20 +2,27 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Search, User, Menu, Instagram } from 'lucide-react';
+import { Search, User, Menu, ChevronDown } from 'lucide-react';
 import { MegaMenu } from './MegaMenu';
 import { MobileNav } from './MobileNav';
 import { SubscribeModal } from './SubscribeModal';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { INSTAGRAM_URL } from '@/lib/constants';
+
+/**
+ * GNB — user mockup index.html 정합 (2026-06-03 풀 정합)
+ *
+ * 구조: Playfair italic "Caselab" 로고 + sub message + 메뉴(메가드롭다운)
+ *       + 구독 버튼(파란) + 검색·로그인 아이콘
+ *
+ * mockup 출처: docs/design_mockup/user/index.html L250~315
+ */
 
 const NAV = [
-  { label: '실전 케이스', href: '/cases' },
-  { label: 'AI 트렌드', href: '/trends' },
-  { label: '자료실', href: '/tools', mega: true },
-  { label: '전자책', href: '/ebooks' },
-  { label: '이런 거 어때요', href: '/topics' },
+  // mockup 순서 + 라벨
+  { label: 'AI 자료실', href: '/tools', mega: true },
+  { label: 'AI 실전케이스', href: '/cases' },
+  { label: '바로 쓰는 프롬프트', href: '/prompts' },
+  { label: 'ebook', href: '/ebooks' },
 ];
 
 export function GNB() {
@@ -36,74 +43,88 @@ export function GNB() {
     <>
       <header
         className={cn(
-          'sticky top-0 z-40 w-full bg-bg/95 backdrop-blur transition-shadow',
-          scrolled && 'border-b border-border shadow-card'
+          'sticky top-0 z-40 w-full bg-white border-b border-border'
         )}
       >
-        <div className="container-wide flex h-14 items-center justify-between gap-4">
-          <div className="flex items-center gap-6">
-            <Link href="/" className="font-serif text-xl font-bold tracking-tight">
-              케이스랩
+        <div className="mx-auto max-w-[1100px] px-6 flex h-14 items-center justify-between gap-4">
+          {/* 로고 + sub message */}
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="font-['Playfair_Display'] italic text-[28px] font-bold tracking-tight leading-none"
+            >
+              Caselab
             </Link>
-            <nav className="hidden lg:flex items-center gap-1">
-              {NAV.map((n) => (
-                <div
-                  key={n.href}
-                  className="relative"
-                  onMouseEnter={() => n.mega && setMegaOpen(true)}
-                  onMouseLeave={() => n.mega && setMegaOpen(false)}
-                >
+            <span className="hidden md:inline-block text-xs font-medium text-ink/30 border-l border-border pl-3 ml-1 tracking-tight">
+              일잘러의 검증된 AI 큐레이션
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            {/* 네비 메뉴 */}
+            <nav className="hidden md:flex items-center gap-[22px] text-[15px] font-medium text-ink/60 mr-4">
+              {NAV.map((n) =>
+                n.mega ? (
+                  <div
+                    key={n.href}
+                    className="relative"
+                    onMouseEnter={() => setMegaOpen(true)}
+                    onMouseLeave={() => setMegaOpen(false)}
+                  >
+                    <Link
+                      href={n.href}
+                      className="inline-flex items-center gap-0.5 hover:text-ink transition-colors"
+                    >
+                      {n.label}
+                      <ChevronDown className="h-3 w-3" />
+                    </Link>
+                    {megaOpen && <MegaMenu onClose={() => setMegaOpen(false)} />}
+                  </div>
+                ) : (
                   <Link
+                    key={n.href}
                     href={n.href}
-                    className="px-3 py-2 text-sm font-medium text-ink/80 hover:text-ink"
+                    className="hover:text-ink transition-colors"
                   >
                     {n.label}
                   </Link>
-                  {n.mega && megaOpen && <MegaMenu onClose={() => setMegaOpen(false)} />}
-                </div>
-              ))}
+                )
+              )}
             </nav>
-          </div>
 
-          <div className="flex items-center gap-1">
-            <a
-              href={INSTAGRAM_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted"
-              aria-label="인스타그램"
-            >
-              <Instagram className="h-4 w-4" />
-            </a>
-            <Link
-              href="/search"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted"
-              aria-label="검색"
-            >
-              <Search className="h-4 w-4" />
-            </Link>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hidden sm:inline-flex"
-              onClick={() => setSubscribeOpen(true)}
-            >
-              구독
-            </Button>
-            <Link
-              href="/login"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted"
-              aria-label="로그인"
-            >
-              <User className="h-4 w-4" />
-            </Link>
+            {/* 구독 버튼 (파란) */}
             <button
               type="button"
-              className="lg:hidden inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted"
+              onClick={() => setSubscribeOpen(true)}
+              className="hidden sm:inline-flex items-center text-sm font-semibold text-white bg-accent hover:bg-accent-hover px-4 py-1.5 rounded-lg transition-colors"
+            >
+              구독하기
+            </button>
+
+            {/* 검색·로그인 아이콘 */}
+            <Link
+              href="/login"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md text-ink/60 hover:bg-muted transition-colors"
+              aria-label="로그인"
+            >
+              <User className="h-5 w-5" strokeWidth={1.8} />
+            </Link>
+            <Link
+              href="/search"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md text-ink/60 hover:bg-muted transition-colors"
+              aria-label="검색"
+            >
+              <Search className="h-5 w-5" strokeWidth={1.8} />
+            </Link>
+
+            {/* 모바일 햄버거 */}
+            <button
+              type="button"
+              className="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted"
               onClick={() => setMobileOpen(true)}
               aria-label="메뉴 열기"
             >
-              <Menu className="h-4 w-4" />
+              <Menu className="h-5 w-5" />
             </button>
           </div>
         </div>

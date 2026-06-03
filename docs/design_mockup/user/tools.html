@@ -127,18 +127,18 @@
 
   <div class="page">
     <div class="filter-tabs">
-      <button class="ftab on">전체</button>
-      <button class="ftab">디자인 / UI</button>
-      <button class="ftab">자동화</button>
-      <button class="ftab">리서치</button>
-      <button class="ftab">글쓰기</button>
-      <button class="ftab">프레젠테이션</button>
-      <button class="ftab">코딩</button>
+      <button class="ftab on" data-cat="all">전체</button>
+      <button class="ftab" data-cat="design">디자인 / UI</button>
+      <button class="ftab" data-cat="automation">자동화</button>
+      <button class="ftab" data-cat="research">리서치</button>
+      <button class="ftab" data-cat="writing">글쓰기</button>
+      <button class="ftab" data-cat="presentation">프레젠테이션</button>
+      <button class="ftab" data-cat="coding">코딩</button>
     </div>
 
     <div class="tool-grid">
 
-      <a href="tool-snipit.html" class="tool-card">
+      <a href="tool-snipit.html" class="tool-card" data-cat="research">
         <div class="tool-thumb"><img src="images/tools/snipit.png" alt="Snipit 사용 화면 — 경쟁사 광고 비교 보드" loading="lazy" /></div>
         <div class="tool-body">
           <div class="tool-head"><div class="tool-name">Snipit</div><div class="tool-cat-label">리서치</div></div>
@@ -147,7 +147,7 @@
         </div>
       </a>
 
-      <a href="tool-proby.html" class="tool-card">
+      <a href="tool-proby.html" class="tool-card" data-cat="research">
         <div class="tool-thumb"><img src="images/tools/proby.png" alt="Proby 사용 화면 — AI 심층 인터뷰" loading="lazy" /></div>
         <div class="tool-body">
           <div class="tool-head"><div class="tool-name">Proby</div><div class="tool-cat-label">리서치</div></div>
@@ -156,7 +156,7 @@
         </div>
       </a>
 
-      <a href="tool-screenflow.html" class="tool-card">
+      <a href="tool-screenflow.html" class="tool-card" data-cat="design">
         <div class="tool-thumb"><img src="images/tools/screenflow.png" alt="ScreenFlow 사용 화면 — URL 한 줄로 화면 캡처" loading="lazy" /></div>
         <div class="tool-body">
           <div class="tool-head"><div class="tool-name">ScreenFlow</div><div class="tool-cat-label">디자인 / UI</div></div>
@@ -165,7 +165,7 @@
         </div>
       </a>
 
-      <a href="#" class="tool-card">
+      <a href="#" class="tool-card" data-cat="design">
         <div class="tool-thumb tool-thumb-empty"><span class="tool-thumb-badge">이미지 준비 중</span><span class="tool-thumb-emoji">⚡</span></div>
         <div class="tool-body">
           <div class="tool-head"><div class="tool-name">v0</div><div class="tool-cat-label">디자인 / UI</div></div>
@@ -174,7 +174,7 @@
         </div>
       </a>
 
-      <a href="#" class="tool-card">
+      <a href="#" class="tool-card" data-cat="automation">
         <div class="tool-thumb tool-thumb-empty"><span class="tool-thumb-badge">이미지 준비 중</span><span class="tool-thumb-emoji">🔗</span></div>
         <div class="tool-body">
           <div class="tool-head"><div class="tool-name">Make</div><div class="tool-cat-label">자동화</div></div>
@@ -183,7 +183,7 @@
         </div>
       </a>
 
-      <a href="#" class="tool-card">
+      <a href="#" class="tool-card" data-cat="research">
         <div class="tool-thumb tool-thumb-empty"><span class="tool-thumb-badge">이미지 준비 중</span><span class="tool-thumb-emoji">🔍</span></div>
         <div class="tool-body">
           <div class="tool-head"><div class="tool-name">Perplexity</div><div class="tool-cat-label">리서치</div></div>
@@ -192,7 +192,7 @@
         </div>
       </a>
 
-      <a href="#" class="tool-card">
+      <a href="#" class="tool-card" data-cat="presentation">
         <div class="tool-thumb tool-thumb-empty"><span class="tool-thumb-badge">이미지 준비 중</span><span class="tool-thumb-emoji">📊</span></div>
         <div class="tool-body">
           <div class="tool-head"><div class="tool-name">Gamma</div><div class="tool-cat-label">프레젠테이션</div></div>
@@ -201,7 +201,7 @@
         </div>
       </a>
 
-      <a href="#" class="tool-card">
+      <a href="#" class="tool-card" data-cat="writing">
         <div class="tool-thumb tool-thumb-empty"><span class="tool-thumb-badge">이미지 준비 중</span><span class="tool-thumb-emoji">✍️</span></div>
         <div class="tool-body">
           <div class="tool-head"><div class="tool-name">DeepL Write</div><div class="tool-cat-label">글쓰기</div></div>
@@ -210,7 +210,7 @@
         </div>
       </a>
 
-      <a href="#" class="tool-card">
+      <a href="#" class="tool-card" data-cat="coding">
         <div class="tool-thumb tool-thumb-empty"><span class="tool-thumb-badge">이미지 준비 중</span><span class="tool-thumb-emoji">💻</span></div>
         <div class="tool-body">
           <div class="tool-head"><div class="tool-name">Cursor</div><div class="tool-cat-label">코딩</div></div>
@@ -222,5 +222,21 @@
     </div>
   </div>
 
-<script src="../js/subscribe-modal.js"></script></body>
+  <script>
+    // 카테고리 필터
+    (function(){
+      var tabs = document.querySelectorAll('.ftab');
+      var cards = document.querySelectorAll('.tool-card');
+      tabs.forEach(function(tab){
+        tab.addEventListener('click', function(){
+          var cat = this.getAttribute('data-cat');
+          tabs.forEach(function(t){ t.classList.toggle('on', t === this); }, this);
+          cards.forEach(function(card){
+            card.style.display = (cat === 'all' || card.getAttribute('data-cat') === cat) ? '' : 'none';
+          });
+        });
+      });
+    })();
+  </script>
+<script src="../js/subscribe-modal.js"></script><script src="../js/lang-toggle.js"></script></body>
 </html>
