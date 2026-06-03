@@ -108,23 +108,29 @@
 
 [[docs/design_mockup/admin/ADMIN_SESSION_NOTES.md]] 디자인 원형 + §18.8 모바일 결정 + D46 토큰 분리 통합.
 
-### 4.1 컬러 토큰 (D46 분리)
+### 4.1 컬러 토큰 (D59 전면 정합, 2026-06-03 갱신 — D46 폐기)
 
-`lib/tokens.ts` 안에 user/admin set 분리. tailwind config는 `bg-user-base` / `bg-admin-base` 별도 클래스.
+`lib/tokens.ts` 단일 set. admin도 user mockup index 정합 (브랜드 정체성 통일).
 
-| 토큰 | user | admin |
-|---|---|---|
-| 배경 | `#fff` / `#f7f7f7` | `#FAFAF7` (warm beige) |
-| 본문 | `#0A0A0A` | `#0A0A0A` |
-| 포인트 | `#3182f6` (토스 블루) | `#1E40AF` (Indigo 700) |
-| border | `#e5e8eb` | `#E5E1D5` |
-| muted | `#8b95a1` | `#8B8678` |
+| 토큰 | 통일 (user/admin) |
+|---|---|
+| 배경 | `#fff` / `#f7f7f7` |
+| 본문 | `#0A0A0A` |
+| 포인트 | `#3182f6` (토스 블루) |
+| border | `#e5e8eb` |
+| muted | `#8b95a1` |
 
-### 4.2 타이포
+**로고**: Playfair Display italic "Caselab" 28px 700 weight (user mockup index 정합, admin도 동일).
 
-- 제목: Noto Serif KR (admin도 동일 — 매거진 톤 일관성)
-- 본문: Pretendard
+**이전 D46 결정 (warm beige + Indigo) 폐기**. [[04_dev_plan.md#19.1]] D59 참조.
+
+### 4.2 타이포 (D58, 2026-06-03 갱신)
+
+- 제목: **Pretendard 800** (extrabold) — mockup 정합. 원안 Noto Serif KR 폐기 ([[04_dev_plan.md#19.1]] D58)
+- 본문: Pretendard 400
+- 강조: Pretendard 600/700
 - 숫자 표 (KPI / 가드레일): tabular-nums (`font-variant-numeric: tabular-nums`)
+- `tailwind.config.ts` `fontFamily.serif`를 Pretendard로 매핑(하위 호환). 기존 `font-serif` 클래스는 그대로 사용 가능, 신규는 `font-sans + font-extrabold` 권장
 
 ### 4.3 레이아웃
 
@@ -140,38 +146,49 @@
 - 알림 종 (D16): unread count badge — admin 인디고
 - web reader (D41) 페이지 전환: 부드러운 fade 80ms
 
-### 4.5 사이드바 구조 (D16 통합 + 영역 8)
+### 4.5 사이드바 구조 (D60 5 카테고리 재구조, 2026-06-03 갱신)
 
 ```
-[로고]
+Playfair "Caselab" 로고 + admin 표기
 ─────────
-📊 대시보드            (/admin)
-📝 콘텐츠              (/admin/contents)        [badge: 초안 N]
-  ↳ 큐레이션           (/admin/contents/curation)   ⭐ D52
-🧰 자료실              (/admin/tools)
-  ↳ 가이드             (/admin/guides)              ⭐ D50 redirect
-  ↳ 프롬프트           (/admin/prompts)             ⭐ D50 redirect
-📚 전자책              (/admin/ebooks)          [badge: 주문 N]
+📊 분석 (Analytics)
+├─ 대시보드             (/admin)                  — 북극성 + 7 위젯 (D61)
+├─ 상세 분석            (/admin/analytics)        — 콘텐츠·페르소나·게이트 breakdown (D33/D35/D36)
+├─ 유입 (UTM)           (/admin/utm)              — UTM Builder + GA4 채널 (D25/D33)
+└─ 검색 키워드          (/admin/analytics/search) — 인기 키워드 top N (D55)
 ─────────
-💬 의견함              (/admin/opinions)        [badge: 미답 N]
-🎫 1:1 문의            (/admin/support)         [badge: 대기 N]    ⭐ D51
-❓ FAQ                 (/admin/faq)                                ⭐ D51
-🚩 댓글 모더레이션      (/admin/comments)        [badge: 신고 N]
-💡 후보 카드            (/admin/topics)          [badge: 열린 N]
-🏷️ 카테고리·태그        (/admin/categories)
-🔗 UTM Builder         (/admin/utm)
-📨 뉴스레터             (/admin/newsletters)                       ⭐ D53
+📝 콘텐츠 (Content)
+├─ 콘텐츠 목록          (/admin/contents)         [badge: 초안 N]
+├─ 새 콘텐츠            (/admin/contents/new)
+├─ 큐레이션             (/admin/contents/curation)— Hero·Highlight·Links 12 슬롯 (D52)
+├─ 카테고리·태그        (/admin/categories)       — D30
+├─ 후보 카드            (/admin/topics)           — D29 [badge: 열린 N]
+├─ 댓글 모더레이션      (/admin/comments)         — D9 [badge: 신고 N]
+├─ 자료실               (/admin/tools)            — guides·prompts·context-card (D50)
+└─ 전자책               (/admin/ebooks)           [badge: 주문 N]
 ─────────
-👥 사용자              (/admin/users)
-💸 수익                (/admin/revenue)
-📈 분석                (/admin/analytics)
-🕐 History             (/admin/history)
-⚙️ 설정                (/admin/settings)
+👥 회원관리 (Members)
+├─ 가입자               (/admin/users)            — D6 슬라이드 + admin_note
+├─ editor 초대          (/admin/users/invite)     — D47
+├─ 의견함               (/admin/opinions)         — D2/D31 [badge: 미답 N]
+├─ 1:1 문의             (/admin/support)          — D51 [badge: 대기 N]
+├─ FAQ                  (/admin/faq)              — D51
+└─ 뉴스레터              (/admin/newsletters)      — D53
 ─────────
-🔔 [종 드롭다운]                                 (D16 + D34)
+💸 매출 (Revenue)
+├─ 수익 대시보드        (/admin/revenue)          — D40 5종 카드
+└─ 주문·발송            (/admin/ebooks/orders)    — D8/D41
+─────────
+⚙️ 운영 (Ops, 보조)
+├─ History              (/admin/history)          — D44/D45 audit_logs
+└─ 설정                 (/admin/settings)         — T-H
+─────────
+🔔 [종 드롭다운]                                  (D16 + D34)
 ```
 
 → Phase 4에 `app/admin/{categories,utm,history,users/invite,revenue,support,faq,newsletters}/page.tsx` 신설 + `/admin/contents/curation` 큐레이션 탭.
+
+이전 "운영 + 소통 2 그룹" 구조는 D60으로 폐기. [[04_dev_plan.md#19.1]] D60 참조.
 
 ---
 
@@ -1074,7 +1091,7 @@ create policy "admin moderate" on comments for update using (is_admin()) with ch
 ## 10. 분석·KPI (정합)
 
 §7.1, §7.2와 동일. 본 § 10은 cross-link:
-- 북극성 (D5/D32): §7.1.1
+- 북극성 (D5/D32/**D68**): §7.1.1 — **현 prompt_copy UV 유지, 출시 후 4~8주 운영 데이터 보고 재검토 가능** ([[04_dev_plan.md#19.1]] D68, 2026-06-03)
 - KPI 5종 (D5): §7.1.2
 - 가드레일 5종 (D5): §7.1.3
 - 알림 7건 (D16/D34): §7.1.4
@@ -1082,6 +1099,7 @@ create policy "admin moderate" on comments for update using (is_admin()) with ch
 - UTM Builder (D25): §7.1.6
 - 콘텐츠 4종 breakdown (D35): §7.2.1
 - 게이트↔KPI 매칭 (D36): §7.2.2
+- **잠정 P0 (시나리오 합의 후 정식 task)**: 가설·실험 트래킹 (D64) + 사용자당 가치 카드 (D66). plan §22.11 활용 시나리오 참조
 
 ### 10.1 events 적재 wrapper (D21)
 
@@ -1373,6 +1391,26 @@ D42 트리거(구독자 500 OR 결제 요청 10건) 도달 시:
 - 글로벌 EN/KR 토글
 - 다크 모드 (사용자 요청 시)
 - 댓글 멀티 스레드 (활성도 보고)
+
+### 15.6 Mockup ↔ 코드 정합 정책 (2026-06-03, plan §20·§21 결정)
+
+- **mockup freeze 데드라인 = Day 5 종료 (~2026-06-08)**. 그 후 mockup 변경 = P2 이월
+- **P0 격상 (출시 전 필수)**:
+  - **D59 UI 전면 정합 (admin도 user mockup index 통일)** — Day 3 (T-R). 폰트·로고·색상 다 user 정합. D46 폐기
+  - **D60 사이드바 5 카테고리 재구조** — Day 3 (T-P, T-M 폐기로 흡수)
+  - **D61 대시보드 시각화 7 위젯** — Day 3~4 + Day 13 (T-Q·T-S·T-T·T-U·T-V·T-W·T-X·T-Y). 똑시 가이드 정합
+  - **D62 콘텐츠 전환율 + 상태 배지** — Day 7 (T-U)
+  - **U3**: `/tools/[slug]` 상세 페이지 hero·featured 컴포넌트 보강 — Day 7~8 (T-O)
+  - **U1**: 콘텐츠 상세 TOC 좌측 sticky 마이그레이션 — Day 6 (T-N)
+- **P1 (출시 +1주~+1개월)**:
+  - U2: pro/con 카드·pain-card·taking-points 블록 → ContextCard·Checklist 매핑 가이드 TrackForm 안 추가
+  - U4: `/ebooks/[slug]` 상세 페이지 mockup(ebook-detail.html) 정합 확인
+  - U6: Unsplash 직링크 → 자체 호스팅 전환 ([[project_mockup_external_images]] 정책)
+  - M6: TrackForm 상세 UI(파일 업로드·미리보기 탭·키워드 제안) — task #11과 묶음
+- **사용자 손 작업 (Day 6)**:
+  - mockup HTML 측 D58 동기화 — Playfair Display·font-serif 잔존 제거. mockup 마무리 일환
+- **출시 일정**: Day 18 → **Day 21 (~+3일)** — D61 7 위젯 전체 P0 격상으로 안전 마진 확보
+- **freeze 미달성 시 처리**: Day 6에 freeze 연장 또는 mockup-코드 disparity 일부 수용 결정. plan §20.8 참조
 - 콘텐츠 추천 알고리즘 고도화
 
 ---

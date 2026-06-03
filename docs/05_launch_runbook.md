@@ -339,6 +339,31 @@ where email = 'caselab.kr@gmail.com';
 
 ---
 
+## Day 5 — Mockup freeze 데드라인 (2026-06-03 신설, plan §20)
+
+**컨텍스트**: user mockup 18개·admin 9개가 modified 상태. 코드와 mockup 동시 작업 중 → 충돌 방지 위해 freeze 시점 박음 (~2026-06-08).
+
+### ✅ 끝났을 때 (사용자 손)
+- `docs/design_mockup/user/`·`admin/` 모든 HTML freeze (더 이상 디자인 변경 없음)
+- mockup HTML 측 D58 동기화 완료 (Playfair Display 제거, font-serif → font-sans+font-bold)
+- freeze 직후 `git status` 캡처 1회 → 변경분 인벤토리 보관
+
+### 📋 워크플로우
+1. 사용자: mockup 잔여 작업 마감 (콘텐츠 상세·도구 상세·이북 상세 등)
+2. 사용자: mockup HTML에서 font-serif·Playfair Display 잔존 제거
+3. 사용자: `git status` 결과 캡처 → 다음 세션 시작 시 공유
+4. freeze 후 mockup 변경 발생 시 = P2 이월 (즉시 코드 반영 X)
+
+### 🛠️ freeze 미달성 시
+- Day 6에 freeze 연장 또는 일부 mockup-코드 disparity 수용 결정. plan §20.8 참조
+
+### 🔗 freeze 후 즉시 처리할 task
+- T-N (Day 6): 콘텐츠 상세 TOC 좌측 sticky 마이그레이션 (U1)
+- T-O (Day 7~8): `/tools/[slug]` hero·featured 보강 (U3, P0 격상)
+- T-M (Day 3~4 진행 중): AdminSidebar 메뉴 mockup 정합
+
+---
+
 ## Day 4~7 — 콘텐츠 10개 작성
 
 ### ✅ 끝났을 때

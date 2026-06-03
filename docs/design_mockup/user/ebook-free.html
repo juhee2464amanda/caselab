@@ -112,16 +112,26 @@
     .book-detail-img{position:relative;width:100%;border:1px solid var(--gray-200);border-radius:12px;overflow:hidden;background:#fff}
     .book-detail-img img{width:100%;height:auto;display:block}
     /* 이미지 안 "무료로 받기 →" 버튼 위 오버레이 클릭 영역 */
-    .book-detail-img .cta-overlay{position:absolute;left:42%;right:42%;top:96.5%;bottom:1.2%;cursor:pointer;border-radius:10px;transition:background .15s,outline-color .15s;outline:2px solid transparent}
-    .book-detail-img .cta-overlay:hover{background:rgba(255,255,255,.08);outline-color:rgba(255,255,255,.35)}
+    .book-detail-img .cta-overlay{position:absolute;left:40%;right:40%;top:95.3%;bottom:3.5%;cursor:pointer;border-radius:10px;transition:background .15s,outline-color .15s;outline:2px solid transparent}
+    .book-detail-img .cta-overlay:hover{background:rgba(255,255,255,.08);outline-color:rgba(255,255,255,.4)}
 
     /* TOC */
-    .toc-list{list-style:none;counter-reset:toc}
+    .toc-list{list-style:none;counter-reset:toc;transition:max-height .3s ease}
     .toc-item{counter-increment:toc;display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--gray-200)}
     .toc-num{font-size:16px;font-weight:800;color:var(--gray-200);min-width:28px}
     .toc-num::before{content:counter(toc,decimal-leading-zero)}
     .toc-item h4{font-size:15px;font-weight:700;letter-spacing:-0.02em;margin-bottom:2px}
     .toc-item p{font-size:13px;color:var(--gray-600)}
+
+    /* 목차 펼쳐보기 */
+    .toc-wrap{position:relative}
+    .toc-list.collapsed{max-height:284px;overflow:hidden}
+    .toc-fade{position:absolute;left:0;right:0;bottom:0;height:120px;background:linear-gradient(to bottom,rgba(255,255,255,0),rgba(255,255,255,1));pointer-events:none;transition:opacity .2s}
+    .toc-wrap.open .toc-fade{opacity:0;pointer-events:none}
+    .toc-toggle{display:flex;align-items:center;gap:4px;margin:8px 0 0 auto;font-size:13.5px;font-weight:600;color:var(--blue);background:transparent;border:none;cursor:pointer;padding:8px 4px;letter-spacing:-0.01em}
+    .toc-toggle:hover{color:var(--ink)}
+    .toc-toggle .chev{display:inline-block;transition:transform .2s;font-size:14px;line-height:1}
+    .toc-wrap.open ~ .toc-toggle .chev{transform:rotate(180deg)}
 
     /* Reviews */
     .review-summary{display:flex;gap:32px;align-items:center;padding:24px;background:var(--bg-sub);border-radius:12px;margin-bottom:24px}
@@ -160,12 +170,12 @@
     .review-submit:hover{background:#000}
     .review-submit:disabled{background:var(--gray-300);cursor:not-allowed}
 
-    /* 하단 CTA 박스 */
-    .cta-bottom{text-align:center;padding:44px 24px;background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 50%,#2563eb 100%);border-radius:16px;color:#fff;margin:32px 0 16px}
-    .cta-bottom h3{font-size:24px;font-weight:800;letter-spacing:-0.025em;margin-bottom:8px;line-height:1.3}
-    .cta-bottom p{font-size:14px;color:rgba(255,255,255,.78);margin-bottom:22px;line-height:1.6}
-    .cta-bottom .cta-btn{display:inline-block;padding:14px 32px;background:#fff;color:var(--ink);border-radius:10px;font-weight:700;font-size:15px;letter-spacing:-0.02em;transition:background .15s}
-    .cta-bottom .cta-btn:hover{background:var(--gray-100)}
+    /* 하단 구독 CTA 박스 — 상세 이미지 끝 파란 CTA와 톤 분리, 미니멀 */
+    .cta-bottom{text-align:center;padding:40px 24px;background:var(--bg-sub);border:1px solid var(--gray-200);border-radius:14px;color:var(--ink);margin:32px 0 16px}
+    .cta-bottom h3{font-size:22px;font-weight:800;letter-spacing:-0.025em;margin-bottom:8px;line-height:1.35;color:var(--ink)}
+    .cta-bottom p{font-size:14px;color:var(--gray-600);margin-bottom:20px;line-height:1.65;max-width:480px;margin-left:auto;margin-right:auto}
+    .cta-bottom .cta-btn{display:inline-block;padding:13px 32px;background:var(--ink);color:#fff;border-radius:10px;font-weight:700;font-size:15px;letter-spacing:-0.02em;transition:background .15s}
+    .cta-bottom .cta-btn:hover{background:#000}
 
     /* Footer */
     .footer{padding:28px 0;border-top:1px solid var(--gray-200);margin-top:8px}
@@ -257,31 +267,36 @@
       <a class="detail-nav-link" data-target="reviews" href="#reviews">리뷰 <span style="color:var(--gray-400);font-weight:600;margin-left:2px">127</span></a>
     </nav>
 
-    <!-- 책 소개 (Yes24 식, 간단 텍스트) -->
+    <!-- 책 소개 (Yes24 식: 헤드라인 볼드 + 본문 라이트) -->
     <section class="detail-block" id="intro">
       <h2 class="detail-block-title">책 소개</h2>
-      <p style="font-size:15.5px;color:var(--gray-800);line-height:1.75;margin-bottom:24px" class="keepall">기획·마케팅·영업 직무에서 1주 동안 직접 AI를 써본 기록입니다. 잘된 것도, 별로였던 것도 솔직하게 담았습니다. 프롬프트를 복사해서 바로 쓸 수 있고, 각 단계에서 "이러면 잘된 것, 이러면 별로인 것" 기준도 함께 제공합니다.</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div style="padding:14px 16px;background:var(--bg-sub);border-radius:10px;font-size:13.5px;color:var(--gray-800)" class="keepall">✓ 기획서 앞에서 빈 입력칸만 보면 머리가 하얘지는 분</div>
-        <div style="padding:14px 16px;background:var(--bg-sub);border-radius:10px;font-size:13.5px;color:var(--gray-800)" class="keepall">✓ AI에게 뭘 시켜야 할지 모르겠어서 "기획서 써줘" 한 줄로 끝나는 분</div>
-        <div style="padding:14px 16px;background:var(--bg-sub);border-radius:10px;font-size:13.5px;color:var(--gray-800)" class="keepall">✓ AI 결과물이 그럴듯한데 윗사람한테 가져가면 항상 막히는 분</div>
-        <div style="padding:14px 16px;background:var(--bg-sub);border-radius:10px;font-size:13.5px;color:var(--gray-800)" class="keepall">✓ AI 강의에 돈은 썼는데 실제 업무에 적용을 못 하고 있는 분</div>
+      <div style="font-size:22px;font-weight:800;line-height:1.5;letter-spacing:-0.025em;color:var(--ink);margin-bottom:24px" class="keepall">
+        AI 강의에 돈을 써도 일에 옮기지 못하는 데는 이유가 있습니다.<br/>
+        1주 실험 노트로 시작하는 실무 AI 워크플로우 12개.
       </div>
-      <p style="font-size:13px;color:var(--gray-500);margin-top:18px;text-align:right" class="keepall">아래 상세 이미지에서 책 미리보기·핵심 가치·후기까지 한 번에 볼 수 있어요 ↓</p>
+      <p style="font-size:15px;color:var(--gray-800);line-height:1.85;font-weight:400;margin-bottom:14px" class="keepall">기획·마케팅·영업에서 1주 동안 직접 AI를 써본 기록입니다. 잘된 것도, 별로였던 것도 솔직하게 담았습니다. 프롬프트를 복사해서 바로 쓸 수 있고, 각 단계에서 "이러면 잘된 것, 이러면 별로인 것" 기준도 함께 제공합니다.</p>
+      <p style="font-size:15px;color:var(--gray-800);line-height:1.85;font-weight:400" class="keepall">AI를 켜기 전, 사람이 먼저 한 문단을 적는 이유부터 시작합니다. 기획서 첫 페이지가 안 풀릴 때, 경쟁사 분석이 표면만 긁고 끝날 때, 윗사람한테 가져가면 막힐 때 — 12개 워크플로우가 각 상황을 어떻게 푸는지 단계별로 보여줍니다.</p>
     </section>
 
-    <!-- 목차 (텍스트 분리) -->
+    <!-- 목차 (펼쳐보기) -->
     <section class="detail-block" id="toc">
       <h2 class="detail-block-title">목차</h2>
-      <ol class="toc-list">
-        <li class="toc-item"><span class="toc-num"></span><div><h4>빈 입력칸 앞에서 머리가 하얘질 때</h4><p>AI를 켜기 전에 종이에 한 문단을 먼저 쓰는 이유</p></div></li>
-        <li class="toc-item"><span class="toc-num"></span><div><h4>기획서 — '의도' 던지는 5단계</h4><p>문제정의 → 가설 → 검증방법 → 실행안 → 측정</p></div></li>
-        <li class="toc-item"><span class="toc-num"></span><div><h4>경쟁사 분석 — AI가 표면만 긁는 이유</h4><p>"경쟁사 5곳 분석해줘"가 실패하는 구조</p></div></li>
-        <li class="toc-item"><span class="toc-num"></span><div><h4>영업 보고서 — 윗사람 톤에 맞추기</h4><p>"본인 것으로 만드는 4단계" 체크리스트</p></div></li>
-        <li class="toc-item"><span class="toc-num"></span><div><h4>고객 인터뷰 정리 — 시킬 것과 시키지 말 것</h4><p>녹취 20시간을 통째로 던지면 다 비슷해지는 이유</p></div></li>
-        <li class="toc-item"><span class="toc-num"></span><div><h4>AI가 정당화만 할 때 — 반박시키는 4가지 지시법</h4><p>약점 찾기, 반대 입장, 역사적 실패, 숨은 가정</p></div></li>
-        <li class="toc-item"><span class="toc-num"></span><div><h4>프롬프트 모음 — 복사해서 바로 쓰기</h4><p>직무별 정리 + 상황 설명 + 예상 결과</p></div></li>
-      </ol>
+      <div class="toc-wrap" id="tocWrap">
+        <ol class="toc-list collapsed" id="tocList">
+          <li class="toc-item"><span class="toc-num"></span><div><h4>빈 입력칸 앞에서 머리가 하얘질 때</h4><p>AI를 켜기 전에 종이에 한 문단을 먼저 쓰는 이유</p></div></li>
+          <li class="toc-item"><span class="toc-num"></span><div><h4>기획서 — '의도' 던지는 5단계</h4><p>문제정의 → 가설 → 검증방법 → 실행안 → 측정</p></div></li>
+          <li class="toc-item"><span class="toc-num"></span><div><h4>경쟁사 분석 — AI가 표면만 긁는 이유</h4><p>"경쟁사 5곳 분석해줘"가 실패하는 구조</p></div></li>
+          <li class="toc-item"><span class="toc-num"></span><div><h4>영업 보고서 — 윗사람 톤에 맞추기</h4><p>"본인 것으로 만드는 4단계" 체크리스트</p></div></li>
+          <li class="toc-item"><span class="toc-num"></span><div><h4>고객 인터뷰 정리 — 시킬 것과 시키지 말 것</h4><p>녹취 20시간을 통째로 던지면 다 비슷해지는 이유</p></div></li>
+          <li class="toc-item"><span class="toc-num"></span><div><h4>AI가 정당화만 할 때 — 반박시키는 4가지 지시법</h4><p>약점 찾기, 반대 입장, 역사적 실패, 숨은 가정</p></div></li>
+          <li class="toc-item"><span class="toc-num"></span><div><h4>프롬프트 모음 — 복사해서 바로 쓰기</h4><p>직무별 정리 + 상황 설명 + 예상 결과</p></div></li>
+        </ol>
+        <div class="toc-fade"></div>
+      </div>
+      <button class="toc-toggle" id="tocToggle" type="button" aria-expanded="false">
+        <span class="label">펼쳐보기</span>
+        <span class="chev" aria-hidden="true">⌄</span>
+      </button>
     </section>
 
     <!-- 상세 이미지 (ecommerce 풀폭 단일 이미지 자리, admin 등록) -->
@@ -401,6 +416,21 @@
       window.addEventListener('scroll', onScroll, {passive:true});
     })();
 
+    // 목차 펼쳐보기 토글
+    (function(){
+      var wrap = document.getElementById('tocWrap');
+      var list = document.getElementById('tocList');
+      var btn = document.getElementById('tocToggle');
+      if(!wrap || !list || !btn) return;
+      btn.addEventListener('click', function(){
+        var open = wrap.classList.toggle('open');
+        list.classList.toggle('collapsed', !open);
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        btn.querySelector('.label').textContent = open ? '접기' : '펼쳐보기';
+        btn.querySelector('.chev').style.transform = open ? 'rotate(180deg)' : '';
+      });
+    })();
+
     // 별점 입력
     (function(){
       var rating = 0;
@@ -455,5 +485,5 @@
       window.location.href='login.html';
     }
   </script>
-<script src="../js/subscribe-modal.js"></script></body>
+<script src="../js/subscribe-modal.js"></script><script src="../js/lang-toggle.js"></script></body>
 </html>

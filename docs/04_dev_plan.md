@@ -47,7 +47,7 @@
 - **분석**: GA4 (페이지뷰·클릭) + `events` 테이블 (비즈니스 이벤트: deep_read·copy·save·react)
 - **AI 초안**: Anthropic Claude API (운영자 admin 폼) — Phase 1
 - **호스팅**: Vercel + Supabase Cloud
-- **에셋**: Pretendard, Noto Serif KR (Bunny Fonts)
+- **에셋**: Pretendard 400/500/600/700/**800** (Bunny Fonts) — D58 (2026-06-03)로 Noto Serif KR 폐기, Pretendard 단일
 - **마크다운/PDF**: remark + rehype (콘텐츠 자유 서술 블록), react-pdf (전자책 뷰어 — 필요 시)
 
 ---
@@ -59,10 +59,10 @@
 | 배경 | `#FAFAF7` |
 | 본문 | `#0A0A0A` |
 | 강조 | 인디고 `#1E40AF` |
-| 제목 | Noto Serif KR |
-| 본문 | Pretendard |
+| 제목 | **Pretendard 800** (D58, 2026-06-03 갱신 — 원안 Noto Serif KR 폐기, mockup 정합) |
+| 본문 | Pretendard 400 |
 
-`tailwind.config.ts`의 `colors.bg`, `colors.ink`, `colors.accent` 글로벌 토큰화. 목업의 `#191F28`, `#3182F6`, Playfair Display는 폐기.
+`tailwind.config.ts`의 `colors.bg`, `colors.ink`, `colors.accent` 글로벌 토큰화. 목업의 `#191F28`, `#3182F6`, Playfair Display는 폐기. **2026-06-03 D58**: Noto Serif KR 폐기 — Pretendard 단일 로드(800 weight 추가). `font-serif` 클래스는 하위 호환 유지(매핑만 Pretendard).
 
 ---
 
@@ -670,7 +670,7 @@ caselab/
 > - 🆕 = 인터뷰 결정, 코드 미적용 (Phase 4 실행 예정)
 > - ⛔ = 폐기 (단서 없음, 새 결정으로 대체 안 함)
 
-### 19.1 결정표 D1~D49
+### 19.1 결정표 D1~D68
 
 | # | 영역 | 결정 | 슬롯 | 신뢰도 / 출처 |
 |---|---|---|---|---|
@@ -719,7 +719,7 @@ caselab/
 | D43 | 결제 | purchases 추가 컬럼 (`resend_token text` + `send_attempts int` + `last_error text` + `discount_code text` + `coupon_id uuid`) — 0003에 alter table | P0 (0003) | 🆕 영역 4 |
 | D44 | history | `audit_logs` 단일 테이블 + JSON metadata. 스키마: `id, actor_id, actor_type('user'\|'system'), action_type, entity_type, entity_id, metadata jsonb, created_at`. RLS = admin only. 영구 보존 | P0 (0003) | 🆕 영역 5 |
 | D45 | history | 노출 = **둘 다** — `/admin/history` 단일 페이지(전체 timeline + 필터) + 각 영역 패널(콘텐츠/사용자/주문 timeline) | P0 | 🆕 영역 5 |
-| D46 | 디자인 | §5-8 `lib/tokens.ts` user/admin set 분리 P0. tailwind config에 `bg-user-base` / `bg-admin-base` 별도 클래스 | P0 | 🆕 영역 7 |
+| D46 | 디자인 | 🚫 **폐기 (D59로 대체, 2026-06-03)** — 원안: §5-8 `lib/tokens.ts` user/admin set 분리 P0. 사용자가 admin UI를 user mockup index와 전면 정합(cool white + 토스 블루 + Playfair Display) 결정 → adminTokens 폐기 | ~~P0~~ | ~~🆕 영역 7~~ |
 | D47 | 권한 | editor 게스트 기고 P0 + **이메일 초대 매커니즘 P0**. Supabase `inviteUserByEmail` + Brevo 발송 + `profiles.role='editor'` 자동. `/admin/users/invite` 폼 신설 | P0 | 🆕 영역 7 + §5-7 정합 |
 | D48 | 운영 | 운영자 알림 다중 채널 — (a) 사이드바 종 D16 (b) Brevo 이메일 (D16 조건) (c) 카카오톡 P1 (채널/알림톡 검토) | P0 (a,b) / P1 (c) | 🆕 영역 7 |
 | D49 | 운영 | Supabase 자동 백업 (Free=7일 / Pro=매일) + **운영자 메모 주 1회** (runbook 명시). 다중 운영자 협업은 editor 권한으로 부분 대응. RLS 분리 본격은 P2 | P0 (메모) / P2 (협업) | 🆕 영역 7 |
@@ -731,6 +731,17 @@ caselab/
 | D55 | 분석 | 검색 키워드 분석 = **P0**. EventType에 `search` 추가 + admin/analytics 안 '인기 키워드' 패널 (일/주/월 top N). `/search` 페이지 query param + filter 발화 시 이벤트 적재 | P0 | 🆕 영역 8 |
 | D56 | 운영 | `/links` 페이지 = **admin 안 큐레이션**. D52 '큐레이션' 탭의 `slot_type='links'` 슬롯을 인스타→웹 랜딩에 노출. 자연 정합 | P0 | 🆕 영역 8 |
 | D57 | 운영/Storage | **Storage 7 버킷 풀 옵션** — 기존 `thumbnails` (Public) + `ebooks` (Private) + 신규 `avatars` (Public, 본인만 write) + `content-images` (Public, editor write) + `newsletter-assets` (Public, admin write) + `support-files` (Private, admin only) + `audit-exports` (Private, admin only). 정책은 `0004_storage_policies.sql`에 분리 | P0 (Day 1) | ✅ 0004 + plan §16 (2026-06-02 옵션 C 확정) |
+| D58 | 디자인 토큰 | **폰트 결정 갱신 — Noto Serif KR 폐기, Pretendard 통일** (mockup 정합, 2026-06-03). §2 원안 "제목=Noto Serif KR / 본문=Pretendard"이 mockup·실제 코드(globals.css)와 어긋남을 발견 → mockup 채택. `tailwind.config.ts` `fontFamily.serif`를 Pretendard로 매핑(하위 호환), `globals.css` Bunny Fonts import에서 noto-serif-kr 제거, Pretendard 800 weight 추가. 기존 `font-serif` 클래스는 그대로 사용 가능 | P0 | ✅ 코드 패치 완료 + §2 갱신 (plan §19) |
+| D59 | 디자인 | **UI 전면 정합 — admin도 user mockup index 통일 (D46 폐기, 2026-06-03)**. cool white `#fff` + Toss Blue `#3182f6` + Playfair Display italic "Caselab" 로고. `lib/tokens.ts` adminTokens 제거, tailwind config `admin-*` 클래스 제거(또는 user-*로 alias), 모든 admin 페이지 `bg-admin-* text-admin-*` → `bg-user-* text-user-*` 일괄 마이그레이션 | P0 (Day 3) | 🆕 plan §21 사용자 결정 (옵션 A 전면 정합) |
+| D60 | 디자인/IA | **사이드바 5 카테고리 재구조 (2026-06-03)** — 운영+소통 2 그룹 → **분석 / 콘텐츠 / 회원관리 / 매출 / 운영(보조)** 5 그룹. plan §21.3 매핑: 분석=대시보드·analytics·utm·검색 / 콘텐츠=목록·new·큐레이션·categories·topics·comments·tools·ebooks / 회원관리=users·invite·opinions·support·faq·newsletters / 매출=revenue·orders / 운영=history·settings | P0 (Day 3) | 🆕 plan §21 사용자 결정 (5 카테고리 권장) |
+| D61 | 분석 | **대시보드 시각화 7 위젯 격상 (2026-06-03, 똑시 가이드 정합)** — (1) 사이트 퍼널 (방문→가입→첫 액션→재방문 + 단계별 전환율) (2) 추이 막대 그래프 (7/14/30일 토글 + 최고일 강조) (3) 콘텐츠 Top N 가로 막대 + 상태 배지 (4) 페르소나 도넛 + 다음 콘텐츠 후보 (5) 유형(페르소나)×채널(UTM) 히트맵 (6) 리텐션 패널 (재방문·완독·구독유지) (7) AI 진단 자연어 인사이트 박스. tremor 또는 recharts 라이브러리 도입. 현 "KPI 5종 카드 = 숫자 나열" 폐기 → "시각화 + 자연어 인사이트" 패턴 | P0 (Day 3~4 + Day 13) | 🆕 plan §21 사용자 결정 (P0 7건 전체) — `docs/design_mockup/admin/똑시님 대시보드 강연/` 자료 기반 |
+| D62 | 분석 | **콘텐츠 전환율 정의 + 상태 배지 알고리즘 (2026-06-03)** — 콘텐츠별 "전환율" = `prompt_copy_count / deep_read_count`. 상태 배지 4종: **키워봐요**(deep_read 많음 + prompt_copy 낮음 = 액션 유도 보강 필요) / **그대로**(prompt_copy 많고 페르소나 다양 = 효자 콘텐츠) / **새콘텐츠**(최근 7일 발행) / **주춤**(직전 14일 대비 액션 -30%). 0005 마이그레이션 또는 content_stats view 보강 | P0 (Day 7) | 🆕 plan §21 (D61과 묶음) |
+| D63 | 분석 | 🅿️ **보류 (의미 재논의)** — AARRR Referral 메커니즘. 사용자가 친구추천 기능 도입에 회의적 (2026-06-03). 케이스랩 무료 단계에서 "referral"이 토스식 친구추천인지·다른 형태(공유 클릭 추적만 등)인지 명확화 필요. 다음 차수 재논의 | 보류 | 🆕 plan §22 |
+| D64 | 분석 | **잠정 P0 — 가설·실험 트래킹 (활용 시나리오 미정)** — `experiments` 테이블 + `/admin/experiments` 페이지. 출시 P0 포함이나 "이걸로 뭘 할 수 있는지" 활용 시나리오 합의 후 정식 task 등재. 시나리오 A(텍스트 일지+가입 그래프 오버레이) / B(자동 A/B) / C(타임스탬프 변화 자동 감지) 중 선택. plan §22.11 참조 | 잠정 P0 | 🆕 plan §22 (시나리오 미정) |
+| D65 | 분석 | 🅿️ **보류** — 가입 폼 `referral_source` 질문 ("어디서 알게 되셨나요?"). D63과 연동 | 보류 | 🆕 plan §22 |
+| D66 | 분석 | **잠정 P0 — 사용자당 가치(Value per User) 카드 (정의 미정)** — 무료 시기 객단가 변형. 정의 후보: `(30일 prompt_copy 총합) / (30일 활성 UV)`. 활용처: ① 신규 가입자 질 모니터링 / ② 콘텐츠 품질 점검 / ③ 유료 전환 readiness. 출시 P0 포함이나 정의·활용처 합의 후 정식 task. plan §22.11 참조 | 잠정 P0 | 🆕 plan §22 (정의 미정) |
+| D67 | 분석/Dev | 🅿️ **보류** — 0005 dev seed 마이그레이션 (시각화 검증용 더미 데이터). 사용자: "해당없음" — 출시 후 실제 데이터로 검증 | 보류 | 🆕 plan §22 |
+| D68 | 분석 | **북극성 KPI 정책 (2026-06-03 확정)** — 현 prompt_copy UV 유지 (D5 확정). 사용자: "이후에 사이트가 어떻게 될지 모르는데 장기 지표 결정은 아직 어렵다. 하면서 바꿀 수 있으니까". **출시 후 운영 데이터 4~8주 보고 재검토 가능** — "30일 활성 가입자" 또는 "가입자당 prompt_copy"로 격상 후보 | P0 (정책 문서) | 🆕 plan §22 |
 
 ### 19.2 보강 완료 (이전 ⚠️ 항목)
 
