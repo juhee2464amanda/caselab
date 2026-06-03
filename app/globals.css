@@ -1,4 +1,6 @@
-@import url('https://fonts.bunny.net/css?family=noto-serif-kr:400,500,600,700|pretendard:400,500,600,700');
+/* D58 (2026-06-03) — Pretendard 단일 본문/제목. */
+/* D59 (2026-06-03) — Playfair Display italic = "Caselab" 브랜드 로고 한정. */
+@import url('https://fonts.bunny.net/css?family=playfair-display:400i,700i|pretendard:400,500,600,700,800');
 
 @tailwind base;
 @tailwind components;
@@ -6,11 +8,12 @@
 
 @layer base {
   :root {
-    --bg: #FAFAF7;
+    /* D59 (2026-06-03) — user mockup index 정합 (cool white + Toss Blue) */
+    --bg: #FFFFFF;
     --ink: #0A0A0A;
-    --accent: #1E40AF;
-    --muted: #F4F4F0;
-    --border: #E5E5E0;
+    --accent: #3182F6;
+    --muted: #F7F7F7;
+    --border: #E5E8EB;
   }
 
   html {
