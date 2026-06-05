@@ -1,16 +1,26 @@
 import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
 import type { ContentRow } from '@/types/content';
+import { caseSeed, applyCaseFilters } from './dev-seed';
 
 const PUBLIC_FIELDS = 'id, slug, track, title, summary, body, job_tags, persona_coverage, read_min, apply_min, status, curated, thumbnail_url, author_quote, view_count, published_at, created_at, updated_at';
 
-export async function listPublishedContents(opts: {
+const IS_DEV = process.env.NODE_ENV === 'development';
+
+type ListOpts = {
   track?: 'case' | 'trend';
   limit?: number;
   curated?: boolean;
   job?: string;
   timeCap?: number;
-} = {}): Promise<ContentRow[]> {
-  if (!isSupabaseConfigured()) return [];
+};
+
+function devFallback(opts: ListOpts): ContentRow[] {
+  if (!IS_DEV) return [];
+  return applyCaseFilters(caseSeed, opts);
+}
+
+export async function listPublishedContents(opts: ListOpts = {}): Promise<ContentRow[]> {
+  if (!isSupabaseConfigured()) return devFallback(opts);
   const supabase = await createSupabaseServerClient();
   let query = supabase
     .from('contents')
@@ -25,9 +35,10 @@ export async function listPublishedContents(opts: {
   const { data, error } = await query;
   if (error) {
     console.warn('[listPublishedContents]', error.message);
-    return [];
+    return devFallback(opts);
   }
-  return (data ?? []) as unknown as ContentRow[];
+  const rows = (data ?? []) as unknown as ContentRow[];
+  return rows.length ? rows : devFallback(opts);
 }
 
 export async function getContentBySlug(slug: string): Promise<ContentRow | null> {

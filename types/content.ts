@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const JOB_TAGS = ['planning', 'marketing', 'sales', 'solo', 'strategy', 'analysis'] as const;
+export const JOB_TAGS = ['planning', 'marketing', 'sales', 'solo', 'strategy', 'analysis', 'revenue_kpi', 'customer_research'] as const;
 export const PERSONAS = ['A', 'B', 'C', 'D', 'E'] as const;
 
 export const JobTagSchema = z.enum(JOB_TAGS);
@@ -197,6 +197,8 @@ export const JOB_LABELS: Record<JobTag, string> = {
   solo: '1인 사업',
   strategy: '전략',
   analysis: '데이터/분석',
+  revenue_kpi: '매출/KPI 관리',
+  customer_research: '고객조사',
 };
 
 // ─── §5-4 온보딩 4종 추가 (D38) ───
