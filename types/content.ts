@@ -132,14 +132,65 @@ export const FrameworkStepSchema = z.object({
   blocks: z.array(BlockSchema).min(1),
 });
 
+// 신규 (D70, 2026-06-06) — mockup content.html 7섹션 정합용 optional 필드
+const PainPointSchema = z.object({
+  num: z.string(),
+  title: z.string(),
+  symptom: z.string(),
+  rootCause: z.string(),
+});
+
+const FrameworkReferenceSchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  sourceLabel: z.string().optional(),
+  sourceTitle: z.string().optional(),
+  sourceUrl: z.string().url().optional(),
+  sourceThumbnail: z.string().url().optional(),
+});
+
+const StepCardSchema = z.object({
+  num: z.number().int().min(1),
+  label: z.string(),
+  description: z.string().optional(),
+  human: z.string(),
+  ai: z.string(),
+  prompt: z.string(),
+  goodResult: z.string().optional(),
+  badResult: z.string().optional(),
+});
+
+const TakingPointSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  action: z.string().optional(),
+});
+
 export const CaseBodySchema = z.object({
   kind: z.literal('case'),
+
+  // 신규 — 모두 optional, 기존 데이터 호환
+  forWho: z.array(z.string()).optional(),
+  caseIntro: z.array(BlockSchema).optional(),
+  painPoints: z.array(PainPointSchema).optional(),
+  frameworkReference: FrameworkReferenceSchema.optional(),
+  stepCards: z.array(StepCardSchema).optional(),
+  pros: z.array(z.string()).optional(),
+  cons: z.array(z.string()).optional(),
+  takingPoints: z.array(TakingPointSchema).optional(),
+
+  // 기존 (legacy 호환 — 4섹션 본문)
   essence: z.array(BlockSchema).min(1),
   framework: z.array(FrameworkStepSchema).min(1),
   failures: z.array(BlockSchema).min(1),
   review: z.array(BlockSchema).min(1),
   customization: z.array(z.string().min(1)).length(4),
 });
+
+export type PainPoint = z.infer<typeof PainPointSchema>;
+export type FrameworkReference = z.infer<typeof FrameworkReferenceSchema>;
+export type StepCard = z.infer<typeof StepCardSchema>;
+export type TakingPoint = z.infer<typeof TakingPointSchema>;
 
 export const TrendBodySchema = z.object({
   kind: z.literal('trend'),
