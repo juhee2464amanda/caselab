@@ -42,7 +42,8 @@ export async function listPublishedContents(opts: ListOpts = {}): Promise<Conten
 }
 
 export async function getContentBySlug(slug: string): Promise<ContentRow | null> {
-  if (!isSupabaseConfigured()) return null;
+  const devHit = () => (IS_DEV ? caseSeed.find((c) => c.slug === slug) ?? null : null);
+  if (!isSupabaseConfigured()) return devHit();
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
     .from('contents')
@@ -50,11 +51,13 @@ export async function getContentBySlug(slug: string): Promise<ContentRow | null>
     .eq('slug', slug)
     .eq('status', 'published')
     .maybeSingle();
-  return (data as unknown as ContentRow) ?? null;
+  return ((data as unknown as ContentRow) ?? devHit()) as ContentRow | null;
 }
 
 export async function listRelated(content: Pick<ContentRow, 'id' | 'job_tags' | 'track'>, limit = 6): Promise<ContentRow[]> {
-  if (!isSupabaseConfigured()) return [];
+  const devFallbackRelated = (): ContentRow[] =>
+    IS_DEV ? caseSeed.filter((c) => c.id !== content.id).slice(0, limit) : [];
+  if (!isSupabaseConfigured()) return devFallbackRelated();
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
     .from('contents')
@@ -64,5 +67,6 @@ export async function listRelated(content: Pick<ContentRow, 'id' | 'job_tags' | 
     .overlaps('job_tags', content.job_tags?.length ? content.job_tags : ['planning'])
     .order('published_at', { ascending: false })
     .limit(limit);
-  return (data ?? []) as unknown as ContentRow[];
+  const rows = (data ?? []) as unknown as ContentRow[];
+  return rows.length ? rows : devFallbackRelated();
 }
