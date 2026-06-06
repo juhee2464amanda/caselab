@@ -62,8 +62,11 @@ export default async function CaseDetailPage({
         <LeftToc />
 
         <div className="flex-1 min-w-0 max-w-[720px] mx-auto xl:px-10">
-          <nav className="text-xs text-ink/50 pt-6">
-            <Link href="/cases" className="hover:text-ink">
+          <nav className="pt-6">
+            <Link
+              href="/cases"
+              className="inline-flex items-center gap-1 text-xs text-ink/50 hover:text-ink hover:underline underline-offset-2 transition-colors py-1.5 -my-1.5"
+            >
               ← 실전 케이스로
             </Link>
           </nav>
