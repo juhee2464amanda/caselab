@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Search, User, Menu, ChevronDown } from 'lucide-react';
 import { MegaMenu } from './MegaMenu';
 import { MobileNav } from './MobileNav';
@@ -30,6 +30,17 @@ export function GNB() {
   const [megaOpen, setMegaOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [subscribeOpen, setSubscribeOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function openMega() {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setMegaOpen(true);
+  }
+
+  function closeMega() {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setMegaOpen(false), 250);
+  }
 
   useEffect(() => {
     function onScroll() {
@@ -68,8 +79,8 @@ export function GNB() {
                   <div
                     key={n.href}
                     className="relative"
-                    onMouseEnter={() => setMegaOpen(true)}
-                    onMouseLeave={() => setMegaOpen(false)}
+                    onMouseEnter={openMega}
+                    onMouseLeave={closeMega}
                   >
                     <Link
                       href={n.href}
@@ -78,7 +89,13 @@ export function GNB() {
                       {n.label}
                       <ChevronDown className="h-3 w-3" />
                     </Link>
-                    {megaOpen && <MegaMenu onClose={() => setMegaOpen(false)} />}
+                    {megaOpen && (
+                      <MegaMenu
+                        onClose={() => setMegaOpen(false)}
+                        onMouseEnter={openMega}
+                        onMouseLeave={closeMega}
+                      />
+                    )}
                   </div>
                 ) : (
                   <Link
