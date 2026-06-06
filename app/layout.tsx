@@ -8,7 +8,7 @@ import { UtmCapture } from '@/components/analytics/UtmCapture';
 
 export const metadata: Metadata = {
   title: {
-    default: '케이스랩 — 일이 풀리는 AI 사용법',
+    default: '케이스랩 — 검증된 AI 큐레이션',
     template: '%s | 케이스랩',
   },
   description:
