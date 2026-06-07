@@ -128,9 +128,25 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
                 <div className="text-[13px] font-extrabold text-ink/30 min-w-6 tracking-[0.04em]">
                   {String(i + 1).padStart(2, '0')}
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="text-[15px] font-bold tracking-[-0.02em] mb-1 break-keep">{f.title}</div>
                   <div className="text-[13.5px] text-ink/60 leading-relaxed break-keep">{f.desc}</div>
+                  {f.image && (
+                    <figure className="mt-3 rounded-xl border border-border overflow-hidden bg-muted">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={f.image.url}
+                        alt={f.image.caption ?? f.title}
+                        loading="lazy"
+                        className="block w-full"
+                      />
+                      {f.image.caption && (
+                        <figcaption className="border-t border-border bg-white px-3.5 py-2 text-[12px] text-ink/50 break-keep">
+                          {f.image.caption}
+                        </figcaption>
+                      )}
+                    </figure>
+                  )}
                 </div>
               </div>
             ))}
