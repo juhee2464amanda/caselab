@@ -456,6 +456,14 @@ export const toolSeed: Tool[] = [
         { name: 'Pro', amount: '유료 · 공식 사이트에서 확인', includes: '광고 자동 추적, 무제한 보드, 팀 공유. 실제 캠페인에 쓰려면 Pro가 필요합니다.' },
       ],
       pricingNote: '* 정확한 요금은 변동될 수 있으니 공식 사이트에서 확인해주세요.',
+      useCases: [
+        {
+          href: '/cases/competitor-analysis',
+          tag: '실전 케이스 · 마케팅',
+          title: '경쟁사 분석 3시간 → 30분, 도구 3개 묶음 케이스',
+          meta: '읽는데 6분 · Snipit · Proby · ScreenFlow',
+        },
+      ],
     },
     status: 'published',
     created_at: T,
