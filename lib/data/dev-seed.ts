@@ -10,6 +10,7 @@
 
 import type { ContentRow, CaseBody, JobTag } from '@/types/content';
 import type { Tool } from '@/types/tool';
+import type { PromptItem } from '@/types/prompt';
 
 const minimalCaseBody: CaseBody = {
   kind: 'case',
@@ -442,6 +443,86 @@ export const toolSeed: Tool[] = [
     pro_pricing: 'Pro $20/월',
     status: 'published',
     created_at: T,
+  },
+];
+
+// ─────────────────────────────────────────────
+// Prompts (mockup prompts.html 8개 정합)
+// ─────────────────────────────────────────────
+export const promptSeed: PromptItem[] = [
+  {
+    id: 'seed-prompt-1',
+    slug: 'hidden-assumptions-5',
+    title: '이 주장이 숨기고 있는 전제 5개 찾기',
+    prompt:
+      '다음 글이 전제로 깔고 있는 가정 5개를 뽑아주세요. 각 가정은 의문문 형태로 다시 써 주세요.',
+    category: 'think',
+    source: 'Anthropic 공식',
+    sourceUrl:
+      'https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview',
+  },
+  {
+    id: 'seed-prompt-2',
+    slug: 'three-perspectives',
+    title: '같은 주제, 세 관점으로 다시 쓰기',
+    prompt:
+      '이 주제를 [낙관 / 회의 / 현실주의] 세 가지 관점에서 각각 100자 이내로 답해 주세요. 결론까지 포함해서.',
+    category: 'think',
+    source: 'Karpathy',
+  },
+  {
+    id: 'seed-prompt-3',
+    slug: 'strongest-counterarguments',
+    title: '결정 직전— "가장 강한 반대 입장 3개"',
+    prompt:
+      '방금 내가 내린 결정에 대해, 가장 강력한 반대 논리 3개를 만들어 주세요. 각 논리가 사실이라면 어떤 데이터로 입증되는지 한 줄로.',
+    category: 'think',
+    source: 'Claude Code',
+  },
+  {
+    id: 'seed-prompt-4',
+    slug: 'table-to-paragraph',
+    title: '표·차트를 한 문단으로 요약',
+    prompt:
+      '이 표의 핵심 흐름을 사실 → 의미 → 시사점 순서로 한 문단(3~5문장)으로 요약해 주세요. 숫자는 원문 그대로 인용.',
+    category: 'make',
+    source: 'OpenAI Cookbook',
+  },
+  {
+    id: 'seed-prompt-5',
+    slug: 'proposal-first-page',
+    title: '기획서 첫 페이지— 전제를 찾아주는 프롬프트',
+    prompt:
+      '다음 문단이 전제로 깔고 있는 가정 5개를 뽑아주세요. 각 가정은 의문문 형태로 다시 써주세요.',
+    category: 'make',
+    source: 'Caselab 검증',
+  },
+  {
+    id: 'seed-prompt-6',
+    slug: 'find-3-weaknesses',
+    title: '방금 답변의 약점 3개 찾아줘',
+    prompt:
+      '방금 답변에서 사실과 다를 수 있는 부분, 논리적 약점, 빠진 관점 3개를 찾아 주세요.',
+    category: 'verify',
+    source: 'Anthropic 공식',
+  },
+  {
+    id: 'seed-prompt-7',
+    slug: 'biggest-reason-wrong',
+    title: '이 결론이 틀릴 수 있는 가장 큰 이유 1개',
+    prompt:
+      '방금 결론이 틀릴 수 있는 가장 큰 이유를, 가능성 높은 순으로 1개만 말해 주세요. 검증할 방법도 한 줄로.',
+    category: 'verify',
+    source: 'Latent Space',
+  },
+  {
+    id: 'seed-prompt-8',
+    slug: 'markdown-to-slack',
+    title: '마크다운 → Slack 붙여넣기용 plain text',
+    prompt:
+      '아래 마크다운을 Slack에 그대로 붙여넣을 수 있는 plain text로 변환해 주세요. 굵게는 *별표*, 코드 블록은 ``` 로 유지.',
+    category: 'refine',
+    source: 'Claude Code',
   },
 ];
 
