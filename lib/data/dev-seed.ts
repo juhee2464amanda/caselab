@@ -394,6 +394,36 @@ export const toolSeed: Tool[] = [
     pricing_label: '무료 플랜',
     is_paid: false,
     has_review: true,
+    url: 'https://snipit.io',
+    body: {
+      audience: '마케터·기획자',
+      tags: ['한국어 지원'],
+      about: {
+        heading: '경쟁사가 어떤 소구점으로 모으는지 한눈에',
+        paragraphs: [
+          '막연한 키워드 한 줄만 던져도 AI가 그에 맞는 메타(Facebook·Instagram) 광고와 레퍼런스 이미지를 한 보드로 정리해줍니다. 핀터레스트에서 길 잃거나, 흩어진 캡처 폴더를 다시 뒤지는 시간이 사라집니다.',
+          '전통적으로 마케터·기획자가 반나절씩 쓰던 "경쟁사 톤·소구점 파악" 작업을 30분 안에 끝낼 수 있게 설계된 도구예요. 광고뿐 아니라 자료 아카이빙·경쟁사 모니터링까지 한 곳에서 처리됩니다.',
+        ],
+      },
+      whenToUse: [
+        { icon: '🎯', title: '새 캠페인 톤·소구점 잡기 전', desc: '"20대 여성, 가을, 향수" 같은 한 줄로 경쟁사 광고 30개를 한 번에 비교.' },
+        { icon: '📡', title: '경쟁사 광고 변화 모니터링', desc: '특정 브랜드를 등록해두면 새 광고가 뜰 때마다 자동으로 보드에 적립.' },
+        { icon: '🖼️', title: '비주얼 레퍼런스 빠르게 모으기', desc: '핀터레스트 탭 7개 띄우는 대신, 한 줄 검색으로 동일 톤 이미지 큐레이션.' },
+        { icon: '📥', title: '팀 자료 아카이빙', desc: '캠페인별 보드로 정리해두면 다음 프로젝트에서 검색·재활용이 쉬워짐.' },
+      ],
+      features: [
+        { title: 'AI 레퍼런스 검색', desc: '막연한 키워드 한 줄에도 의도에 맞는 광고·이미지를 찾아 묶어줍니다.' },
+        { title: '메타 광고 자동 추적', desc: '경쟁사가 Facebook·Instagram에 새로 올린 광고를 자동으로 캐치해 알림.' },
+        { title: '한 보드 정렬·비교', desc: '카피·CTA·비주얼 톤을 격자로 한 번에 비교. 흩어진 캡처가 한 화면에 모임.' },
+        { title: '캠페인별 아카이브', desc: '프로젝트 단위로 보드를 분리해 저장. 팀원과 공유 링크로 즉시 공유.' },
+        { title: '한국어 인터페이스', desc: '검색 쿼리부터 보드 라벨까지 한국어 그대로. 영문 SaaS의 진입 장벽이 없음.' },
+      ],
+      pricing: [
+        { name: 'Free', amount: '무료 · 2일 무료 체험', includes: '기본 레퍼런스 검색 + 보드 1개. 도구가 어떤 식인지 감 잡는 용도로 충분.' },
+        { name: 'Pro', amount: '유료 · 공식 사이트에서 확인', includes: '광고 자동 추적, 무제한 보드, 팀 공유. 실제 캠페인에 쓰려면 Pro가 필요합니다.' },
+      ],
+      pricingNote: '* 정확한 요금은 변동될 수 있으니 공식 사이트에서 확인해주세요.',
+    },
     status: 'published',
     created_at: T,
   },
@@ -409,6 +439,32 @@ export const toolSeed: Tool[] = [
     pricing_label: '유료',
     is_paid: true,
     has_review: true,
+    url: 'https://proby.ai',
+    body: {
+      audience: 'UX 리서처·기획자',
+      tags: ['다국어 지원'],
+      about: {
+        heading: 'AI가 꼬리질문까지 던지는 심층 인터뷰',
+        paragraphs: [
+          '설문은 답이 얕고, 인터뷰는 시간이 많이 듭니다. Proby는 AI가 사용자에게 직접 꼬리질문을 던지며 인터뷰를 진행해, 적은 비용으로 깊이 있는 응답을 모읍니다.',
+          '다국어 인터뷰도 자동으로 번역·요약하고 페르소나까지 도출해줘요. 리서치 설계부터 정리까지 한 흐름으로 끝납니다.',
+        ],
+      },
+      whenToUse: [
+        { icon: '🗣️', title: '사용자 인터뷰를 빠르게 돌릴 때', desc: '모더레이터 없이 AI가 진행. 동시에 여러 명을 인터뷰해 표본을 빠르게 확보.' },
+        { icon: '🌐', title: '해외 사용자 리서치', desc: '다국어 인터뷰를 자동 번역·요약. 언어 장벽 없이 인사이트만 받아봄.' },
+        { icon: '🧩', title: '페르소나 도출이 필요할 때', desc: '응답을 묶어 페르소나·핵심 니즈를 자동 정리.' },
+      ],
+      features: [
+        { title: 'AI 꼬리질문', desc: '응답에 따라 AI가 더 깊은 후속 질문을 자동 생성.' },
+        { title: '자동 번역·요약', desc: '다국어 응답을 번역하고 핵심만 요약.' },
+        { title: '페르소나 도출', desc: '인터뷰 결과에서 사용자 유형·니즈를 자동 추출.' },
+      ],
+      pricing: [
+        { name: 'Pro', amount: '유료 · 공식 사이트에서 확인', includes: '인터뷰 진행 + 번역·요약 + 페르소나 도출. 실제 리서치 운영용.' },
+      ],
+      pricingNote: '* 정확한 요금은 공식 사이트에서 확인해주세요.',
+    },
     status: 'published',
     created_at: T,
   },
@@ -424,6 +480,30 @@ export const toolSeed: Tool[] = [
     pricing_label: '유료',
     is_paid: true,
     has_review: true,
+    url: 'https://screenflow.app',
+    body: {
+      audience: '프로덕트 디자이너·기획자',
+      about: {
+        heading: 'URL 한 줄로 웹사이트 전체 플로우 캡처',
+        paragraphs: [
+          'URL 하나만 넣으면 사이트의 화면 흐름을 자동으로 따라가며 전체 플로우를 캡처합니다. 가입·결제 같은 플로우를 손으로 일일이 찍던 작업이 사라져요.',
+          '캡처한 화면은 피그마로 바로 복사할 수 있어, 화면 설계와 레퍼런스 정리가 훨씬 빨라집니다.',
+        ],
+      },
+      whenToUse: [
+        { icon: '🧭', title: '경쟁 서비스 플로우 분석', desc: 'URL만 넣으면 가입~결제 전체 화면 흐름을 자동 캡처.' },
+        { icon: '🎨', title: '화면 설계 레퍼런스 수집', desc: '캡처를 피그마로 바로 복사해 와이어프레임 출발점으로.' },
+      ],
+      features: [
+        { title: '자동 플로우 캡처', desc: 'URL 입력 한 번으로 전체 화면 흐름을 따라가며 수집.' },
+        { title: '피그마 복사', desc: '캡처 화면을 피그마로 바로 붙여넣기.' },
+        { title: '플로우 정리', desc: '화면을 순서대로 정렬해 흐름을 한눈에.' },
+      ],
+      pricing: [
+        { name: 'Pro', amount: '유료 · 공식 사이트에서 확인', includes: '무제한 플로우 캡처 + 피그마 연동. 실무 설계용.' },
+      ],
+      pricingNote: '* 정확한 요금은 공식 사이트에서 확인해주세요.',
+    },
     status: 'published',
     created_at: T,
   },
