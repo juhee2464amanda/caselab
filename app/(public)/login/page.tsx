@@ -2,10 +2,7 @@
 
 import { Suspense, useState, useTransition } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useSearchParams } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
@@ -20,6 +17,13 @@ const ERROR_MESSAGES: Record<string, string> = {
   oauth_denied: '소셜 로그인이 취소되었어요. 다시 시도해 주세요.',
   exchange_failed: '로그인 처리 중 문제가 발생했어요. 다시 시도해 주세요.',
   missing_code: '로그인 정보가 전달되지 않았어요. 다시 시도해 주세요.',
+};
+
+/** 콜백이 차단 시 넘겨주는 provider 값 → 사용자 표기 라벨 */
+const PROVIDER_LABEL: Record<string, string> = {
+  google: 'Google',
+  kakao: '카카오',
+  email: '이메일',
 };
 
 /** Google 공식 4-color "G" 마크 */
@@ -47,41 +51,34 @@ function KakaoIcon({ className }: { className?: string }) {
 }
 
 function LoginInner() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const params = useSearchParams();
   const next = params.get('next') ?? '/';
   const errorParam = params.get('error');
-  const [error, setError] = useState<string | null>(
-    errorParam ? (ERROR_MESSAGES[errorParam] ?? '로그인에 실패했어요. 다시 시도해 주세요.') : null
-  );
+  const [error, setError] = useState<string | null>(() => {
+    if (!errorParam) return null;
+    // 이미 다른 방식으로 가입된 이메일 → 최초 가입 방식으로 안내
+    if (errorParam === 'email_in_use') {
+      const providerParam = params.get('provider');
+      const label = providerParam ? (PROVIDER_LABEL[providerParam] ?? providerParam) : '다른 방법';
+      return `이미 ${label}(으)로 가입된 계정이에요. ${label} 로그인을 이용해 주세요.`;
+    }
+    return ERROR_MESSAGES[errorParam] ?? '로그인에 실패했어요. 다시 시도해 주세요.';
+  });
   const [pending, startTransition] = useTransition();
-  const router = useRouter();
   const supabase = createSupabaseBrowserClient();
 
   function loginWith(provider: 'google' | 'kakao') {
     startTransition(async () => {
-      if (provider === 'kakao') {
-        // 운영 시 Edge Function 프록시로 분기 — Phase 0 PoC 후 활성화
-        const fn = `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''}/functions/v1/kakao-oauth?next=${encodeURIComponent(next)}`;
-        window.location.href = fn;
-        return;
-      }
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
-        options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
+        options: {
+          // provider를 콜백에 전달 → "최초 가입 방식만 허용" 검증에 사용
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}&provider=${provider}`,
+          // 카카오: Supabase가 account_email·profile_image·profile_nickname 3개를 항상 강제 요청함
+          // (custom scopes 무시). → 카카오 콘솔 동의항목에서 이 3개가 모두 '사용/필수'여야 KOE205 안 남.
+        },
       });
       if (error) setError(error.message);
-    });
-  }
-
-  function loginEmail(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    startTransition(async () => {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) setError(error.message);
-      else router.push(next);
     });
   }
 
@@ -92,7 +89,7 @@ function LoginInner() {
           케이스랩
         </Link>
         <p className="text-center text-sm text-ink/60 mb-8">
-          이메일과 비밀번호로, 또는 소셜로 로그인하세요.
+          간편하게 소셜 계정으로 시작하세요.
         </p>
 
         {error && (
@@ -102,7 +99,7 @@ function LoginInner() {
         )}
 
         {/* 소셜 로그인 — 브랜드 가이드 정합 (카카오 #FEE500 / Google white+border) */}
-        <div className="space-y-2.5 mb-6">
+        <div className="space-y-2.5">
           <button
             type="button"
             onClick={() => loginWith('kakao')}
@@ -122,29 +119,6 @@ function LoginInner() {
             Google로 계속하기
           </button>
         </div>
-
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center text-xs">
-            <span className="bg-bg px-2 text-ink/40">또는 이메일</span>
-          </div>
-        </div>
-
-        <form onSubmit={loginEmail} className="space-y-3">
-          <div>
-            <Label htmlFor="email">이메일</Label>
-            <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-          </div>
-          <div>
-            <Label htmlFor="password">비밀번호</Label>
-            <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
-          </div>
-          <Button type="submit" variant="accent" className="w-full" disabled={pending}>
-            로그인
-          </Button>
-        </form>
 
         <p className="mt-6 text-center text-xs text-ink/50">
           처음이신가요? 위 소셜 로그인으로 자동 가입돼요.
