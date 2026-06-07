@@ -22,6 +22,30 @@ const ERROR_MESSAGES: Record<string, string> = {
   missing_code: '로그인 정보가 전달되지 않았어요. 다시 시도해 주세요.',
 };
 
+/** Google 공식 4-color "G" 마크 */
+function GoogleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden focusable="false">
+      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+      <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18A10.97 10.97 0 0 0 1 12c0 1.77.43 3.45 1.18 4.94l3.66-2.84z" />
+      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z" />
+    </svg>
+  );
+}
+
+/** Kakao 공식 말풍선 심볼 */
+function KakaoIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden focusable="false">
+      <path
+        fill="#000000"
+        d="M12 3C6.477 3 2 6.463 2 10.733c0 2.724 1.81 5.117 4.546 6.487-.2.736-.726 2.67-.83 3.084-.13.516.19.51.398.371.164-.108 2.6-1.762 3.66-2.48.726.104 1.473.16 2.226.16 5.523 0 10-3.463 10-7.733C22 6.463 17.523 3 12 3z"
+      />
+    </svg>
+  );
+}
+
 function LoginInner() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -77,23 +101,26 @@ function LoginInner() {
           </p>
         )}
 
-        <div className="space-y-2 mb-6">
-          <Button
-            variant="outline"
-            className="w-full bg-yellow-300 hover:bg-yellow-400 border-yellow-400"
+        {/* 소셜 로그인 — 브랜드 가이드 정합 (카카오 #FEE500 / Google white+border) */}
+        <div className="space-y-2.5 mb-6">
+          <button
+            type="button"
             onClick={() => loginWith('kakao')}
             disabled={pending}
+            className="relative flex h-12 w-full items-center justify-center rounded-lg bg-[#FEE500] text-[15px] font-medium text-black/85 transition hover:brightness-95 disabled:opacity-50"
           >
-            <span className="font-bold">K</span> 카카오로 시작하기
-          </Button>
-          <Button
-            variant="outline"
-            className="w-full"
+            <KakaoIcon className="absolute left-4 h-[18px] w-[18px]" />
+            카카오로 계속하기
+          </button>
+          <button
+            type="button"
             onClick={() => loginWith('google')}
             disabled={pending}
+            className="relative flex h-12 w-full items-center justify-center rounded-lg border border-[#dadce0] bg-white text-[15px] font-medium text-[#3c4043] transition hover:bg-[#f8f9fa] disabled:opacity-50"
           >
-            Google로 시작하기
-          </Button>
+            <GoogleIcon className="absolute left-4 h-[18px] w-[18px]" />
+            Google로 계속하기
+          </button>
         </div>
 
         <div className="relative my-6">
