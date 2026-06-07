@@ -2,6 +2,13 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
 
+type Row = {
+  content_id: string | null;
+  tool_id: string | null;
+  contents: { slug: string; track: 'case' | 'trend'; title: string } | null;
+  tools: { slug: string; name: string } | null;
+};
+
 export default async function LikedPage() {
   if (!isSupabaseConfigured()) return <p className="text-sm text-ink/60">Supabase 연결 후 사용 가능</p>;
   const supabase = await createSupabaseServerClient();
@@ -9,11 +16,11 @@ export default async function LikedPage() {
   if (!user) redirect('/login?next=/mypage/liked');
   const { data } = await supabase
     .from('reactions')
-    .select('content_id, contents(slug, track, title)')
+    .select('content_id, tool_id, contents(slug, track, title), tools(slug, name)')
     .eq('user_id', user.id)
     .eq('type', 'like')
     .order('created_at', { ascending: false });
-  const items = (data ?? []) as unknown as Array<{ content_id: string; contents: { slug: string; track: 'case' | 'trend'; title: string } }>;
+  const items = (data ?? []) as unknown as Row[];
 
   return (
     <div>
@@ -22,13 +29,22 @@ export default async function LikedPage() {
         <p className="card p-10 text-center text-ink/40 text-sm">아직 없어요.</p>
       ) : (
         <ul className="space-y-2">
-          {items.map((it) => (
-            <li key={it.content_id} className="card p-4">
-              <Link href={`/${it.contents.track === 'case' ? 'cases' : 'trends'}/${it.contents.slug}`} className="font-medium">
-                {it.contents.title}
-              </Link>
-            </li>
-          ))}
+          {items.map((it, i) => {
+            const c = it.contents;
+            const t = it.tools;
+            if (!c && !t) return null;
+            const href = c ? `/${c.track === 'case' ? 'cases' : 'trends'}/${c.slug}` : `/tools/${t!.slug}`;
+            const title = c ? c.title : t!.name;
+            const badge = c ? (c.track === 'case' ? '케이스' : '트렌드') : '도구';
+            return (
+              <li key={it.content_id ?? it.tool_id ?? i} className="card p-4 flex items-center gap-2">
+                <span className="badge shrink-0">{badge}</span>
+                <Link href={href} className="font-medium">
+                  {title}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

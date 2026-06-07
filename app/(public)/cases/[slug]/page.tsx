@@ -177,7 +177,7 @@ export default async function CaseDetailPage({
             )}
           </div>
 
-          <ActionsBar />
+          <ActionsBar contentId={content.id} />
           <ContentShareSection url={url} title={content.title} />
           <CommentThread contentId={content.id} />
           <ExploreOtherContent />
