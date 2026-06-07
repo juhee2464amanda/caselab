@@ -1,14 +1,25 @@
 import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
 import { ActionsBar } from '@/components/content/ActionsBar';
+import { ToolToc } from '@/components/tools/ToolToc';
 import { TOOL_CATEGORY_LABELS, type Tool } from '@/types/tool';
 
 export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
   const body = tool.body ?? {};
   const catLabel = TOOL_CATEGORY_LABELS[tool.category];
 
+  const tocItems = [
+    { id: 'hero', label: '개요' },
+    ...(body.about ? [{ id: 'about', label: '어떤 서비스인가요' }] : []),
+    ...(body.whenToUse?.length ? [{ id: 'when', label: '언제 쓰면 좋은가요' }] : []),
+    ...(body.features?.length ? [{ id: 'features', label: '주요 기능' }] : []),
+    ...(body.pricing?.length ? [{ id: 'pricing', label: '가격' }] : []),
+  ];
+
   return (
-    <div className="mx-auto max-w-[860px] px-6 pt-8 pb-20">
+    <div className="mx-auto max-w-[1100px] px-6 pt-8 pb-20 flex">
+      <ToolToc items={tocItems} />
+      <div className="flex-1 min-w-0 max-w-[760px]">
       {/* Breadcrumb */}
       <div className="flex items-center gap-1.5 text-[13px] text-ink/50 mb-5">
         <Link href="/tools" className="hover:text-accent">도구 모음</Link>
@@ -19,7 +30,7 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
       </div>
 
       {/* Hero */}
-      <section className="grid grid-cols-1 md:grid-cols-[1fr_1.1fr] gap-6 md:gap-9 md:items-center mb-10">
+      <section id="hero" className="scroll-mt-20 grid grid-cols-1 md:grid-cols-[1fr_1.1fr] gap-6 md:gap-9 md:items-center mb-10">
         <div className="aspect-[16/10] rounded-2xl overflow-hidden border border-border bg-muted">
           {tool.thumbnail_url ? (
             <img src={tool.thumbnail_url} alt={tool.name} className="w-full h-full object-cover" />
@@ -81,7 +92,7 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
 
       {/* About */}
       {body.about && (
-        <Section label="어떤 서비스인가요" title={body.about.heading}>
+        <Section id="about" label="어떤 서비스인가요" title={body.about.heading}>
           <div className="space-y-3.5">
             {body.about.paragraphs.map((p, i) => (
               <p key={i} className="text-[15.5px] leading-[1.75] text-ink/80 max-w-[680px] break-keep">
@@ -94,7 +105,7 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
 
       {/* When to use */}
       {body.whenToUse && body.whenToUse.length > 0 && (
-        <Section label="언제 쓰면 좋은가요" title="이런 일을 할 때 가장 빛납니다">
+        <Section id="when" label="언제 쓰면 좋은가요" title="이런 일을 할 때 가장 빛납니다">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {body.whenToUse.map((w, i) => (
               <div key={i} className="p-4 border border-border rounded-[10px] bg-white">
@@ -109,7 +120,7 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
 
       {/* Features */}
       {body.features && body.features.length > 0 && (
-        <Section label="주요 기능" title="이 도구가 잘하는 것">
+        <Section id="features" label="주요 기능" title="이 도구가 잘하는 것">
           <div className="border-t border-border">
             {body.features.map((f, i) => (
               <div key={i} className="flex gap-4 py-4 border-b border-border items-start">
@@ -128,7 +139,7 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
 
       {/* Pricing */}
       {body.pricing && body.pricing.length > 0 && (
-        <Section label="가격" title="요금 정보">
+        <Section id="pricing" label="가격" title="요금 정보">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {body.pricing.map((p, i) => (
               <div key={i} className="p-5 border border-border rounded-xl bg-white">
@@ -175,21 +186,24 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
           </div>
         </section>
       )}
+      </div>
     </div>
   );
 }
 
 function Section({
+  id,
   label,
   title,
   children,
 }: {
+  id?: string;
   label: string;
   title?: string;
   children: React.ReactNode;
 }) {
   return (
-    <section className="mb-12">
+    <section id={id} className="mb-12 scroll-mt-20">
       <div className="text-[11px] font-bold text-ink/30 uppercase tracking-[0.08em] mb-2.5">
         {label}
       </div>
