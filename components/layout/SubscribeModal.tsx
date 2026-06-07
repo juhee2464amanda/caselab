@@ -15,25 +15,29 @@ interface Props {
 export function SubscribeModal({ open, onOpenChange }: Props) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
+  const [consented, setConsented] = useState(false);
   const [done, setDone] = useState(false);
   const [pending, startTransition] = useTransition();
   const supabase = createSupabaseBrowserClient();
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!email) return;
+    if (!email || !consented) return;
     startTransition(async () => {
-      // 구독 요청은 opinions에 type='subscribe'로 임시 저장
-      await supabase.from('opinions').insert({
-        body: `구독 신청: ${name || '익명'}`,
-        email,
-      });
+      // 비로그인 구독자 → newsletter_subscribers (중복 이메일은 무시)
+      await supabase
+        .from('newsletter_subscribers')
+        .upsert(
+          { email, name: name || null, source: 'modal', consented: true },
+          { onConflict: 'email', ignoreDuplicates: true },
+        );
       setDone(true);
       setTimeout(() => {
         onOpenChange(false);
         setDone(false);
         setEmail('');
         setName('');
+        setConsented(false);
       }, 1500);
     });
   }
@@ -73,7 +77,18 @@ export function SubscribeModal({ open, onOpenChange }: Props) {
                 placeholder="you@example.com"
               />
             </div>
-            <Button type="submit" variant="accent" className="w-full" disabled={pending}>
+            <label className="flex items-start gap-2 text-xs text-ink/70 cursor-pointer">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-3.5 w-3.5 accent-accent"
+                checked={consented}
+                onChange={(e) => setConsented(e.target.checked)}
+              />
+              <span>
+                <a href="/legal/privacy" target="_blank" className="underline">개인정보 수집·이용</a>에 동의합니다. (이메일 수신용, 언제든 해지 가능)
+              </span>
+            </label>
+            <Button type="submit" variant="accent" className="w-full" disabled={pending || !consented}>
               구독하기
             </Button>
           </form>

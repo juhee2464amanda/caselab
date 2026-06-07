@@ -147,7 +147,12 @@ export function GNB() {
         </div>
       </header>
 
-      <MobileNav open={mobileOpen} onClose={() => setMobileOpen(false)} nav={NAV} />
+      <MobileNav
+        open={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        nav={NAV}
+        onSubscribe={() => setSubscribeOpen(true)}
+      />
       <SubscribeModal open={subscribeOpen} onOpenChange={setSubscribeOpen} />
     </>
   );
