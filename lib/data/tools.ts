@@ -13,6 +13,9 @@ const PUBLIC_FIELDS =
   'pricing_label, is_paid, pro_pricing, has_review, status, created_at, ' +
   'subcategory:categories!tools_subcategory_id_fkey!inner(slug, label)';
 
+// 상세 페이지용 — 카드 필드 + url + body(jsonb)
+const DETAIL_FIELDS = PUBLIC_FIELDS + ', url, body';
+
 type ToolEmbedRow = Omit<Tool, 'category'> & {
   subcategory: { slug: ToolCategory; label: string } | null;
 };
@@ -61,7 +64,7 @@ export async function getToolBySlug(slug: string): Promise<Tool | null> {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
     .from('tools')
-    .select(PUBLIC_FIELDS)
+    .select(DETAIL_FIELDS)
     .eq('slug', slug)
     .eq('status', 'published')
     .maybeSingle();
