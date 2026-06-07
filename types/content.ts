@@ -192,14 +192,30 @@ export type FrameworkReference = z.infer<typeof FrameworkReferenceSchema>;
 export type StepCard = z.infer<typeof StepCardSchema>;
 export type TakingPoint = z.infer<typeof TakingPointSchema>;
 
+/** 트렌드 "누구한테 중요해요" — 직무별 관련도 */
+export const TrendForWhoSchema = z.object({
+  role: z.string(),
+  why: z.string(),
+});
+
+/** 트렌드 본문 — AI 소식/화두를 일하는 사람 관점에서 정리.
+ *  모든 섹션 optional: 운영자가 기본 7섹션에서 빼거나 추가/수정. 있는 섹션만 렌더. */
 export const TrendBodySchema = z.object({
   kind: z.literal('trend'),
-  whats_new: z.array(BlockSchema).min(1),
-  experiment: z.array(BlockSchema).min(1),
-  verdict: z.object({
-    useful: z.array(BlockSchema).min(1),
-    notUseful: z.array(BlockSchema).min(1),
-  }),
+  /** 무슨 소식이에요 */
+  what: z.array(BlockSchema).optional(),
+  /** 왜 지금 화두예요 */
+  why: z.array(BlockSchema).optional(),
+  /** 누구한테 중요해요 (직무별 관련도) */
+  forWho: z.array(TrendForWhoSchema).optional(),
+  /** 핵심 3가지 */
+  keyPoints: z.array(z.string()).optional(),
+  /** 좀 더 들어가면 (선택) */
+  deepDive: z.array(BlockSchema).optional(),
+  /** 그래서, 내 일엔? */
+  soWhat: z.array(BlockSchema).optional(),
+  /** 출처·더 보기 */
+  sources: z.array(z.object({ label: z.string(), url: z.string() })).optional(),
 });
 
 export const ContentBodySchema = z.discriminatedUnion('kind', [
@@ -210,6 +226,7 @@ export const ContentBodySchema = z.discriminatedUnion('kind', [
 export type ContentBody = z.infer<typeof ContentBodySchema>;
 export type CaseBody = z.infer<typeof CaseBodySchema>;
 export type TrendBody = z.infer<typeof TrendBodySchema>;
+export type TrendForWho = z.infer<typeof TrendForWhoSchema>;
 export type FrameworkStep = z.infer<typeof FrameworkStepSchema>;
 export type JobTag = z.infer<typeof JobTagSchema>;
 export type Persona = z.infer<typeof PersonaSchema>;

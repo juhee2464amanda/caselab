@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { ArrowUpRight } from 'lucide-react';
 import { getContentBySlug, listRelated } from '@/lib/data/contents';
 import { renderBlocks } from '@/lib/content-render';
 import { ContentHeader } from '@/components/content/ContentHeader';
@@ -13,12 +14,6 @@ import { ToolToc } from '@/components/tools/ToolToc';
 import { DeepReadTracker } from '@/components/analytics/DeepReadTracker';
 
 export const revalidate = 60;
-
-const TOC = [
-  { id: 's1', label: '뭐가 나왔나' },
-  { id: 's2', label: '직접 실험' },
-  { id: 's3', label: '언제 쓸만·별로' },
-];
 
 function SectionHeader({ num, title }: { num: string; title: string }) {
   return (
@@ -45,11 +40,26 @@ export default async function TrendDetailPage({
   const related = await listRelated(content);
   const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/trends/${slug}`;
 
+  // 있는 섹션만 목차에 (모든 섹션 optional)
+  const toc = (
+    [
+      body.what?.length && { id: 's1', label: '무슨 소식' },
+      body.why?.length && { id: 's2', label: '왜 화두' },
+      body.forWho?.length && { id: 's3', label: '누구한테' },
+      body.keyPoints?.length && { id: 's4', label: '핵심 3가지' },
+      body.deepDive?.length && { id: 's5', label: '더 들어가면' },
+      body.soWhat?.length && { id: 's6', label: '내 일엔?' },
+    ] as ({ id: string; label: string } | false | 0 | undefined)[]
+  ).filter(Boolean) as { id: string; label: string }[];
+
+  let n = 0;
+  const num = () => String(++n).padStart(2, '0');
+
   return (
     <article>
       <DeepReadTracker contentId={content.id} />
       <div className="mx-auto max-w-[1200px] px-6 flex gap-0">
-        <ToolToc items={TOC} />
+        <ToolToc items={toc} />
 
         <div className="flex-1 min-w-0 max-w-[720px] mx-auto xl:px-10">
           <nav className="pt-6">
@@ -73,33 +83,93 @@ export default async function TrendDetailPage({
           {content.author_quote && <AuthorQuote quote={content.author_quote} />}
 
           <div className="prose-caselab">
-            <section id="s1" className="pt-2">
-              <SectionHeader num="01" title="뭐가 나왔나" />
-              {renderBlocks(body.whats_new, 'new')}
-            </section>
+            {/* 무슨 소식이에요 */}
+            {body.what && body.what.length > 0 && (
+              <section id="s1" className="pt-2">
+                <SectionHeader num={num()} title="무슨 소식이에요" />
+                {renderBlocks(body.what, 'what')}
+              </section>
+            )}
 
-            <section id="s2" className="pt-11 mt-11 border-t border-border">
-              <SectionHeader num="02" title="직접 실험해봤다" />
-              {renderBlocks(body.experiment, 'exp')}
-            </section>
+            {/* 왜 지금 화두예요 */}
+            {body.why && body.why.length > 0 && (
+              <section id="s2" className="pt-11 mt-11 border-t border-border">
+                <SectionHeader num={num()} title="왜 지금 화두예요" />
+                {renderBlocks(body.why, 'why')}
+              </section>
+            )}
 
-            <section id="s3" className="pt-11 mt-11 border-t border-border">
-              <SectionHeader num="03" title="언제 쓸만하고, 언제 별로인가" />
-              <div className="grid gap-3.5 md:grid-cols-2 mt-1">
-                <div className="rounded-xl border border-[#03b26c]/25 bg-[#e8f8f0]/50 p-5">
-                  <div className="text-xs font-bold uppercase tracking-wider text-[#03b26c] mb-2">
-                    쓸만한 케이스
-                  </div>
-                  {renderBlocks(body.verdict.useful, 'use')}
+            {/* 누구한테 중요해요 */}
+            {body.forWho && body.forWho.length > 0 && (
+              <section id="s3" className="pt-11 mt-11 border-t border-border">
+                <SectionHeader num={num()} title="누구한테 중요해요" />
+                <div className="grid gap-3 sm:grid-cols-2 mt-1">
+                  {body.forWho.map((w, i) => (
+                    <div key={i} className="rounded-xl border border-border bg-white p-4">
+                      <div className="text-sm font-bold text-accent mb-1">{w.role}</div>
+                      <div className="text-[13.5px] text-ink/70 leading-relaxed break-keep">{w.why}</div>
+                    </div>
+                  ))}
                 </div>
-                <div className="rounded-xl border border-[#f04452]/25 bg-[#fdecef]/50 p-5">
-                  <div className="text-xs font-bold uppercase tracking-wider text-[#f04452] mb-2">
-                    별로인 케이스
-                  </div>
-                  {renderBlocks(body.verdict.notUseful, 'nuse')}
+              </section>
+            )}
+
+            {/* 핵심 3가지 */}
+            {body.keyPoints && body.keyPoints.length > 0 && (
+              <section id="s4" className="pt-11 mt-11 border-t border-border">
+                <SectionHeader num={num()} title="핵심만 빠르게" />
+                <ul className="flex flex-col gap-2.5 mt-1">
+                  {body.keyPoints.map((k, i) => (
+                    <li key={i} className="flex gap-3 items-start">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-50 text-[11px] font-bold text-accent">
+                        {i + 1}
+                      </span>
+                      <span className="text-[15px] text-ink/80 leading-relaxed break-keep">{k}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {/* 좀 더 들어가면 (선택) */}
+            {body.deepDive && body.deepDive.length > 0 && (
+              <section id="s5" className="pt-11 mt-11 border-t border-border">
+                <SectionHeader num={num()} title="좀 더 들어가면" />
+                {renderBlocks(body.deepDive, 'deep')}
+              </section>
+            )}
+
+            {/* 그래서, 내 일엔? */}
+            {body.soWhat && body.soWhat.length > 0 && (
+              <section id="s6" className="pt-11 mt-11 border-t border-border">
+                <SectionHeader num={num()} title="그래서, 내 일엔?" />
+                <div className="rounded-xl border border-accent/20 bg-accent-50/40 p-5">
+                  {renderBlocks(body.soWhat, 'so')}
                 </div>
-              </div>
-            </section>
+              </section>
+            )}
+
+            {/* 출처·더 보기 */}
+            {body.sources && body.sources.length > 0 && (
+              <section className="pt-11 mt-11 border-t border-border">
+                <div className="text-xs font-bold text-ink/40 tracking-[0.08em] mb-3">출처·더 보기</div>
+                <ul className="flex flex-col gap-1.5">
+                  {body.sources.map((s, i) => (
+                    <li key={i}>
+                      <a
+                        href={s.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"
+                      >
+                        {s.label}
+                        <ArrowUpRight className="h-3.5 w-3.5" />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
           </div>
 
           <ActionsBar />
