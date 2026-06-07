@@ -1,19 +1,10 @@
 import Link from 'next/link';
-import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
+import { listProducts } from '@/lib/data/products';
 
 export const revalidate = 60;
 
 export default async function EbooksPage() {
-  let books: { id: string; slug: string; title: string; description: string | null; price: number; thumbnail_url: string | null }[] = [];
-  if (isSupabaseConfigured()) {
-    const supabase = await createSupabaseServerClient();
-    const { data } = await supabase
-      .from('products')
-      .select('id, slug, title, description, price, thumbnail_url')
-      .eq('status', 'active')
-      .order('created_at', { ascending: false });
-    books = data ?? [];
-  }
+  const books = await listProducts();
   return (
     <div className="container-wide py-10">
       <header className="mb-10 text-center">
