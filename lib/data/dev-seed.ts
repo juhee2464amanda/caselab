@@ -309,6 +309,73 @@ export const caseSeed: ContentRow[] = [
     created_at: T,
     updated_at: T,
   },
+  // ── Trends (track:'trend', 발행일 분산: 1/3/6개월 필터 데모용) ──
+  {
+    id: 'seed-trend-1',
+    slug: 'claude-memory-1week',
+    track: 'trend',
+    title: 'Claude 메모리 기능, 실제로 일에 쓸만한가— 1주일 실험',
+    summary:
+      '대화를 기억한다는 메모리 기능을 실제 업무 루틴에 1주일 붙여봤다. 어디서 빛나고 어디서 헛도는지.',
+    body: minimalCaseBody,
+    job_tags: ['planning'],
+    persona_coverage: ['A'],
+    read_min: 5,
+    apply_min: 0,
+    status: 'published',
+    curated: false,
+    thumbnail_url:
+      'https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=400&q=80',
+    author_quote: null,
+    view_count: 0,
+    published_at: '2026-05-21T00:00:00.000Z',
+    created_at: '2026-05-21T00:00:00.000Z',
+    updated_at: '2026-05-21T00:00:00.000Z',
+  },
+  {
+    id: 'seed-trend-2',
+    slug: 'gemini-vs-gpt-research',
+    track: 'trend',
+    title: '리서치엔 Gemini, 초안엔 GPT— 한 달 써보고 갈라본 기준',
+    summary:
+      '두 모델을 같은 업무에 한 달 번갈아 쓰며 정리한, 작업 종류별 선택 기준.',
+    body: minimalCaseBody,
+    job_tags: ['marketing'],
+    persona_coverage: ['E'],
+    read_min: 6,
+    apply_min: 0,
+    status: 'published',
+    curated: false,
+    thumbnail_url:
+      'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=400&q=80',
+    author_quote: null,
+    view_count: 0,
+    published_at: '2026-04-10T00:00:00.000Z',
+    created_at: '2026-04-10T00:00:00.000Z',
+    updated_at: '2026-04-10T00:00:00.000Z',
+  },
+  {
+    id: 'seed-trend-3',
+    slug: 'mcp-for-non-devs',
+    track: 'trend',
+    title: 'MCP, 비개발자에게도 의미 있나— 한 달 지켜본 결론',
+    summary:
+      'AI 앱을 외부 도구와 잇는 MCP 표준이 실무자에게 어떤 변화를 주는지, 과장 빼고 정리.',
+    body: minimalCaseBody,
+    job_tags: ['planning', 'marketing'],
+    persona_coverage: ['A', 'E'],
+    read_min: 7,
+    apply_min: 0,
+    status: 'published',
+    curated: false,
+    thumbnail_url:
+      'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=80',
+    author_quote: null,
+    view_count: 0,
+    published_at: '2026-01-15T00:00:00.000Z',
+    created_at: '2026-01-15T00:00:00.000Z',
+    updated_at: '2026-01-15T00:00:00.000Z',
+  },
 ];
 
 // ─────────────────────────────────────────────
