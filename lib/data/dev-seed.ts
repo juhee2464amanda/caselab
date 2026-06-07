@@ -551,6 +551,31 @@ export const toolSeed: Tool[] = [
     thumbnail_emoji: '⚡',
     pricing_label: '무료 플랜',
     is_paid: false,
+    url: 'https://v0.dev',
+    body: {
+      audience: '디자이너·프론트엔드·기획자',
+      about: {
+        heading: '프롬프트로 UI 컴포넌트를 바로 만든다',
+        paragraphs: [
+          '만들고 싶은 화면을 한 문장으로 설명하면 v0가 실제로 동작하는 UI 컴포넌트를 생성해줍니다. Vercel이 만든 도구라 결과물 품질이 안정적이에요.',
+          '와이어프레임 단계에서 빠르게 시안을 뽑거나, 코드까지 받아 바로 붙일 때 특히 유용합니다.',
+        ],
+      },
+      whenToUse: [
+        { icon: '🧱', title: '와이어프레임 빠르게', desc: '한 문장으로 화면 시안을 생성해 아이디어를 즉시 눈으로 확인.' },
+        { icon: '🔁', title: '컴포넌트 반복 수정', desc: '"버튼 더 크게, 색은 파랑" 식으로 대화하며 다듬기.' },
+      ],
+      features: [
+        { title: '프롬프트 → UI', desc: '자연어 설명을 동작하는 컴포넌트로 변환.' },
+        { title: '코드 추출', desc: '생성된 UI의 React/Tailwind 코드를 바로 복사.' },
+        { title: '반복 개선', desc: '대화형으로 디자인을 점진적으로 수정.' },
+      ],
+      pricing: [
+        { name: 'Free', amount: '무료', includes: '기본 생성 크레딧. 감 잡고 가볍게 쓰기 좋음.' },
+        { name: 'Pro', amount: '유료 · 공식 사이트에서 확인', includes: '더 많은 생성·기능. 실무 반복 사용용.' },
+      ],
+      pricingNote: '* 정확한 요금은 공식 사이트에서 확인해주세요.',
+    },
     status: 'published',
     created_at: T,
   },
@@ -565,6 +590,31 @@ export const toolSeed: Tool[] = [
     thumbnail_emoji: '🔗',
     pricing_label: '무료 플랜',
     is_paid: false,
+    url: 'https://www.make.com',
+    body: {
+      audience: '기획·운영·마케터',
+      about: {
+        heading: '앱 사이를 코드 없이 잇는 자동화',
+        paragraphs: [
+          '구글시트에 행이 추가되면 슬랙으로 알림, 폼 응답을 노션에 정리 — 이런 반복 작업을 블록을 연결하듯 자동화합니다. 코드를 몰라도 됩니다.',
+          '한 번 만들어두면 사람이 손대지 않아도 계속 돌아가, 운영 잡무를 크게 줄여줍니다.',
+        ],
+      },
+      whenToUse: [
+        { icon: '🔁', title: '반복 잡무 자동화', desc: '매번 손으로 옮기던 데이터·알림을 자동으로 연결.' },
+        { icon: '🔌', title: '여러 앱 연동', desc: '구글·슬랙·노션 등 흩어진 도구를 한 흐름으로.' },
+      ],
+      features: [
+        { title: '비주얼 워크플로우', desc: '블록을 드래그로 연결해 자동화 시나리오 구성.' },
+        { title: '1000+ 앱 연동', desc: '대부분의 SaaS와 기본 커넥터 제공.' },
+        { title: '예약·트리거 실행', desc: '특정 이벤트나 시간에 자동 실행.' },
+      ],
+      pricing: [
+        { name: 'Free', amount: '무료', includes: '월 일정량 작업 실행. 간단한 자동화엔 충분.' },
+        { name: 'Pro', amount: '유료 · 공식 사이트에서 확인', includes: '더 많은 실행·고급 기능. 운영 자동화 본격 사용용.' },
+      ],
+      pricingNote: '* 정확한 요금은 공식 사이트에서 확인해주세요.',
+    },
     status: 'published',
     created_at: T,
   },
@@ -579,6 +629,31 @@ export const toolSeed: Tool[] = [
     thumbnail_emoji: '🔎',
     pricing_label: '무료 플랜',
     is_paid: false,
+    url: 'https://www.perplexity.ai',
+    body: {
+      audience: '기획·마케터·리서처',
+      about: {
+        heading: '출처가 달린 AI 검색',
+        paragraphs: [
+          '질문을 던지면 웹을 검색해 답을 정리하고, 각 문장에 출처 링크를 달아줍니다. "그럴듯한데 사실인지 모를" AI 답변의 한계를 출처로 메워줘요.',
+          '사실 확인이 중요한 리서치·시장 조사에서 특히 시간을 아껴줍니다.',
+        ],
+      },
+      whenToUse: [
+        { icon: '🔍', title: '빠른 사실 확인', desc: '출처가 달린 답으로 근거까지 한 번에 확인.' },
+        { icon: '📚', title: '시장·경쟁 리서치', desc: '흩어진 정보를 검색·요약해 출발점을 빠르게.' },
+      ],
+      features: [
+        { title: '출처 인용', desc: '답변의 각 근거에 원문 링크 제공.' },
+        { title: '실시간 검색', desc: '최신 웹 정보를 반영해 답변.' },
+        { title: '후속 질문', desc: '대화를 이어가며 점점 깊게 파고들기.' },
+      ],
+      pricing: [
+        { name: 'Free', amount: '무료', includes: '기본 검색·답변. 일상 리서치엔 충분.' },
+        { name: 'Pro', amount: '유료 · 공식 사이트에서 확인', includes: '고급 모델·더 많은 검색. 본격 리서치용.' },
+      ],
+      pricingNote: '* 정확한 요금은 공식 사이트에서 확인해주세요.',
+    },
     status: 'published',
     created_at: T,
   },
@@ -593,6 +668,31 @@ export const toolSeed: Tool[] = [
     thumbnail_emoji: '📊',
     pricing_label: '무료 플랜',
     is_paid: false,
+    url: 'https://gamma.app',
+    body: {
+      audience: '기획·마케터·1인사업',
+      about: {
+        heading: '프롬프트로 발표 자료를 만든다',
+        paragraphs: [
+          '주제나 개요만 넣으면 Gamma가 슬라이드 구조·문구·디자인을 한 번에 만들어줍니다. PPT 템플릿과 씨름하던 시간이 사라져요.',
+          '초안을 빠르게 뽑은 뒤 내용만 다듬으면 되니, 발표 준비 시간을 크게 줄여줍니다.',
+        ],
+      },
+      whenToUse: [
+        { icon: '🖥️', title: '발표 자료 초안', desc: '개요만 넣으면 슬라이드 전체를 자동 생성.' },
+        { icon: '⏱️', title: '시간이 급할 때', desc: '디자인 고민 없이 정돈된 자료를 빠르게 확보.' },
+      ],
+      features: [
+        { title: '프롬프트 → 슬라이드', desc: '주제를 구조화된 발표 자료로 변환.' },
+        { title: '자동 디자인', desc: '테마·레이아웃을 일관되게 적용.' },
+        { title: '웹·PDF 공유', desc: '링크 또는 PDF로 바로 공유.' },
+      ],
+      pricing: [
+        { name: 'Free', amount: '무료', includes: '기본 생성 크레딧. 가볍게 만들어보기.' },
+        { name: 'Pro', amount: '유료 · 공식 사이트에서 확인', includes: '더 많은 생성·고급 기능. 실무 반복 사용용.' },
+      ],
+      pricingNote: '* 정확한 요금은 공식 사이트에서 확인해주세요.',
+    },
     status: 'published',
     created_at: T,
   },
@@ -607,6 +707,31 @@ export const toolSeed: Tool[] = [
     thumbnail_emoji: '✍️',
     pricing_label: '무료 플랜',
     is_paid: false,
+    url: 'https://www.deepl.com/write',
+    body: {
+      audience: '글쓰기·해외 협업',
+      about: {
+        heading: '영문 톤을 자연스럽게 다듬는 AI 교정',
+        paragraphs: [
+          '번역기가 "뜻은 맞는데 어색한" 문장을 만든다면, DeepL Write는 원문 의도를 살리며 자연스러운 표현으로 다듬어줍니다. 이메일·보고서의 영문 톤을 원어민처럼.',
+          '뉘앙스 선택지를 제안해줘, 격식·친근함 같은 톤을 상황에 맞게 고를 수 있습니다.',
+        ],
+      },
+      whenToUse: [
+        { icon: '✉️', title: '영문 이메일·보고서', desc: '초안을 붙여넣으면 자연스러운 표현으로 교정.' },
+        { icon: '🎚️', title: '톤 조절이 필요할 때', desc: '격식/친근 등 뉘앙스 대안을 골라 적용.' },
+      ],
+      features: [
+        { title: '문장 교정', desc: '어색한 표현을 자연스럽게 다듬기.' },
+        { title: '뉘앙스 제안', desc: '같은 뜻의 여러 표현 중 선택.' },
+        { title: '실시간 수정', desc: '입력하는 대로 즉시 개선안 표시.' },
+      ],
+      pricing: [
+        { name: 'Free', amount: '무료', includes: '기본 교정. 짧은 글엔 충분.' },
+        { name: 'Pro', amount: '유료 · 공식 사이트에서 확인', includes: '더 긴 글·고급 톤 옵션. 업무 문서용.' },
+      ],
+      pricingNote: '* 정확한 요금은 공식 사이트에서 확인해주세요.',
+    },
     status: 'published',
     created_at: T,
   },
@@ -622,6 +747,31 @@ export const toolSeed: Tool[] = [
     pricing_label: '무료 플랜',
     is_paid: false,
     pro_pricing: 'Pro $20/월',
+    url: 'https://cursor.com',
+    body: {
+      audience: '개발자·비개발자',
+      about: {
+        heading: 'AI가 코드를 같이 짜는 에디터',
+        paragraphs: [
+          'VS Code와 비슷한 에디터에 AI가 깊게 붙어 있어, 자연어로 요청하면 코드를 생성·수정해줍니다. 코드를 잘 몰라도 간단한 자동화 스크립트를 만들 수 있어요.',
+          '프로젝트 맥락을 이해한 채로 제안하기 때문에, 반복 작업이나 막힌 부분을 빠르게 풀어줍니다.',
+        ],
+      },
+      whenToUse: [
+        { icon: '🤖', title: '간단한 자동화 스크립트', desc: '비개발자도 자연어로 요청해 스크립트 초안을 받기.' },
+        { icon: '🧑‍💻', title: '반복 코딩 작업', desc: '맥락을 이해한 AI가 수정·리팩터링을 제안.' },
+      ],
+      features: [
+        { title: '자연어 코드 생성', desc: '요청을 코드로 변환·수정.' },
+        { title: '프로젝트 맥락 이해', desc: '코드베이스를 참고해 정확한 제안.' },
+        { title: 'Tab 자동완성', desc: '다음 편집을 예측해 빠르게 작성.' },
+      ],
+      pricing: [
+        { name: 'Free', amount: '무료', includes: '기본 사용. 가볍게 체험하기.' },
+        { name: 'Pro', amount: 'Pro $20/월', includes: '더 많은 AI 요청·고급 모델. 본격 사용용.' },
+      ],
+      pricingNote: '* 정확한 요금은 공식 사이트에서 확인해주세요.',
+    },
     status: 'published',
     created_at: T,
   },
