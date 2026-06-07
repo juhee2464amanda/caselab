@@ -8,7 +8,7 @@
  * 출시 Day 3~7에 Supabase에 실제 콘텐츠 INSERT되면 자동으로 fallback이 안 쓰임.
  */
 
-import type { ContentRow, CaseBody, JobTag } from '@/types/content';
+import type { ContentRow, CaseBody, TrendBody, JobTag } from '@/types/content';
 import type { Tool } from '@/types/tool';
 import type { PromptItem } from '@/types/prompt';
 import type { GuideItem } from '@/types/guide';
@@ -28,6 +28,23 @@ const minimalCaseBody: CaseBody = {
   review: [{ type: 'text', markdown: '(dev seed)' }],
   customization: ['시점', '톤', '범위', '깊이'],
 };
+
+function devTrendBody(o: {
+  whatsNew: string;
+  experiment: string;
+  useful: string;
+  notUseful: string;
+}): TrendBody {
+  return {
+    kind: 'trend',
+    whats_new: [{ type: 'text', markdown: o.whatsNew }],
+    experiment: [{ type: 'text', markdown: o.experiment }],
+    verdict: {
+      useful: [{ type: 'text', markdown: o.useful }],
+      notUseful: [{ type: 'text', markdown: o.notUseful }],
+    },
+  };
+}
 
 // case-1 (intent-5-steps) — mockup content.html 7섹션 풀 매핑
 const intent5StepsBody: CaseBody = {
@@ -317,7 +334,12 @@ export const caseSeed: ContentRow[] = [
     title: 'Claude 메모리 기능, 실제로 일에 쓸만한가— 1주일 실험',
     summary:
       '대화를 기억한다는 메모리 기능을 실제 업무 루틴에 1주일 붙여봤다. 어디서 빛나고 어디서 헛도는지.',
-    body: minimalCaseBody,
+    body: devTrendBody({
+      whatsNew: 'Claude에 이전 대화의 맥락을 기억하는 메모리 기능이 추가됐다. 매번 같은 배경을 다시 설명하지 않아도 된다는 것이 핵심.',
+      experiment: '1주일간 회의록 정리·반복 요청·진행 중 프로젝트 질의에 메모리를 켜고 사용해봤다.',
+      useful: '반복되는 프로젝트 맥락을 매번 설명하지 않아도 되는 점이 가장 컸다. 같은 형식의 작업을 이어갈 때 효율이 확실히 올라갔다.',
+      notUseful: '서로 다른 프로젝트 맥락이 섞이면 엉뚱한 과거 대화를 끌어와 오히려 헷갈릴 때가 있었다. 중요한 작업은 새 대화로 분리하는 게 안전.',
+    }),
     job_tags: ['planning'],
     persona_coverage: ['A'],
     read_min: 5,
@@ -339,7 +361,12 @@ export const caseSeed: ContentRow[] = [
     title: '리서치엔 Gemini, 초안엔 GPT— 한 달 써보고 갈라본 기준',
     summary:
       '두 모델을 같은 업무에 한 달 번갈아 쓰며 정리한, 작업 종류별 선택 기준.',
-    body: minimalCaseBody,
+    body: devTrendBody({
+      whatsNew: 'Gemini와 GPT 모두 큰 업데이트가 있었다. 같은 작업을 두 모델에 한 달간 번갈아 맡기며 어디서 무엇이 더 나은지 비교해봤다.',
+      experiment: '리서치·초안 작성·교정 등 작업 종류별로 동일 프롬프트를 양쪽에 넣고 결과를 기록했다.',
+      useful: '출처가 필요한 리서치엔 Gemini, 빠른 초안엔 GPT가 잘 맞았다. 작업 성격에 따라 갈라 쓰니 결과 품질이 올라갔다.',
+      notUseful: '한 모델만 고집하면 작업마다 강점을 못 살린다. 둘을 오가는 번거로움은 감수해야 한다.',
+    }),
     job_tags: ['marketing'],
     persona_coverage: ['E'],
     read_min: 6,
@@ -361,7 +388,12 @@ export const caseSeed: ContentRow[] = [
     title: 'MCP, 비개발자에게도 의미 있나— 한 달 지켜본 결론',
     summary:
       'AI 앱을 외부 도구와 잇는 MCP 표준이 실무자에게 어떤 변화를 주는지, 과장 빼고 정리.',
-    body: minimalCaseBody,
+    body: devTrendBody({
+      whatsNew: 'AI 앱과 외부 도구를 잇는 MCP(Model Context Protocol) 표준이 Claude·ChatGPT·Cursor 등 주요 클라이언트에 빠르게 확산됐다.',
+      experiment: '비개발자 관점에서 한 달간 MCP 연동을 붙여보며 실무에 실제로 어떤 변화를 주는지 지켜봤다.',
+      useful: '한 번 연결해두면 여러 AI 앱에서 같은 도구·데이터를 재사용할 수 있다. 반복 연동 작업이 크게 줄었다.',
+      notUseful: '아직 초기 설정 진입장벽이 있어, 비개발자가 도움 없이 바로 쓰기엔 이른 감이 있다.',
+    }),
     job_tags: ['planning', 'marketing'],
     persona_coverage: ['A', 'E'],
     read_min: 7,
