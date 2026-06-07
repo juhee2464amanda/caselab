@@ -2,11 +2,14 @@
 
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { Search, User, Menu, ChevronDown } from 'lucide-react';
 import { MegaMenu } from './MegaMenu';
 import { MobileNav } from './MobileNav';
 import { SubscribeModal } from './SubscribeModal';
 import { FEATURED_EBOOK_SLUG } from '@/lib/constants';
+import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { useAuth } from '@/lib/hooks/use-auth';
 import { cn } from '@/lib/utils';
 
 /**
@@ -32,7 +35,11 @@ export function GNB() {
   const [megaOpen, setMegaOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [subscribeOpen, setSubscribeOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const userMenuRef = useRef<HTMLDivElement | null>(null);
+  const router = useRouter();
+  const { user } = useAuth();
 
   function openMega() {
     if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -44,6 +51,14 @@ export function GNB() {
     closeTimer.current = setTimeout(() => setMegaOpen(false), 250);
   }
 
+  async function logout() {
+    setUserMenuOpen(false);
+    const supabase = createSupabaseBrowserClient();
+    await supabase.auth.signOut();
+    router.push('/');
+    router.refresh();
+  }
+
   useEffect(() => {
     function onScroll() {
       setScrolled(window.scrollY > 4);
@@ -51,6 +66,18 @@ export function GNB() {
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  // 사용자 메뉴 바깥 클릭 시 닫기
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    function onClick(e: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [userMenuOpen]);
 
   return (
     <>
@@ -120,14 +147,70 @@ export function GNB() {
               구독하기
             </button>
 
-            {/* 검색·로그인 아이콘 */}
-            <Link
-              href="/login"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md text-ink/60 hover:bg-muted transition-colors"
-              aria-label="로그인"
-            >
-              <User className="h-5 w-5" strokeWidth={1.8} />
-            </Link>
+            {/* 로그인 아이콘 / 사용자 메뉴 */}
+            {user ? (
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setUserMenuOpen((v) => !v)}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-md text-ink/60 hover:bg-muted transition-colors overflow-hidden"
+                  aria-label="내 메뉴"
+                  aria-haspopup="menu"
+                  aria-expanded={userMenuOpen}
+                >
+                  {user.user_metadata?.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={user.user_metadata.avatar_url as string}
+                      alt=""
+                      className="h-7 w-7 rounded-full object-cover"
+                    />
+                  ) : (
+                    <User className="h-5 w-5" strokeWidth={1.8} />
+                  )}
+                </button>
+                {userMenuOpen && (
+                  <div
+                    role="menu"
+                    className="absolute right-0 top-full mt-1 w-40 rounded-lg border border-border bg-white py-1 shadow-elevated"
+                  >
+                    <Link
+                      href="/mypage"
+                      role="menuitem"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="block px-3 py-2 text-sm text-ink/80 hover:bg-muted"
+                    >
+                      마이페이지
+                    </Link>
+                    <Link
+                      href="/mypage/profile"
+                      role="menuitem"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="block px-3 py-2 text-sm text-ink/80 hover:bg-muted"
+                    >
+                      프로필 설정
+                    </Link>
+                    <hr className="my-1 border-border" />
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={logout}
+                      className="block w-full px-3 py-2 text-left text-sm text-ink/80 hover:bg-muted"
+                    >
+                      로그아웃
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-md text-ink/60 hover:bg-muted transition-colors"
+                aria-label="로그인"
+              >
+                <User className="h-5 w-5" strokeWidth={1.8} />
+              </Link>
+            )}
             <Link
               href="/search"
               className="inline-flex h-9 w-9 items-center justify-center rounded-md text-ink/60 hover:bg-muted transition-colors"
@@ -154,6 +237,8 @@ export function GNB() {
         onClose={() => setMobileOpen(false)}
         nav={NAV}
         onSubscribe={() => setSubscribeOpen(true)}
+        isLoggedIn={!!user}
+        onLogout={logout}
       />
       <SubscribeModal open={subscribeOpen} onOpenChange={setSubscribeOpen} />
     </>

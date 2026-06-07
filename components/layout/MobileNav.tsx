@@ -9,9 +9,11 @@ interface Props {
   onClose: () => void;
   nav: { label: string; href: string }[];
   onSubscribe?: () => void;
+  isLoggedIn?: boolean;
+  onLogout?: () => void;
 }
 
-export function MobileNav({ open, onClose, nav, onSubscribe }: Props) {
+export function MobileNav({ open, onClose, nav, onSubscribe, isLoggedIn, onLogout }: Props) {
   return (
     <div
       className={cn(
@@ -63,20 +65,35 @@ export function MobileNav({ open, onClose, nav, onSubscribe }: Props) {
             </Link>
           ))}
           <hr className="my-3 border-border" />
-          <Link
-            href="/login"
-            onClick={onClose}
-            className="block px-3 py-2.5 rounded-md text-sm font-medium hover:bg-muted"
-          >
-            로그인
-          </Link>
-          <Link
-            href="/mypage"
-            onClick={onClose}
-            className="block px-3 py-2.5 rounded-md text-sm font-medium hover:bg-muted"
-          >
-            마이페이지
-          </Link>
+          {isLoggedIn ? (
+            <>
+              <Link
+                href="/mypage"
+                onClick={onClose}
+                className="block px-3 py-2.5 rounded-md text-sm font-medium hover:bg-muted"
+              >
+                마이페이지
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onLogout?.();
+                }}
+                className="block w-full px-3 py-2.5 rounded-md text-left text-sm font-medium hover:bg-muted"
+              >
+                로그아웃
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              onClick={onClose}
+              className="block px-3 py-2.5 rounded-md text-sm font-medium hover:bg-muted"
+            >
+              로그인
+            </Link>
+          )}
         </nav>
       </aside>
     </div>
