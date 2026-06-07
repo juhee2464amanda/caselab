@@ -10,3 +10,6 @@ export const CONTACT_EMAIL = 'caselab.kr@gmail.com';
 // 사이트 표기명
 export const SITE_NAME = '케이스랩';
 export const SITE_TAGLINE = '일이 풀리는 AI 사용법';
+
+// GNB "ebook" 클릭 시 직행할 무료 ebook (mockup ebook-free.html 정합)
+export const FEATURED_EBOOK_SLUG = 'ai-1week-notes';
