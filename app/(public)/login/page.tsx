@@ -16,14 +16,23 @@ export default function LoginPage() {
   );
 }
 
+const ERROR_MESSAGES: Record<string, string> = {
+  oauth_denied: '소셜 로그인이 취소되었어요. 다시 시도해 주세요.',
+  exchange_failed: '로그인 처리 중 문제가 발생했어요. 다시 시도해 주세요.',
+  missing_code: '로그인 정보가 전달되지 않았어요. 다시 시도해 주세요.',
+};
+
 function LoginInner() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
-  const router = useRouter();
   const params = useSearchParams();
   const next = params.get('next') ?? '/';
+  const errorParam = params.get('error');
+  const [error, setError] = useState<string | null>(
+    errorParam ? (ERROR_MESSAGES[errorParam] ?? '로그인에 실패했어요. 다시 시도해 주세요.') : null
+  );
+  const [pending, startTransition] = useTransition();
+  const router = useRouter();
   const supabase = createSupabaseBrowserClient();
 
   function loginWith(provider: 'google' | 'kakao') {
@@ -62,6 +71,12 @@ function LoginInner() {
           이메일과 비밀번호로, 또는 소셜로 로그인하세요.
         </p>
 
+        {error && (
+          <p className="mb-4 rounded-md bg-red-50 px-3 py-2 text-center text-sm text-red-600">
+            {error}
+          </p>
+        )}
+
         <div className="space-y-2 mb-6">
           <Button
             variant="outline"
@@ -99,7 +114,6 @@ function LoginInner() {
             <Label htmlFor="password">비밀번호</Label>
             <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
           <Button type="submit" variant="accent" className="w-full" disabled={pending}>
             로그인
           </Button>
