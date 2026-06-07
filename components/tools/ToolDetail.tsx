@@ -14,6 +14,7 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
     ...(body.whenToUse?.length ? [{ id: 'when', label: '언제 쓰면 좋은가요' }] : []),
     ...(body.features?.length ? [{ id: 'features', label: '주요 기능' }] : []),
     ...(body.pricing?.length ? [{ id: 'pricing', label: '가격' }] : []),
+    ...(body.useCases?.length ? [{ id: 'use-cases', label: '실전 사용기' }] : []),
   ];
 
   return (
@@ -154,6 +155,29 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
           {body.pricingNote && (
             <p className="mt-3.5 text-[13px] text-ink/40">{body.pricingNote}</p>
           )}
+        </Section>
+      )}
+
+      {/* Use cases */}
+      {body.useCases && body.useCases.length > 0 && (
+        <Section id="use-cases" label="실전 사용기 · 옵션" title="이 도구를 직접 써본 케이스">
+          <div className="grid gap-3.5">
+            {body.useCases.map((u, i) => (
+              <Link
+                key={i}
+                href={u.href}
+                className="block p-4 border border-border rounded-xl hover:border-accent hover:shadow-[0_4px_14px_rgba(49,130,246,0.06)] transition-all"
+              >
+                <span className="inline-block text-[11px] font-bold text-accent bg-accent-50 px-2 py-0.5 rounded mb-1.5">
+                  {u.tag}
+                </span>
+                <h3 className="text-[15.5px] font-bold tracking-[-0.02em] leading-snug mb-1.5 break-keep">
+                  {u.title}
+                </h3>
+                <p className="text-xs text-ink/50">{u.meta}</p>
+              </Link>
+            ))}
+          </div>
         </Section>
       )}
 

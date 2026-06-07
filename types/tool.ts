@@ -52,6 +52,15 @@ export interface ToolBody {
   pricing?: ToolPricingPlan[];
   /** 가격 하단 주석 */
   pricingNote?: string;
+  /** 실전 사용기 — 연결 케이스 카드 */
+  useCases?: ToolUseCase[];
+}
+export interface ToolUseCase {
+  /** 케이스 링크 (예: /cases/competitor-analysis) */
+  href: string;
+  tag: string;
+  title: string;
+  meta: string;
 }
 
 export interface Tool {
