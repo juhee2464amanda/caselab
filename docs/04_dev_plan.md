@@ -197,7 +197,7 @@ const ContentBodySchema = z.discriminatedUnion('kind', [CaseBodySchema, TrendBod
 | `events` | id, user_id(uuid nullable), content_id(uuid nullable), event_type, metadata(jsonb), created_at | 월별 파티셔닝 |
 | `products` | id, slug, title, type('ebook'), price(int=0 무료), pdf_path(Storage), thumbnail_url, status | price>0은 출시 후 결정 |
 | `purchases` | id, user_id(uuid FK nullable), product_id(uuid FK), name, phone, email, status('pending'\|'sent'\|'failed'), sent_at | Edge Function이 sent 처리 |
-| `tools` | id, slug, name, category('tool'\|'prompt'\|'guide'\|'context-card'), description, url, pricing_tier, status | 자료실 통합 — 페르소나 C의 "맥락 카드"는 'context-card' 카테고리로 |
+| `tools` | id, slug, name, category('tool'\|'prompt'\|'guide'\|'context-card'), description, url, pricing_tier, status, **thumbnail_emoji, pricing_label, is_paid, pro_pricing, has_review(default false), subcategory_id(FK→categories where type='tool_subcategory')** | 자료실 통합 — 페르소나 C의 "맥락 카드"는 'context-card' 카테고리로. category=자료 타입 유지, 기능분류는 subcategory_id (D69·D70 / 0005·0006) |
 | `topic_suggestions`, `topic_votes` | 기존 유지 | content_id 외래키 추가 |
 
 ### 함수 / 정책
@@ -654,6 +654,34 @@ caselab/
 5. 사용자 액션(view/copy/save) → `track.ts` wrapper가 `events.metadata`에 `utm_source/medium/campaign` 자동 병합 적재
 6. `/admin/utm` 히스토리 → `events` GROUP BY `metadata->>'utm_campaign'` → 클릭 수 자동 표시
 7. `/admin/analytics`에서 채널별 conversion 분석 가능
+
+---
+
+### 18.11 Tools 테이블 확장 + 카테고리 모델 정합 (Option C)
+
+**결정 일자**: 2026-06-06 (commit 5a0df3c)
+
+**배경**: mockup `tools.html` 구현(commit f5c37a7)에서 카드에 썸네일 이모지·가격 라벨·사용기 배지 데이터가 필요했음. 동시에 `tools.category`가 ①자료 타입(tool/prompt/guide/context-card)과 ②도구 기능분류(design/automation/...)로 충돌 사용되고 있었음 — prod CHECK 제약은 ①만 허용해 기능분류 도구는 INSERT 거부. §19.6에서 설계한 `tools.subcategory_id` FK 모델(D13↔D26)을 실제 실행해 분리.
+
+**결정 표 (2건)**:
+
+| # | 결정 | 슬롯 | 신뢰도 |
+|---|---|---|---|
+| **D69** | tools 5컬럼 확장 — `thumbnail_emoji`, `pricing_label`, `is_paid`, `pro_pricing`, `has_review`(default false). 모두 nullable, 기존 데이터 영향 0 | **0005 마이그레이션 (shipped)** | ✅ |
+| **D70** | 기능분류 6종을 `categories(type='tool_subcategory', parent_track='tool')`에 seed(design/automation/research/writing/presentation/coding) + `tools.subcategory_id`로 연결. `tools.category`는 **타입 역할 유지(제약 변경 없음)**. 공개 `/tools`는 subcategory_id join(!inner)으로 기능분류 노출 | **0006 마이그레이션 (shipped)** | ✅ |
+
+**핵심**:
+- `tools.category` enum **변경 없음** → `/prompts`·`/guides`·홈 통계 무손상
+- 공개 `lib/data/tools.ts`가 `categories!tools_subcategory_id_fkey!inner` 임베드로 join, slug를 `Tool.category`로 매핑 (공개 UI 무변경)
+- 부수 수정: `lib/data/tools.ts` PUBLIC_FIELDS에 `thumbnail_emoji` 누락 → 추가
+
+**영향받는 파일**:
+- `supabase/migrations/0005_tools_extend.sql` (신설)
+- `supabase/migrations/0006_seed_tool_subcategories.sql` (신설)
+- `types/tool.ts` Tool 인터페이스 + `lib/data/tools.ts` (subcategory 임베드)
+- `caselab_admin` ToolForm (도구 분류 셀렉터 — 별도 repo)
+
+**이월**: 도구 상세 페이지 목업 정합, prompts/guides UI 빌드아웃, dev-seed prompt/guide (별도 작업).
 
 ---
 

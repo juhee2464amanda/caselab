@@ -74,17 +74,17 @@
 
 ---
 
-## Day 1 — Supabase 풀 셋업 (2026-06-02 갱신: 0001~0004 + Storage 7 + Auth)
+## Day 1 — Supabase 풀 셋업 (2026-06-06 갱신: 0001~0006 + Storage 7 + Auth)
 
 ### ✅ 끝났을 때
 - 새 프로젝트 `Caselab-prod` 생성 + API 키 3종 → `.env.local`
-- 마이그레이션 4개 적용: `0001_init.sql` + `0002_admin_p0.sql` + `0003_categories_tags_utm.sql` + `0004_storage_policies.sql`
+- 마이그레이션 6개 적용: `0001_init.sql` + `0002_admin_p0.sql` + `0003_categories_tags_utm.sql` + `0004_storage_policies.sql` + `0005_tools_extend.sql` + `0006_seed_tool_subcategories.sql`
 - DB 객체: 테이블 ~20개 / view 2개 / 함수 ~10개 / 트리거 ~22개 / Storage 정책 ~19개
 - Storage 버킷 7개: `thumbnails` `ebooks` `avatars` `content-images` `newsletter-assets` `support-files` `audit-exports`
 - Authentication: Email 가입 ON + **Confirm email OFF** ([[project_auth_confirm_off]] 영구 정책)
 - `.env.local`에 `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` 박힘
 
-### 📋 Step 1~10 (90~120분 예상)
+### 📋 Step 1~12 (100~130분 예상)
 
 #### Step 1 — 새 프로젝트 생성 (~5분)
 [supabase.com/dashboard](https://supabase.com/dashboard) → New Project
@@ -170,7 +170,33 @@ from pg_policies where schemaname='storage' and tablename='objects';
 ```
 → 약 **15~25개** (0002의 ebooks/thumbnails 4 + 0004의 신규 15)
 
-#### Step 10 — Authentication 설정 (~5분)
+#### Step 10 — `0005_tools_extend.sql` 적용 (~2분)
+SQL Editor → `+` New query → 0005 전체 복붙 → Run → "Success" (tools 5컬럼 추가, 멱등)
+
+**검증**:
+```sql
+select count(*) as tools_new_cols
+from information_schema.columns
+where table_name='tools'
+  and column_name in ('thumbnail_emoji','pricing_label','is_paid','pro_pricing','has_review');
+```
+→ **5** 나와야 함
+
+#### Step 11 — `0006_seed_tool_subcategories.sql` 적용 (~2분)
+SQL Editor → `+` New query → 0006 전체 복붙 → Run → "Success" (tool_subcategory 6건 seed, 멱등)
+
+**검증**:
+```sql
+select count(*) as tool_subcategories,
+       string_agg(slug, ', ' order by sort_order) as slugs
+from public.categories
+where type='tool_subcategory' and is_active=true;
+```
+→ **count=6 / slugs="design, automation, research, writing, presentation, coding"**
+
+> ※ CLI 사용 시: `supabase db push`로 0005·0006 일괄 적용 가능 (Caselab-prod 링크 + 0001~0004 이력 repair 전제, [[project_supabase_cli_setup]])
+
+#### Step 12 — Authentication 설정 (~5분)
 Authentication → **Providers** → Email:
 - Enabled ON ✅
 - **Confirm email OFF** ⛔ ([[project_auth_confirm_off]] 영구 정책)
@@ -426,6 +452,7 @@ open http://localhost:3000/sitemap.xml
 - Brevo API Key 발급 + Supabase secrets 3종 등록 완료
 - `send-ebook` Edge Function 배포 (Brevo HTTP API 사용)
 - 본인 이메일로 전자책 주문 → 1분 내 PDF 다운로드 링크 도착
+- **(이월) `newsletter_subscribers`(0007) → Brevo Contact 동기화 트리거 추가** — 비로그인 구독자도 Brevo 리스트 반영. 기존 `trg_sync_brevo_contact`(profiles) 패턴 재사용. SubscribeModal은 이미 `newsletter_subscribers`에 적재 중.
 
 ### 📋 Brevo 단일 발신자 인증 (~5분)
 1. [brevo.com](https://www.brevo.com/) 가입 (Google 로그인 가능). Day 0에 이미 가입했으면 패스.
