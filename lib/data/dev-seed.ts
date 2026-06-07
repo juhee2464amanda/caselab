@@ -12,6 +12,7 @@ import type { ContentRow, CaseBody, TrendBody, JobTag } from '@/types/content';
 import type { Tool } from '@/types/tool';
 import type { PromptItem } from '@/types/prompt';
 import type { GuideItem } from '@/types/guide';
+import type { ProductRow } from '@/types/product';
 
 const minimalCaseBody: CaseBody = {
   kind: 'case',
@@ -817,6 +818,44 @@ export const guideSeed: GuideItem[] = [
     category: 'agents', source: '공식 표준', sourceType: 'default',
     thumbLabel: '⬡ Model Context Protocol', thumbBg: '#0a0a0a', thumbColor: '#ffffff',
     linkLabel: 'modelcontextprotocol.io',
+  },
+];
+
+// ─────────────────────────────────────────────
+// Products / ebook (mockup ebook-detail.html 정합)
+// ─────────────────────────────────────────────
+export const productSeed: ProductRow[] = [
+  {
+    id: 'seed-ebook-1',
+    slug: 'ai-1week-notes',
+    title: 'AI, 다들 쓰는데 나만 못 쓰는 것 같다면 — 1주 실험 노트',
+    description:
+      '기획·마케팅·영업 직무에서 1주 동안 직접 써본 AI 워크플로우 12개. 잘된 것도, 별로였던 것도 솔직하게 담았습니다.',
+    price: 0,
+    thumbnail_url: null,
+    body: {
+      subtitle: '케이스랩 · 1주 실험 노트',
+      stats: [
+        { num: '12', label: '워크플로우' },
+        { num: '3', label: '직무 커버' },
+        { num: '45분', label: '분량' },
+      ],
+      toc: [
+        { title: '빈 입력칸 앞에서 머리가 하얘질 때', desc: 'AI를 켜기 전에 종이에 한 문단을 먼저 쓰는 이유. Step-0 framework.' },
+        { title: "기획서 — '의도' 던지는 5단계", desc: '문제정의 → 가설 → 검증방법 → 실행안 → 측정. 각 단계에서 AI에게 시킬 것.' },
+        { title: '경쟁사 분석 — AI가 표면만 긁는 이유', desc: '"경쟁사 5곳 분석해줘"가 실패하는 구조와, 깊이를 만드는 4단계.' },
+        { title: '영업 보고서 — 윗사람 톤에 맞추기', desc: 'AI 결과물을 "본인 것으로 만드는 4단계". 거래처·회사 톤·질문 대응.' },
+        { title: '고객 인터뷰 정리 — 시킬 것과 시키지 말 것', desc: '녹취 20시간을 AI에 통째로 던지면 다 비슷해지는 이유와 분리 기준.' },
+        { title: 'AI가 정당화만 할 때 — 반박시키는 4가지 지시법', desc: '약점 찾기, 반대 입장, 역사적 실패, 숨은 가정. 가설 검증에 AI를 제대로 쓰는 법.' },
+        { title: '프롬프트 모음 — 복사해서 바로 쓰기', desc: '본문에 나온 프롬프트 전체를 직무별로 정리. 상황 설명 + 프롬프트 + 예상 결과.' },
+      ],
+      whoFor: [
+        { icon: '📝', title: '기획자', desc: '기획서 앞에서 막히는데, AI에 뭘 시켜야 할지 모르겠는 분' },
+        { icon: '📊', title: '마케터', desc: '경쟁사 분석, 캠페인 콘셉트에 AI를 쓰고 싶은데 결과가 늘 얕은 분' },
+        { icon: '🤝', title: '영업', desc: '제안서·보고서를 AI로 빠르게 쓰고 싶은데 윗사람 통과가 안 되는 분' },
+        { icon: '💡', title: '1인사업', desc: '클라이언트 제안서·인터뷰 정리에 AI를 쓰고 싶은데 매번 새로 시작하는 분' },
+      ],
+    },
   },
 ];
 
