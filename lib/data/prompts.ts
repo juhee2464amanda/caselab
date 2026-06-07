@@ -1,0 +1,52 @@
+import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
+import type { PromptItem, PromptCategory } from '@/types/prompt';
+import { PROMPT_CATEGORIES } from '@/types/prompt';
+import { promptSeed } from './dev-seed';
+
+const IS_DEV = process.env.NODE_ENV === 'development';
+
+type ToolPromptRow = {
+  id: string;
+  slug: string;
+  name: string;
+  body: {
+    prompt?: string;
+    promptCategory?: string;
+    source?: string;
+    sourceUrl?: string;
+  } | null;
+};
+
+function isPromptCategory(v: unknown): v is PromptCategory {
+  return typeof v === 'string' && (PROMPT_CATEGORIES as readonly string[]).includes(v);
+}
+
+function mapPromptRow(r: ToolPromptRow): PromptItem {
+  const b = r.body ?? {};
+  return {
+    id: r.id,
+    slug: r.slug,
+    title: r.name,
+    prompt: b.prompt ?? '',
+    category: isPromptCategory(b.promptCategory) ? b.promptCategory : 'think',
+    source: b.source,
+    sourceUrl: b.sourceUrl,
+  };
+}
+
+export async function listPrompts(): Promise<PromptItem[]> {
+  if (!isSupabaseConfigured()) return IS_DEV ? promptSeed : [];
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from('tools')
+    .select('id, slug, name, body')
+    .eq('category', 'prompt')
+    .eq('status', 'published')
+    .order('created_at', { ascending: false });
+  if (error) {
+    console.warn('[listPrompts]', error.message);
+    return IS_DEV ? promptSeed : [];
+  }
+  const rows = ((data ?? []) as unknown as ToolPromptRow[]).map(mapPromptRow);
+  return rows.length ? rows : IS_DEV ? promptSeed : [];
+}
