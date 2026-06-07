@@ -31,6 +31,8 @@ export interface ToolWhenItem {
 export interface ToolFeature {
   title: string;
   desc: string;
+  /** 선택: 이 기능의 실제 서비스 화면(스크린샷) — 있으면 기능 아래 이미지 영역 표시 */
+  image?: { url: string; caption?: string };
 }
 export interface ToolPricingPlan {
   name: string;
