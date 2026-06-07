@@ -18,9 +18,9 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
   ];
 
   return (
-    <div className="mx-auto max-w-[1100px] px-6 pt-8 pb-20 flex">
+    <div className="mx-auto max-w-[1200px] px-6 pt-8 pb-20 flex gap-0">
       <ToolToc items={tocItems} />
-      <div className="flex-1 min-w-0 max-w-[760px]">
+      <div className="flex-1 min-w-0 max-w-[720px] mx-auto xl:px-10">
       {/* Breadcrumb */}
       <div className="flex items-center gap-1.5 text-[13px] text-ink/50 mb-5">
         <Link href="/tools" className="hover:text-accent">도구 모음</Link>
@@ -183,9 +183,9 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
 
       <ActionsBar />
 
-      {/* Other tools */}
+      {/* Other tools — 모바일/태블릿 (데스크톱은 우측 사이드바) */}
       {related.length > 0 && (
-        <section className="mt-8">
+        <section className="mt-8 xl:hidden">
           <div className="text-base font-extrabold tracking-[-0.02em] mb-3.5">같은 카테고리 도구</div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {related.map((r) => (
@@ -211,6 +211,38 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
         </section>
       )}
       </div>
+
+      {/* 우측: 이어서 보기 (데스크톱) */}
+      {related.length > 0 && (
+        <aside className="hidden xl:block w-[240px] shrink-0 pl-8">
+          <div className="sticky top-20">
+            <div className="text-[13px] font-bold text-ink/40 uppercase tracking-[0.04em] mb-3">
+              이어서 보기
+            </div>
+            <div className="flex flex-col gap-2.5">
+              {related.map((r) => (
+                <Link
+                  key={r.id}
+                  href={`/tools/${r.slug}`}
+                  className="flex items-center gap-3 p-2.5 rounded-lg border border-border hover:border-accent hover:bg-muted transition-colors"
+                >
+                  <div className="w-10 h-10 rounded-md overflow-hidden shrink-0 bg-muted flex items-center justify-center">
+                    {r.thumbnail_url ? (
+                      <img src={r.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-base opacity-50">{r.thumbnail_emoji ?? '🛠️'}</span>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[13px] font-bold tracking-[-0.02em] truncate">{r.name}</div>
+                    <div className="text-[11px] text-ink/50 truncate">{TOOL_CATEGORY_LABELS[r.category]}</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </aside>
+      )}
     </div>
   );
 }
