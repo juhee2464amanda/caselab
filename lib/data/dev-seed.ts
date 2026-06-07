@@ -11,6 +11,7 @@
 import type { ContentRow, CaseBody, JobTag } from '@/types/content';
 import type { Tool } from '@/types/tool';
 import type { PromptItem } from '@/types/prompt';
+import type { GuideItem } from '@/types/guide';
 
 const minimalCaseBody: CaseBody = {
   kind: 'case',
@@ -523,6 +524,120 @@ export const promptSeed: PromptItem[] = [
       '아래 마크다운을 Slack에 그대로 붙여넣을 수 있는 plain text로 변환해 주세요. 굵게는 *별표*, 코드 블록은 ``` 로 유지.',
     category: 'refine',
     source: 'Claude Code',
+  },
+];
+
+// ─────────────────────────────────────────────
+// Guides (mockup guides.html 대표 12개)
+// ─────────────────────────────────────────────
+export const guideSeed: GuideItem[] = [
+  {
+    id: 'seed-guide-1', slug: 'anthropic-prompt-engineering',
+    title: 'Anthropic 프롬프트 엔지니어링 가이드',
+    description: 'Claude를 잘 쓰기 위한 공식 가이드. 프롬프트 구조, 역할 지정, 체인 오브 소트까지.',
+    url: 'https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview',
+    category: 'prompt', source: '공식 문서', sourceType: 'default',
+    thumbLabel: '✳ Claude API Docs', thumbBg: '#f5f5f0', thumbColor: '#1a1a1a',
+    linkLabel: 'docs.anthropic.com',
+  },
+  {
+    id: 'seed-guide-2', slug: 'openai-prompt-best-practices',
+    title: 'OpenAI 프롬프트 베스트 프랙티스',
+    description: 'GPT를 더 정확하게 쓰는 6가지 전략. 예시가 풍부해서 바로 따라할 수 있음.',
+    url: 'https://platform.openai.com/docs/guides/prompt-engineering',
+    category: 'prompt', source: '공식 문서', sourceType: 'default',
+    thumbLabel: 'OpenAI Developers', thumbBg: '#ffffff', thumbColor: '#000000',
+    linkLabel: 'platform.openai.com',
+  },
+  {
+    id: 'seed-guide-3', slug: 'google-gemini-prompt-design',
+    title: 'Google Gemini 프롬프트 디자인 전략',
+    description: 'Gemini 기준 프롬프트 설계 원칙. Few-shot·Chain-of-thought·시스템 인스트럭션 예시.',
+    url: 'https://ai.google.dev/gemini-api/docs/prompting-strategies',
+    category: 'prompt', source: '공식 문서', sourceType: 'default',
+    thumbLabel: 'Google AI for Developers', thumbBg: '#ffffff', thumbColor: '#333333',
+    linkLabel: 'ai.google.dev',
+  },
+  {
+    id: 'seed-guide-4', slug: 'dair-ai-prompt-engineering-guide',
+    title: 'Prompt Engineering Guide — 가장 종합적인 커뮤니티 가이드',
+    description: '프롬프팅·컨텍스트 엔지니어링·RAG·AI 에이전트까지 다루는 75k stars의 종합 가이드. 13개 언어 번역.',
+    url: 'https://github.com/dair-ai/Prompt-Engineering-Guide',
+    category: 'prompt', source: 'GitHub · 커뮤니티', sourceType: 'github',
+    thumbLabel: 'dair-ai / Prompt-Engineering-Guide  ★ 75k', thumbBg: '#0d1117', thumbColor: '#ffffff',
+    linkLabel: 'github.com/dair-ai/Prompt-Engineering-Guide',
+  },
+  {
+    id: 'seed-guide-5', slug: 'anthropic-customer-stories',
+    title: 'Anthropic Customer Stories',
+    description: 'Notion, Slack, Figma 같은 회사가 Claude를 실제 업무에 어떻게 끼워 넣었는지. 산업·규모·제품별 필터 가능.',
+    url: 'https://claude.com/customers',
+    category: 'cases', source: '고객 사례', sourceType: 'default',
+    thumbLabel: '✳ Claude Customers', thumbBg: '#f5f5f0', thumbColor: '#1a1a1a',
+    linkLabel: 'claude.com/customers',
+  },
+  {
+    id: 'seed-guide-6', slug: 'stanford-ai-index',
+    title: 'Stanford AI Index — AI 산업 연례 데이터 리포트',
+    description: '스탠퍼드 HAI가 매년 발표하는 AI 산업 전체 데이터. 투자·인력·모델 성능·정책까지. 가장 인용되는 공식 리포트.',
+    url: 'https://hai.stanford.edu/ai-index',
+    category: 'cases', source: '산업 리포트', sourceType: 'default',
+    thumbLabel: 'Stanford · HAI', thumbBg: '#8c1515', thumbColor: '#ffffff',
+    linkLabel: 'hai.stanford.edu/ai-index',
+  },
+  {
+    id: 'seed-guide-7', slug: 'anthropic-courses',
+    title: 'Anthropic Courses — 공식 무료 코스 5종',
+    description: 'API 기초·프롬프트 엔지니어링·실전 프롬프팅·평가·도구 사용. Anthropic이 직접 만든 인터랙티브 튜토리얼.',
+    url: 'https://github.com/anthropics/courses',
+    category: 'education', source: '무료 코스', sourceType: 'course',
+    thumbLabel: 'anthropics / courses  ★ 21.6k', thumbBg: '#0d1117', thumbColor: '#ffffff',
+    linkLabel: 'github.com/anthropics/courses',
+  },
+  {
+    id: 'seed-guide-8', slug: 'microsoft-genai-for-beginners',
+    title: 'Generative AI for Beginners — Microsoft 공식 21레슨',
+    description: 'Microsoft가 만든 생성형 AI 입문 코스. LLM, 프롬프트 엔지니어링, RAG, 에이전트, 파인튜닝까지 21레슨.',
+    url: 'https://github.com/microsoft/generative-ai-for-beginners',
+    category: 'education', source: '무료 코스', sourceType: 'course',
+    thumbLabel: 'microsoft / gen-ai-for-beginners  ★ 111k', thumbBg: '#0d1117', thumbColor: '#ffffff',
+    linkLabel: 'github.com/microsoft/generative-ai-for-beginners',
+  },
+  {
+    id: 'seed-guide-9', slug: 'anthropic-cookbook',
+    title: 'Anthropic Cookbook — Claude 활용 레시피 모음',
+    description: '분류·RAG·요약·도구 사용·멀티모달·프롬프트 캐싱·파인튜닝까지 실제로 동작하는 노트북·레시피 모음.',
+    url: 'https://github.com/anthropics/anthropic-cookbook',
+    category: 'skills', source: 'GitHub · Anthropic 공식', sourceType: 'github',
+    thumbLabel: 'anthropics / anthropic-cookbook', thumbBg: '#0d1117', thumbColor: '#ffffff',
+    linkLabel: 'github.com/anthropics/anthropic-cookbook',
+  },
+  {
+    id: 'seed-guide-10', slug: 'awesome-chatgpt-prompts',
+    title: 'awesome-chatgpt-prompts — 가장 큰 오픈소스 프롬프트 라이브러리',
+    description: '"세계 최대 오픈소스 프롬프트 라이브러리." 어떤 모델이든 통하는 검증된 프롬프트 수백 개.',
+    url: 'https://github.com/f/awesome-chatgpt-prompts',
+    category: 'skills', source: 'GitHub · 커뮤니티', sourceType: 'github',
+    thumbLabel: 'f / awesome-chatgpt-prompts  ★ 163k', thumbBg: '#0d1117', thumbColor: '#ffffff',
+    linkLabel: 'github.com/f/awesome-chatgpt-prompts',
+  },
+  {
+    id: 'seed-guide-11', slug: 'building-effective-agents',
+    title: 'Building Effective Agents — Anthropic 공식',
+    description: '복잡한 프레임워크보다 단순·조합 가능한 패턴이 성공한다는 Anthropic의 실전 조언. 에이전트 vs 워크플로우 구분이 핵심.',
+    url: 'https://www.anthropic.com/research/building-effective-agents',
+    category: 'agents', source: '연구 글', sourceType: 'default',
+    thumbLabel: '✳ Anthropic Research', thumbBg: '#f5f5f0', thumbColor: '#1a1a1a',
+    linkLabel: 'anthropic.com/research',
+  },
+  {
+    id: 'seed-guide-12', slug: 'model-context-protocol',
+    title: 'MCP — AI 앱과 외부 시스템을 잇는 USB-C 표준',
+    description: 'Claude·ChatGPT·Cursor·VS Code가 모두 따르는 오픈 표준. 데이터·도구·워크플로우를 한 번 만들면 어디서든 연결.',
+    url: 'https://modelcontextprotocol.io',
+    category: 'agents', source: '공식 표준', sourceType: 'default',
+    thumbLabel: '⬡ Model Context Protocol', thumbBg: '#0a0a0a', thumbColor: '#ffffff',
+    linkLabel: 'modelcontextprotocol.io',
   },
 ];
 
