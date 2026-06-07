@@ -8,9 +8,10 @@ interface Props {
   open: boolean;
   onClose: () => void;
   nav: { label: string; href: string }[];
+  onSubscribe?: () => void;
 }
 
-export function MobileNav({ open, onClose, nav }: Props) {
+export function MobileNav({ open, onClose, nav, onSubscribe }: Props) {
   return (
     <div
       className={cn(
@@ -39,6 +40,18 @@ export function MobileNav({ open, onClose, nav }: Props) {
           </button>
         </header>
         <nav className="p-4 space-y-1">
+          {onSubscribe && (
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onSubscribe();
+              }}
+              className="mb-2 block w-full rounded-lg bg-accent px-3 py-2.5 text-center text-sm font-semibold text-white hover:bg-accent-hover transition-colors"
+            >
+              구독하기
+            </button>
+          )}
           {nav.map((n) => (
             <Link
               key={n.href}
