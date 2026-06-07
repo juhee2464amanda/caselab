@@ -30,7 +30,7 @@
 | Supabase | 사용 (Free) | Day 1 |
 | Vercel | 사용 (Hobby 무료) | Day 10 |
 | Google OAuth | 사용 | Day 2 |
-| Kakao OAuth | 사용 (선택) | Day 2 |
+| Kakao OAuth | 사용 (Supabase 기본 provider) | Day 2 |
 | GA4 | 사용 (무료) | Day 8 |
 | 첫 콘텐츠 | 후보 1번 “빈 입력칸…” | Day 3 |
 
@@ -243,12 +243,22 @@ Authentication → **URL Configuration**:
      - `http://localhost:3000/auth/callback`
 5. Supabase Dashboard → Authentication → Providers → Google → Enable → 키 입력 → Save
 
-### 📋 Kakao OAuth (선택)
-Issue #3 본문 참고 + Edge Function 배포 필요. Day 0에서 Cloudflare 안 쓰니까 Kakao OAuth 셋업도 Day 10 이후로 미뤄도 OK.
+### 📋 Kakao OAuth (Supabase 기본 provider — 2026-06-08 완료)
+> 기존 "Edge Function 프록시" 방식 폐기. Supabase 공식 Kakao provider 사용 (§18.12 D69).
+1. [developers.kakao.com](https://developers.kakao.com) → 앱 `케이스랩` (ID 1479618) → 비즈앱 전환(개인 본인인증, 사업자번호 불요) + 앱 아이콘 등록(`public/brand/app-icon-512.png`)
+2. 카카오 로그인 활성화 ON · 동의항목 **닉네임/프로필사진/카카오계정(이메일) 3개 모두 '사용 또는 필수'** (Supabase가 3개 강제 요청 → 하나라도 미설정 시 KOE205)
+3. 플랫폼 키 → REST API 키 수정 → **카카오 로그인 Redirect URI** = `https://<supabase-ref>.supabase.co/auth/v1/callback` + Client Secret 코드 생성·사용함
+4. Supabase Dashboard → Authentication → Providers → **Kakao** Enable → REST API Key + Client Secret 입력 → `Allow users without an email` ON → Save
+
+### 📋 로그인 정책 설정 (§18.12 D70·D71)
+- 로그인 = **소셜 전용**(구글·카카오). 이메일/비번 폼 제거됨
+- **첫 가입 방식만 허용**: Supabase Dashboard → Authentication → Sign In/Providers → **Allow manual linking = ON** (콜백의 unlinkIdentity 동작에 필요)
+- `Confirm email = OFF` 유지
 
 ### 🔍 검증
-- `npm run dev` → `/login` → Google 로그인 → `/onboarding`
+- `npm run dev` → `/login` → Google·Kakao 로그인 → `/onboarding`
 - Supabase Studio → profiles → 본인 row ✓
+- 같은 이메일로 다른 provider 로그인 시도 → `/login?error=email_in_use` 차단 + identities 1개 유지 확인
 
 ---
 

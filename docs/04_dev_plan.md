@@ -42,7 +42,7 @@
 - **폼**: React Hook Form + Zod (jsonb 직렬화)
 - **렌더링**: 메인·트랙 목록·콘텐츠 상세 ISR + **On-Demand Revalidation** (`revalidateTag`), Admin·마이페이지 SSR/CSR
 - **백엔드**: Supabase (Postgres + Auth + Storage + Edge Functions)
-- **인증**: Google OAuth (Supabase 공식 Provider) · **Kakao OAuth (Custom: Supabase Auth + Edge Function 프록시)**
+- **인증**: Google OAuth · Kakao OAuth (둘 다 Supabase 공식 Provider). 소셜 전용 로그인 + 첫 가입 방식 고정 — §18.12 참조
 - **이메일**: Resend (API) + Supabase Edge Function 트리거 · **PDF는 Signed URL 다운로드**
 - **분석**: GA4 (페이지뷰·클릭) + `events` 테이블 (비즈니스 이벤트: deep_read·copy·save·react)
 - **AI 초안**: Anthropic Claude API (운영자 admin 폼) — Phase 1
@@ -551,6 +551,7 @@ caselab/
 - 2026-06-02: **Gmail SMTP → Brevo로 재전환**. 사유: 약관(개인 Gmail 자동 발송 회색지대) + 딜리버러빌리티(Gmail은 자기 도메인 DKIM 못 박음). Brevo 단일 발신자 인증으로 caselab.kr@gmail.com 발신 유지, 일 300건/월 9k 무료, Edge Function 아키텍처 유지(denomailer → Brevo HTTP API fetch)
 - 2026-06-02: **자료실(`/admin/tools`) CRUD 우선 진행 결정** — §18.7 참조
 - 2026-06-02: **Admin 영역 모바일 일괄 적용** — §18.8 참조 (AdminSidebar 드로어 + 8개 페이지 패딩·테이블 overflow + 폼 헤더 wrap)
+- 2026-06-08: **로그인 정책 재정의** — §18.12 참조 (D69 카카오 네이티브 전환·Edge Function 폐기 / D70 소셜 전용·이메일폼 제거 / D71 첫 가입 방식만 허용+차단 / D72 카카오 비즈앱 개인 본인인증)
 
 ### 18.6 다른 세션에서 컨텍스트 파악 시 우선순위
 
@@ -682,6 +683,25 @@ caselab/
 - `caselab_admin` ToolForm (도구 분류 셀렉터 — 별도 repo)
 
 **이월**: 도구 상세 페이지 목업 정합, prompts/guides UI 빌드아웃, dev-seed prompt/guide (별도 작업).
+
+### 18.12 로그인 정책 — 카카오 네이티브 전환 + 소셜 전용 + 첫 가입 방식 고정
+
+**결정 일자**: 2026-06-08
+
+**배경**: §1·Phase 0에 "Kakao OAuth = Supabase Auth + Edge Function 프록시(Custom)"로 적혀 있었으나, ① 비즈앱 전환으로 카카오 `account_email` 동의가 풀려 Supabase **기본 Kakao provider**로 충분해짐 ② Supabase 자동 계정연결(같은 이메일이면 다른 provider도 한 계정에 묶임)로 "카카오로 눌렀는데 구글 계정으로 들어가는" 혼란 발생 ③ 일반 이메일/비번 회원가입은 비번 저장 책임·재설정 메일 인프라 부담이 커서 MVP 보류.
+
+**결정 (4건)**:
+
+| # | 결정 | 영향 |
+|---|---|---|
+| **D69** | Kakao OAuth = **Supabase 기본 provider**로 전환 (Edge Function 프록시 폐기). 코드: `signInWithOAuth({provider:'kakao'})` → `/auth/callback`. `supabase/functions/kakao-oauth/`는 dead code | §1·§8 인증 서술 갱신. 카카오 콘솔 동의항목 3개(account_email·profile_image·profile_nickname) 모두 '사용/필수' 필요(미설정 시 KOE205) |
+| **D70** | **소셜 전용 로그인** (구글·카카오). 로그인 페이지의 이메일/비번 폼 제거. 자체 회원가입·비번찾기는 **출시 후 수요 보고 도입** | `app/(public)/login/page.tsx` 폼·구분선·관련 로직 제거. 비번 저장 책임 회피 |
+| **D71** | **첫 가입 방식만 허용** — 같은 이메일로 최초 가입 provider가 아닌 방식 로그인 시 차단 + "이미 ○○로 가입된 계정" 안내. 자동연결된 identity는 `unlinkIdentity()`로 제거 | `app/auth/callback/route.ts` 재작성(쿠키 버퍼 + identities 검증). Supabase **Manual Linking ON** 필요 |
+| **D72** | 카카오 비즈앱 = **개인 본인인증**으로 전환(사업자등록증 불요). 앱 아이콘 = `public/brand/app-icon*.png` | 이메일 수집 가능. 자세한 운영 메모는 [[project_kakao_login]] |
+
+**한계 (인지함)**: 구글 이메일 ≠ 카카오 이메일이면 별개 계정 2개 생성은 막을 수 없음(공통 키 부재). 향후 계정통합 안내로 대응.
+
+**영향받는 파일**: `app/(public)/login/page.tsx`, `app/auth/callback/route.ts`, `public/brand/app-icon*`. (Edge Function `supabase/functions/kakao-oauth/` = 폐기 예정 dead code)
 
 ---
 
