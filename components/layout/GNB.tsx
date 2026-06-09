@@ -7,7 +7,6 @@ import { Search, User, Menu, ChevronDown } from 'lucide-react';
 import { MegaMenu } from './MegaMenu';
 import { MobileNav } from './MobileNav';
 import { SubscribeModal } from './SubscribeModal';
-import { FEATURED_EBOOK_SLUG } from '@/lib/constants';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { cn } from '@/lib/utils';
@@ -26,8 +25,8 @@ const NAV = [
   { label: 'AI 자료실', href: '/tools', mega: true },
   { label: 'AI 실전케이스', href: '/cases' },
   { label: '바로 쓰는 프롬프트', href: '/prompts' },
-  // mockup: ebook 클릭 → 무료 ebook 상세 직행 (ebook-free.html)
-  { label: 'ebook', href: `/ebooks/${FEATURED_EBOOK_SLUG}` },
+  // ebook 목록으로 (상품 없을 때 404 방지 — 목록은 빈 상태 안내)
+  { label: 'ebook', href: '/ebooks' },
 ];
 
 export function GNB() {
