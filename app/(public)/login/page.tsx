@@ -180,7 +180,13 @@ function LoginInner() {
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-xs text-ink/50">
+        <p className="mt-3 text-center text-xs text-ink/50">
+          <Link href="/forgot-password" className="hover:text-ink/70 underline underline-offset-2">
+            비밀번호를 잊으셨나요?
+          </Link>
+        </p>
+
+        <p className="mt-5 text-center text-xs text-ink/50">
           아직 계정이 없으신가요?{' '}
           <Link href={signupHref} className="text-accent underline underline-offset-2">
             회원가입

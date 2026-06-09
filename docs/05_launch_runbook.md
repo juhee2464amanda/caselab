@@ -256,6 +256,7 @@ Authentication → **URL Configuration**:
 - `Confirm email = OFF` 유지
 - **비밀번호 정책** (§18.13 D74): Authentication → Providers → **Email** → Minimum length **8** + Password Requirements **"letters, digits and symbols"** → Save
 - **마이그레이션 0013** (§18.13 D76): SQL Editor에 `supabase/migrations/0013_signup_consent.sql` Run (newsletter 옵트인 + 트리거 동의값 반영)
+- **비밀번호 재설정용 커스텀 SMTP** (§18.13 D77): Authentication → Emails → **Custom SMTP** 활성화 → Brevo SMTP(host `smtp-relay.brevo.com`, port 587, login=Brevo SMTP 로그인, password=Brevo SMTP key, sender=`caselab.kr@gmail.com`/케이스랩). 미연결 시 기본 메일은 rate-limit이라 재설정 메일 미도달 위험
 
 ### 🔍 검증
 - `npm run dev` → `/login` → Google·Kakao 로그인 → `/onboarding`
