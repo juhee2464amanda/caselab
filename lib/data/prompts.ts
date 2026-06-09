@@ -9,6 +9,7 @@ type ToolPromptRow = {
   id: string;
   slug: string;
   name: string;
+  pick_order: number | null;
   body: {
     prompt?: string;
     promptCategory?: string;
@@ -31,6 +32,7 @@ function mapPromptRow(r: ToolPromptRow): PromptItem {
     category: isPromptCategory(b.promptCategory) ? b.promptCategory : 'think',
     source: b.source,
     sourceUrl: b.sourceUrl,
+    pickOrder: r.pick_order ?? null,
   };
 }
 
@@ -39,7 +41,7 @@ export async function listPrompts(): Promise<PromptItem[]> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from('tools')
-    .select('id, slug, name, body')
+    .select('id, slug, name, pick_order, body')
     .eq('category', 'prompt')
     .eq('status', 'published')
     .order('created_at', { ascending: false });
