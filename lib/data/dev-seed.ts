@@ -1125,6 +1125,7 @@ export const promptSeed: PromptItem[] = [
     source: 'Anthropic 공식',
     sourceUrl:
       'https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview',
+    pickOrder: 1,
   },
   {
     id: 'seed-prompt-2',
@@ -1170,6 +1171,7 @@ export const promptSeed: PromptItem[] = [
       '방금 답변에서 사실과 다를 수 있는 부분, 논리적 약점, 빠진 관점 3개를 찾아 주세요.',
     category: 'verify',
     source: 'Anthropic 공식',
+    pickOrder: 2,
   },
   {
     id: 'seed-prompt-7',
@@ -1188,6 +1190,15 @@ export const promptSeed: PromptItem[] = [
       '아래 마크다운을 Slack에 그대로 붙여넣을 수 있는 plain text로 변환해 주세요. 굵게는 *별표*, 코드 블록은 ``` 로 유지.',
     category: 'refine',
     source: 'Claude Code',
+  },
+  {
+    id: 'seed-prompt-9',
+    slug: 'pre-mortem-decision',
+    title: '의사결정 프리모템— 6개월 뒤 실패를 가정하고 역추적',
+    prompt:
+      '지금 우리가 내리려는 결정을 아래 절차로 검증해 주세요.\n1) 6개월 뒤 이 결정이 "완전히 실패했다"고 가정합니다.\n2) 실패로 이어진 가장 그럴듯한 원인 5개를 가능성 높은 순으로 적어주세요.\n3) 각 원인마다 (a) 지금 미리 관측할 수 있는 조기 신호 1개와 (b) 그 신호를 줄이기 위한 사전 조치 1개를 한 줄로 덧붙여주세요.\n4) 마지막으로, 5개 중 "지금 당장 손쓰지 않으면 가장 치명적인" 1개를 골라 이유와 함께 말해주세요.',
+    category: 'verify',
+    source: 'Caselab 검증',
   },
 ];
 
