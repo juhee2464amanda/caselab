@@ -2,7 +2,10 @@
 
 import { Suspense, useState, useTransition } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
@@ -25,6 +28,18 @@ const PROVIDER_LABEL: Record<string, string> = {
   kakao: '카카오',
   email: '이메일',
 };
+
+/** signInWithPassword 에러를 사용자 친화적으로 변환 */
+function translateLoginError(message: string): string {
+  const m = message.toLowerCase();
+  if (m.includes('invalid login credentials') || m.includes('invalid')) {
+    return '이메일 또는 비밀번호가 올바르지 않아요.';
+  }
+  if (m.includes('email not confirmed')) {
+    return '이메일 인증이 필요해요.';
+  }
+  return '로그인 처리 중 문제가 발생했어요. 다시 시도해 주세요.';
+}
 
 /** Google 공식 4-color "G" 마크 */
 function GoogleIcon({ className }: { className?: string }) {
@@ -64,7 +79,10 @@ function LoginInner() {
     }
     return ERROR_MESSAGES[errorParam] ?? '로그인에 실패했어요. 다시 시도해 주세요.';
   });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [pending, startTransition] = useTransition();
+  const router = useRouter();
   const supabase = createSupabaseBrowserClient();
 
   function loginWith(provider: 'google' | 'kakao') {
@@ -82,6 +100,18 @@ function LoginInner() {
     });
   }
 
+  function loginEmail(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    startTransition(async () => {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) setError(translateLoginError(error.message));
+      else router.push(next);
+    });
+  }
+
+  const signupHref = next === '/' ? '/signup' : `/signup?next=${encodeURIComponent(next)}`;
+
   return (
     <div className="min-h-[80vh] grid place-items-center px-4 py-10">
       <div className="w-full max-w-sm">
@@ -89,7 +119,7 @@ function LoginInner() {
           케이스랩
         </Link>
         <p className="text-center text-sm text-ink/60 mb-8">
-          간편하게 소셜 계정으로 시작하세요.
+          소셜 또는 이메일로 로그인하세요.
         </p>
 
         {error && (
@@ -120,8 +150,41 @@ function LoginInner() {
           </button>
         </div>
 
+        {/* 소셜 가입은 폼이 없으므로 약관·개인정보는 고지(간주 동의). 마케팅 동의는 온보딩에서 별도 수집 */}
+        <p className="mt-3 text-center text-[11px] leading-relaxed text-ink/40 keepall">
+          소셜 계정으로 계속하면{' '}
+          <Link href="/legal/terms" target="_blank" className="underline underline-offset-2">이용약관</Link> 및{' '}
+          <Link href="/legal/privacy" target="_blank" className="underline underline-offset-2">개인정보처리방침</Link>에 동의하는 것으로 간주됩니다.
+        </p>
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-border" />
+          </div>
+          <div className="relative flex justify-center text-xs">
+            <span className="bg-bg px-2 text-ink/40">또는 이메일</span>
+          </div>
+        </div>
+
+        <form onSubmit={loginEmail} className="space-y-3">
+          <div>
+            <Label htmlFor="email">이메일</Label>
+            <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
+          </div>
+          <div>
+            <Label htmlFor="password">비밀번호</Label>
+            <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
+          </div>
+          <Button type="submit" variant="accent" className="w-full" disabled={pending}>
+            {pending ? '로그인 중…' : '로그인'}
+          </Button>
+        </form>
+
         <p className="mt-6 text-center text-xs text-ink/50">
-          처음이신가요? 위 소셜 로그인으로 자동 가입돼요.
+          아직 계정이 없으신가요?{' '}
+          <Link href={signupHref} className="text-accent underline underline-offset-2">
+            회원가입
+          </Link>
         </p>
       </div>
     </div>
