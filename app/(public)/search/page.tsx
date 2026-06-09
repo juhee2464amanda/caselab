@@ -3,6 +3,7 @@ import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase
 import { Input } from '@/components/ui/input';
 import { TimeBadge } from '@/components/content/TimeBadge';
 import { JobTags } from '@/components/content/JobTags';
+import { SearchTracker } from '@/components/analytics/SearchTracker';
 
 export default async function SearchPage({
   searchParams,
@@ -26,9 +27,12 @@ export default async function SearchPage({
       </header>
 
       {query && (
-        <p className="mb-4 text-sm text-ink/60">
-          “{query}” 결과 {results.length}건
-        </p>
+        <>
+          <SearchTracker keyword={query} resultsCount={results.length} />
+          <p className="mb-4 text-sm text-ink/60">
+            “{query}” 결과 {results.length}건
+          </p>
+        </>
       )}
       <ul className="space-y-3">
         {results.map((it) => (

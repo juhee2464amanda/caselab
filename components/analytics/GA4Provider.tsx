@@ -4,6 +4,7 @@ import Script from 'next/script';
 import { useEffect, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { GA_ID, pageview } from '@/lib/analytics/ga4';
+import { track } from '@/lib/analytics/track';
 
 const CONSENT_KEY = 'caselab.consent.analytics';
 
@@ -52,9 +53,11 @@ export function GA4Provider() {
   }, []);
 
   useEffect(() => {
-    if (!GA_ID) return;
-    // pageview는 consent와 무관하게 gtag에 전달 (Consent Mode v2가 차단 여부 결정)
-    pageview(pathname + (params.toString() ? `?${params}` : ''));
+    const path = pathname + (params.toString() ? `?${params}` : '');
+    // 자체 events 적재 — GA4 유무와 무관 (UV/PV 원천). track.ts가 user_id·UTM 처리
+    void track('pv', { path });
+    // GA4 pageview는 consent와 무관하게 gtag에 전달 (Consent Mode v2가 차단 여부 결정)
+    if (GA_ID) pageview(path);
   }, [pathname, params]);
 
   if (!GA_ID) return null;

@@ -95,7 +95,7 @@ export default async function CaseDetailPage({
             {body.caseIntro && body.caseIntro.length > 0 && (
               <section id="s2" className="pt-11 mt-11 border-t border-border">
                 <SectionHeader num="02" title="어떤 케이스를 다루나요" />
-                {renderBlocks(body.caseIntro, 'intro')}
+                {renderBlocks(body.caseIntro, 'intro', content.id)}
               </section>
             )}
 
@@ -154,7 +154,7 @@ export default async function CaseDetailPage({
             {!body.forWho && !body.stepCards && (
               <section id="s1" className="pt-2">
                 <SectionHeader num="01" title="본질" />
-                {renderBlocks(body.essence, 'essence')}
+                {renderBlocks(body.essence, 'essence', content.id)}
                 <div className="pt-11 mt-11 border-t border-border">
                   <SectionHeader num="02" title="Framework" />
                   <div className="space-y-10">
@@ -168,7 +168,7 @@ export default async function CaseDetailPage({
                             {step.description}
                           </p>
                         )}
-                        {renderBlocks(step.blocks, `step-${i}`)}
+                        {renderBlocks(step.blocks, `step-${i}`, content.id)}
                       </div>
                     ))}
                   </div>

@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { createSupabaseBrowserClient } from '@/lib/supabase/client';
-import { track } from './ga4';
+import { track } from './track';
 
 interface Options {
   contentId: string;
@@ -30,17 +29,11 @@ export function useDeepRead({
     let timer: number | null = null;
     let fired = false;
 
-    const supabase = createSupabaseBrowserClient();
-
     function fire() {
       if (fired) return;
       fired = true;
-      track('deep_read', { content_id: contentId });
-      // events 테이블 insert (anon으로도 허용)
-      supabase
-        .from('events')
-        .insert({ content_id: contentId, event_type: 'deep_read' })
-        .then(() => undefined, () => undefined);
+      // 단일 경로(track.ts): events.deep_read + user_id + GA4
+      void track('deep_read', { content_id: contentId });
     }
 
     const observer = new IntersectionObserver(

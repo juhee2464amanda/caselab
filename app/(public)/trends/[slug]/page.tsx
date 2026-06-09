@@ -87,7 +87,7 @@ export default async function TrendDetailPage({
             {body.what && body.what.length > 0 && (
               <section id="s1" className="pt-2">
                 <SectionHeader num={num()} title="무슨 소식이에요" />
-                {renderBlocks(body.what, 'what')}
+                {renderBlocks(body.what, 'what', content.id)}
               </section>
             )}
 
@@ -95,7 +95,7 @@ export default async function TrendDetailPage({
             {body.why && body.why.length > 0 && (
               <section id="s2" className="pt-11 mt-11 border-t border-border">
                 <SectionHeader num={num()} title="왜 지금 화두예요" />
-                {renderBlocks(body.why, 'why')}
+                {renderBlocks(body.why, 'why', content.id)}
               </section>
             )}
 
@@ -135,7 +135,7 @@ export default async function TrendDetailPage({
             {body.deepDive && body.deepDive.length > 0 && (
               <section id="s5" className="pt-11 mt-11 border-t border-border">
                 <SectionHeader num={num()} title="좀 더 들어가면" />
-                {renderBlocks(body.deepDive, 'deep')}
+                {renderBlocks(body.deepDive, 'deep', content.id)}
               </section>
             )}
 
@@ -144,7 +144,7 @@ export default async function TrendDetailPage({
               <section id="s6" className="pt-11 mt-11 border-t border-border">
                 <SectionHeader num={num()} title="그래서, 내 일엔?" />
                 <div className="rounded-xl border border-accent/20 bg-accent-50/40 p-5">
-                  {renderBlocks(body.soWhat, 'so')}
+                  {renderBlocks(body.soWhat, 'so', content.id)}
                 </div>
               </section>
             )}

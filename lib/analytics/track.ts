@@ -33,7 +33,8 @@ export type EventType =
   | 'scroll_25'
   | 'scroll_50'
   | 'scroll_100'
-  | 'search';
+  | 'search'
+  | 'product_view';
 
 /**
  * GA4 event name 매핑. D21 결정 — Phase 4 PG 도입 시점에 ebook_order → 'purchase' 매핑 활성.
@@ -54,6 +55,30 @@ const GA4_EVENT_NAME: Record<EventType, string> = {
   scroll_50: 'scroll',
   scroll_100: 'scroll',
   search: 'search',
+  product_view: 'product_view',
+};
+
+/**
+ * DB event_type 매핑 — events 테이블·SQL 뷰(weekly_kpi/get_daily_trend)·admin 쿼리 정합.
+ * 일부 EventType은 같은 DB 이벤트로 통합(pv→pageview, react_up/down→react. 방향은 metadata.direction).
+ */
+const DB_EVENT_NAME: Record<EventType, string> = {
+  pv: 'pageview',
+  deep_read: 'deep_read',
+  prompt_copy: 'prompt_copy',
+  save: 'save',
+  react_up: 'react',
+  react_down: 'react',
+  cta_click: 'cta_click',
+  ebook_order: 'ebook_order',
+  ebook_download: 'ebook_download',
+  ebook_read_page: 'ebook_read_page',
+  ebook_finish: 'ebook_finish',
+  scroll_25: 'scroll_25',
+  scroll_50: 'scroll_50',
+  scroll_100: 'scroll_100',
+  search: 'search',
+  product_view: 'product_view',
 };
 
 /**
@@ -69,17 +94,23 @@ export async function track(
   // 1) events 테이블 적재 (anon RLS 허용, 익명 사용자도 적재 가능)
   try {
     const supabase = createSupabaseBrowserClient();
-    const { content_id, ...rest } = merged as { content_id?: string } & Record<
-      string,
-      unknown
-    >;
-    await supabase
-      .from('events')
-      .insert({
-        event_type: eventType,
-        content_id: content_id ?? null,
-        metadata: rest,
-      });
+    const { content_id, product_id, ...rest } = merged as {
+      content_id?: string;
+      product_id?: string;
+    } & Record<string, unknown>;
+    // user_id 채움 — UV distinct 집계 원천 (getSession은 로컬, 네트워크 없음)
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const row: Record<string, unknown> = {
+      event_type: DB_EVENT_NAME[eventType],
+      content_id: content_id ?? null,
+      user_id: session?.user?.id ?? null,
+      metadata: rest,
+    };
+    // product_id는 값이 있을 때만 포함 (0011 미적용 환경에서 일반 이벤트 insert 실패 방지)
+    if (product_id) row.product_id = product_id;
+    await supabase.from('events').insert(row);
   } catch {
     // silent
   }

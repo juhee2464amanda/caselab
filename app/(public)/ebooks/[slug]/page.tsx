@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { ArrowRight, Star } from 'lucide-react';
 import { getProductBySlug } from '@/lib/data/products';
 import { Button } from '@/components/ui/button';
+import { ProductViewTracker } from '@/components/analytics/ProductViewTracker';
 
 export const revalidate = 60;
 
@@ -52,6 +53,7 @@ export default async function EbookDetailPage({
 
   return (
     <div className="mx-auto max-w-[1000px] px-6 py-10 pb-20">
+      <ProductViewTracker productId={book.id} />
       {/* Hero */}
       <section className="grid gap-8 md:grid-cols-[260px_1fr] items-start">
         <div className="aspect-[3/4] rounded-lg bg-white border border-border relative overflow-hidden shadow-elevated">
