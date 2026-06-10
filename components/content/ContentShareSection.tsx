@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { shareToKakao } from '@/lib/kakao';
 
 export function ContentShareSection({
   url,
@@ -22,17 +23,11 @@ export function ContentShareSection({
     }
   }
 
-  function shareKakao() {
+  async function shareKakao() {
     if (typeof window === 'undefined') return;
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      navigator.share({ title, url }).catch(() => {});
-    } else {
-      window.open(
-        `https://story.kakao.com/share?url=${encodeURIComponent(url)}`,
-        '_blank',
-        'width=600,height=400'
-      );
-    }
+    // Kakao JS SDK 공유 팝업. SDK 불가(키 없음/로드 실패) 시 링크 복사로 폴백.
+    const ok = await shareToKakao({ url, title });
+    if (!ok) await copyLink();
   }
 
   function shareTwitter() {
