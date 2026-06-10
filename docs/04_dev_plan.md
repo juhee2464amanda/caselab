@@ -553,6 +553,7 @@ caselab/
 - 2026-06-02: **Admin 영역 모바일 일괄 적용** — §18.8 참조 (AdminSidebar 드로어 + 8개 페이지 패딩·테이블 overflow + 폼 헤더 wrap)
 - 2026-06-08: **로그인 정책 재정의** — §18.12 참조 (D69 카카오 네이티브 전환·Edge Function 폐기 / D70 소셜 전용·이메일폼 제거 / D71 첫 가입 방식만 허용+차단 / D72 카카오 비즈앱 개인 본인인증)
 - 2026-06-09: **이메일 회원가입 부활 + 동의·비밀번호 정책** — §18.13 참조 (D73 /signup·이메일폼 복원 / D74 비번 8자+영숫특 / D75 동의 UI 필수·선택 / D76 newsletter 옵트인+0013), PR #42
+- 2026-06-10: **P1 두 건 해결 (Featured 예약노출 + Brevo 동기화)** — §18.14 참조. ① 공개 Hero를 `featured_contents`(slot_type='hero' + featured_from/until 날짜창) 기반 재배선(이전엔 `contents.curated`만 봄). ② `newsletter_subscribers` → Brevo 동기화 트리거+Edge Function(`sync-brevo-contact`) 신설·prod 배포·검증 완료(list #3).
 
 ### 18.6 다른 세션에서 컨텍스트 파악 시 우선순위
 
@@ -721,6 +722,27 @@ caselab/
 | **D77** | 비밀번호 찾기/재설정 추가 — `/forgot-password`(`resetPasswordForEmail`) + `/reset-password`. 재설정 링크는 **token_hash 방식**(`{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery`)이고, **검증은 새 비번 제출 시점에만**(`verifyOtp`→`updateUser`) 수행 → 메일 스캐너 prefetch가 일회용 토큰을 소진하는 문제 + PKCE 브라우저 의존 문제를 동시 회피. 발송 메일 = **Supabase 커스텀 SMTP(Brevo)** + 한국어 이메일 템플릿 | `/login`에 "비밀번호를 잊으셨나요?" 링크. "아이디 찾기"는 ID=이메일이라 불필요 |
 
 **영향받는 파일**: `app/(public)/{signup,forgot-password,reset-password}/page.tsx`(신규), `app/(public)/login/page.tsx`, `app/(public)/onboarding/page.tsx`, `components/layout/Footer.tsx`, `supabase/migrations/0013_signup_consent.sql`.
+
+### 18.14 P1 두 건 — Featured 예약노출 + Brevo 동기화 (2026-06-10)
+
+**결정 일자**: 2026-06-10
+
+**배경**: 출시 점검에서 P1 두 건 발견 — ① admin이 `featured_contents`(slot/날짜)에 큐레이션해도 공개 Hero는 `contents.curated` 플래그만 봐서 슬롯·예약노출이 전부 무시됨. ② 구독모달이 `newsletter_subscribers`에 적재만 하고 Brevo 리스트 동기화가 미구현(0007 주석의 "Day 9 트리거"가 빈 칸).
+
+**① Featured 예약 노출 — 공개 Hero 재배선**
+- `lib/data/contents.ts`에 `listFeaturedContents()` 신설: `featured_contents`(slot_type='hero', active=true) 읽고 **예약창**(`featured_from <= now <= featured_until`, null=상시) 필터 + slot 순 정렬 + contents `!inner`(published만). 비거나 미구성이면 `curated` 폴백.
+- `app/(public)/page.tsx` Hero가 `listFeaturedContents(5)` 사용.
+- **남은 후속(caselab_admin 레포)**: `CurationManager`는 현재 `sort_label`만 쓰고 `featured_from/until` 입력 UI가 없음 → admin에 날짜 프리셋(1주/2달) 입력 추가해야 예약이 실제로 채워짐. ([[project_admin_crud_queue]]에 누적)
+- **스키마 drift 주의**: repo 마이그레이션(0010)은 `featured_contents.slot`/`unique(slot)`만 있으나 prod/admin은 `slot_type`/`unique(slot_type,slot)` 사용. 쿼리는 prod 실스키마에 맞춤. 정합 마이그레이션 별도 필요.
+
+**② Brevo 동기화 — end-to-end 구현·배포 완료**
+- Edge Function `supabase/functions/sync-brevo-contact/` 신설 (Brevo Contacts upsert/blacklist, `BREVO_NEWSLETTER_LIST_ID`).
+- 마이그레이션 `0014_newsletter_brevo_sync.sql`: `newsletter_subscribers` insert/status변경 → 위 함수 호출 트리거.
+- **⚠️ 아키텍처 변경**: Supabase 관리형은 `ALTER DATABASE SET app.*` 가 막힘(42501) → GUC 대신 **Supabase Vault**(`vault.create_secret`/`decrypted_secrets`)로 `sync_brevo_url`·`service_role_key` 보관. 기존 send-ebook/profiles 트리거(0002)도 같은 GUC 의존이라 실제론 미작동 상태였음 → **send-ebook도 같은 Vault 방식 전환 필요(후속)**.
+- **검증**: 2026-06-10 prod 테스트 insert → Brevo `caselab-newsletter`(list #3)에 컨택 적재 확인(API 직접 검증).
+- **주의**: 붙여넣기 공백 혼입으로 URL/키가 깨지면 `regexp_replace(..., '\s','','g')`로 정리. 검증: `select length(decrypted_secret), decrypted_secret ~ '\s' from vault.decrypted_secrets where name=...`.
+
+**영향받는 파일**: `lib/data/contents.ts`, `app/(public)/page.tsx`, `supabase/functions/sync-brevo-contact/index.ts`, `supabase/migrations/0014_newsletter_brevo_sync.sql`.
 
 ---
 
