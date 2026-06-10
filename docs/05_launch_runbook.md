@@ -465,7 +465,7 @@ open http://localhost:3000/sitemap.xml
 - Brevo API Key 발급 + Supabase secrets 3종 등록 완료
 - `send-ebook` Edge Function 배포 (Brevo HTTP API 사용)
 - 본인 이메일로 전자책 주문 → 1분 내 PDF 다운로드 링크 도착
-- **(이월) `newsletter_subscribers`(0007) → Brevo Contact 동기화 트리거 추가** — 비로그인 구독자도 Brevo 리스트 반영. 기존 `trg_sync_brevo_contact`(profiles) 패턴 재사용. SubscribeModal은 이미 `newsletter_subscribers`에 적재 중.
+- ✅ **(2026-06-10 완료) `newsletter_subscribers` → Brevo 동기화** — 아래 "newsletter 동기화" 절차 참조. prod 배포·검증 완료(§18.14).
 
 ### 📋 Brevo 단일 발신자 인증 (~5분)
 1. [brevo.com](https://www.brevo.com/) 가입 (Google 로그인 가능). Day 0에 이미 가입했으면 패스.
@@ -488,6 +488,25 @@ supabase secrets set BREVO_SENDER_EMAIL=caselab.kr@gmail.com
 supabase secrets set BREVO_SENDER_NAME=케이스랩
 supabase secrets set SITE_URL=https://<your>.vercel.app   # Day 10 후 갱신
 supabase functions deploy send-ebook
+```
+
+### 📋 newsletter 동기화 — `sync-brevo-contact` 배포 (2026-06-10 완료, 재현용)
+> 비로그인 구독자(`newsletter_subscribers`)를 Brevo 리스트에 자동 적재. SubscribeModal은 이미 적재 중.
+> ⚠️ Supabase 관리형은 `ALTER DATABASE SET app.*`가 막힘(42501) → **Vault**로 시크릿 보관.
+```bash
+# 1) Brevo Contacts → Lists 에서 뉴스레터 리스트 생성, 숫자 ID 확인 (prod = #3 caselab-newsletter)
+supabase secrets set BREVO_NEWSLETTER_LIST_ID=3 --project-ref <ref>   # BREVO_API_KEY는 send-ebook과 공유
+supabase functions deploy sync-brevo-contact --project-ref <ref>
+```
+SQL Editor에서 (마이그레이션 `0014` 전체 Run 후):
+```sql
+-- Vault에 시크릿 2개 (붙여넣기 공백 혼입 주의 — 깨지면 regexp_replace로 정리)
+select vault.create_secret('https://<ref>.supabase.co/functions/v1/sync-brevo-contact', 'sync_brevo_url');
+select vault.create_secret('<SERVICE_ROLE_KEY eyJ...>', 'service_role_key');
+-- 검증: sync_brevo_url len=72, has_space=false 여야 함
+select name, length(decrypted_secret) len, decrypted_secret ~ '\s' has_space
+from vault.decrypted_secrets where name in ('sync_brevo_url','service_role_key');
+-- 테스트: insert into newsletter_subscribers(...) → Brevo 리스트에 컨택 적재 확인
 ```
 
 ### 📋 전자책 PDF 업로드 (첫 책 한 번)
