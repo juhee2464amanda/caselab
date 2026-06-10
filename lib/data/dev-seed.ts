@@ -1330,8 +1330,20 @@ export const productSeed: ProductRow[] = [
     thumbnail_url: null,
     body: {
       subtitle: '1주 실험 노트 — 기획·마케팅·영업에서 직접 써본 AI 워크플로우 12개',
+      lead: 'AI 강의에 돈을 써도 일에 옮기지 못하는 데는 이유가 있습니다.\n1주 실험 노트로 시작하는 실무 AI 워크플로우 12개.',
+      author: 'Caselab',
+      detailImages: [
+        'https://jsresrgzrsxotopfzpos.supabase.co/storage/v1/object/public/content-images/ebook/free-ebook-detail.jpg',
+      ],
       rating: 4.8,
       reviewCount: 127,
+      ratingDist: [
+        { score: 5, count: 99 },
+        { score: 4, count: 19 },
+        { score: 3, count: 6 },
+        { score: 2, count: 2 },
+        { score: 1, count: 1 },
+      ],
       format: 'PDF + 전자책 뷰어',
       volume: '45분 분량 (약 80페이지)',
       jobs: '기획 · 마케팅 · 영업',
