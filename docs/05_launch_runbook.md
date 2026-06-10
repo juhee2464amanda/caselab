@@ -466,6 +466,7 @@ open http://localhost:3000/sitemap.xml
 - `send-ebook` Edge Function 배포 (Brevo HTTP API 사용)
 - 본인 이메일로 전자책 주문 → 1분 내 PDF 다운로드 링크 도착
 - ✅ **(2026-06-10 완료) `newsletter_subscribers` → Brevo 동기화** — 아래 "newsletter 동기화" 절차 참조. prod 배포·검증 완료(§18.14).
+- ✅ **(2026-06-10 완료) send-ebook 자동발송 트리거 Vault 전환** — `0002`의 GUC 트리거가 prod에서 미작동이던 것을 `0015`로 복구. 아래 "send-ebook Vault 설정" 절차 참조 (§18.15).
 
 ### 📋 Brevo 단일 발신자 인증 (~5분)
 1. [brevo.com](https://www.brevo.com/) 가입 (Google 로그인 가능). Day 0에 이미 가입했으면 패스.
@@ -489,6 +490,18 @@ supabase secrets set BREVO_SENDER_NAME=케이스랩
 supabase secrets set SITE_URL=https://<your>.vercel.app   # Day 10 후 갱신
 supabase functions deploy send-ebook
 ```
+
+### 📋 send-ebook Vault 설정 — 자동발송 트리거 (2026-06-10 `0015`로 복구)
+> ⚠️ `0002`의 send-ebook 트리거는 GUC(`current_setting('app.*')`) 의존이라 prod에서 GUC 차단(42501)으로 **출시 이후 미작동**이었음. `0015`에서 Vault 방식으로 전환. 위 secrets 등록·함수 배포 외에 **아래 Vault 시크릿 등록이 있어야 자동발송이 작동**한다.
+```sql
+-- SQL Editor에서 (마이그레이션 0015 전체 Run 전/후):
+select vault.create_secret('https://<ref>.supabase.co/functions/v1/send-ebook', 'send_ebook_url');
+-- service_role_key 는 newsletter 동기화(아래)에서 이미 등록했으면 재사용 — 없으면 같이 등록
+-- 검증: send_ebook_url has_space=false 여야 함
+select name, length(decrypted_secret) len, decrypted_secret ~ '\s' has_space
+from vault.decrypted_secrets where name in ('send_ebook_url','service_role_key');
+```
+> 미설정 시 트리거는 silent skip — 주문 적재(`purchases`)는 정상, 메일 발송만 보류. 그땐 아래 "검증"의 수동 curl 트리거로 함수 자체는 점검 가능.
 
 ### 📋 newsletter 동기화 — `sync-brevo-contact` 배포 (2026-06-10 완료, 재현용)
 > 비로그인 구독자(`newsletter_subscribers`)를 Brevo 리스트에 자동 적재. SubscribeModal은 이미 적재 중.
