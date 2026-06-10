@@ -26,4 +26,9 @@ export interface PromptItem {
   source?: string;
   /** 출처 외부 링크 (있으면 칩 클릭 시 새 탭) */
   sourceUrl?: string;
+  /**
+   * 에디터 PICK 상단노출 순서 (tools.pick_order).
+   * null = 일반(최신순 누적), 숫자 = PICK 밴드에 노출되며 작을수록 앞.
+   */
+  pickOrder?: number | null;
 }
