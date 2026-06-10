@@ -221,11 +221,6 @@ export default async function EbookDetailPage({
                 </div>
               ))}
             </div>
-            <Link href={orderHref} className="mt-6 block">
-              <span className="flex w-full items-center justify-center rounded-[10px] bg-accent px-4 py-4 text-base font-bold text-white transition-colors hover:bg-accent-700">
-                {cta}
-              </span>
-            </Link>
           </section>
         )}
 
@@ -306,7 +301,7 @@ export default async function EbookDetailPage({
         </div>
 
         {/* 공유 */}
-        <EbookShare />
+        <EbookShare title={book.title} imageUrl={book.thumbnail_url ?? body.detailImages?.[0]} />
       </div>
     </>
   );
