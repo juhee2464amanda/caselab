@@ -5,8 +5,10 @@ import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase
 type Row = {
   content_id: string | null;
   tool_id: string | null;
+  product_id: string | null;
   contents: { slug: string; track: 'case' | 'trend'; title: string } | null;
   tools: { slug: string; name: string } | null;
+  products: { slug: string; title: string } | null;
 };
 
 export default async function LikedPage() {
@@ -16,7 +18,7 @@ export default async function LikedPage() {
   if (!user) redirect('/login?next=/mypage/liked');
   const { data } = await supabase
     .from('reactions')
-    .select('content_id, tool_id, contents(slug, track, title), tools(slug, name)')
+    .select('content_id, tool_id, product_id, contents(slug, track, title), tools(slug, name), products(slug, title)')
     .eq('user_id', user.id)
     .eq('type', 'like')
     .order('created_at', { ascending: false });
@@ -32,12 +34,17 @@ export default async function LikedPage() {
           {items.map((it, i) => {
             const c = it.contents;
             const t = it.tools;
-            if (!c && !t) return null;
-            const href = c ? `/${c.track === 'case' ? 'cases' : 'trends'}/${c.slug}` : `/tools/${t!.slug}`;
-            const title = c ? c.title : t!.name;
-            const badge = c ? (c.track === 'case' ? '케이스' : '트렌드') : '도구';
+            const p = it.products;
+            if (!c && !t && !p) return null;
+            const href = c
+              ? `/${c.track === 'case' ? 'cases' : 'trends'}/${c.slug}`
+              : t
+                ? `/tools/${t.slug}`
+                : `/ebooks/${p!.slug}`;
+            const title = c ? c.title : t ? t.name : p!.title;
+            const badge = c ? (c.track === 'case' ? '케이스' : '트렌드') : t ? '도구' : '전자책';
             return (
-              <li key={it.content_id ?? it.tool_id ?? i} className="card p-4 flex items-center gap-2">
+              <li key={it.content_id ?? it.tool_id ?? it.product_id ?? i} className="card p-4 flex items-center gap-2">
                 <span className="badge shrink-0">{badge}</span>
                 <Link href={href} className="font-medium">
                   {title}

@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { ArrowRight, Star } from 'lucide-react';
 import { getProductBySlug } from '@/lib/data/products';
 import { Button } from '@/components/ui/button';
+import { ActionsBar } from '@/components/content/ActionsBar';
+import { ReviewSection } from '@/components/content/ReviewSection';
 
 export const revalidate = 60;
 
@@ -47,7 +49,7 @@ export default async function EbookDetailPage({
     body.intro?.length && { id: 'intro', label: '책 소개' },
     body.toc?.length && { id: 'toc', label: '목차' },
     body.whoFor?.length && { id: 'who', label: '이런 분에게' },
-    body.reviews?.length && { id: 'reviews', label: `리뷰 ${body.reviewCount ?? body.reviews?.length}` },
+    { id: 'reviews', label: '리뷰' },
   ].filter(Boolean) as { id: string; label: string }[];
 
   return (
@@ -102,6 +104,8 @@ export default async function EbookDetailPage({
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
+
+          <ActionsBar productId={book.id} />
         </div>
       </section>
 
@@ -162,32 +166,10 @@ export default async function EbookDetailPage({
         </section>
       )}
 
-      {/* 리뷰 */}
-      {body.reviews && body.reviews.length > 0 && (
-        <section id="reviews" className="mb-12 scroll-mt-28">
-          <div className="flex items-baseline gap-3 mb-5">
-            <h2 className="text-xl font-extrabold tracking-[-0.025em]">리뷰</h2>
-            {body.rating != null && (
-              <span className="flex items-center gap-1.5 text-sm">
-                <Stars rating={body.rating} />
-                <span className="font-bold">{body.rating.toFixed(1)}</span>
-                {body.reviewCount != null && <span className="text-ink/40">· {body.reviewCount}개</span>}
-              </span>
-            )}
-          </div>
-          <div className="space-y-3 max-w-[680px]">
-            {body.reviews.map((r, i) => (
-              <div key={i} className="p-4 border border-border rounded-xl bg-white">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-sm font-bold">{r.author}</span>
-                  <Stars rating={r.rating} />
-                </div>
-                <p className="text-[13.5px] text-ink/70 leading-relaxed break-keep">{r.text}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      {/* 리뷰 — DB 배선 (구매자만 작성) */}
+      <div id="reviews">
+        <ReviewSection productId={book.id} requirePurchase />
+      </div>
 
       {/* 하단 CTA */}
       <section className="card p-8 text-center">
