@@ -7,7 +7,7 @@ import { EbookToc } from '@/components/ebook/EbookToc';
 import { EbookReviews } from '@/components/ebook/EbookReviews';
 import { EbookShare } from '@/components/ebook/EbookShare';
 import { EbookSubscribeButton } from '@/components/ebook/EbookSubscribeButton';
-import { EbookWishButton } from '@/components/ebook/EbookWishButton';
+import { EbookActions } from '@/components/ebook/EbookActions';
 import type { ProductRow } from '@/types/product';
 
 export const revalidate = 60;
@@ -159,7 +159,7 @@ export default async function EbookDetailPage({
             >
               {cta}
             </Link>
-            <EbookWishButton productId={book.id} />
+            <EbookActions productId={book.id} />
           </div>
           <p className="text-center text-xs text-ink/40 break-keep">
             {free
