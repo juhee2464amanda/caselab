@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
+import { Suspense, useEffect, useState, useTransition } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import type { EmailOtpType } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,18 +11,47 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 
 export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[80vh] grid place-items-center text-sm text-ink/40">로딩…</div>}>
+      <ResetInner />
+    </Suspense>
+  );
+}
+
+/** updateUser 실패 사유를 사용자 친화적으로 변환 (미매핑은 원문 노출 — 진단용) */
+function translateUpdateError(message: string): string {
+  const m = message.toLowerCase();
+  if (m.includes('different') || m.includes('same password') || m.includes('same as the old')) {
+    return '직전 비밀번호와 같아요. 다른 비밀번호를 입력해 주세요.';
+  }
+  if (m.includes('weak') || m.includes('characters') || m.includes('at least')) {
+    return '비밀번호는 8자 이상이며 영문·숫자·특수문자를 모두 포함해야 해요.';
+  }
+  return `변경 실패: ${message}`;
+}
+
+function ResetInner() {
   const router = useRouter();
+  const params = useSearchParams();
   const supabase = createSupabaseBrowserClient();
 
-  const [ready, setReady] = useState<'checking' | 'ok' | 'invalid'>('checking');
+  // 메일 링크의 token_hash는 "제출 시점"에만 검증한다 (prefetch 토큰 소진 방지)
+  const tokenHash = params.get('token_hash');
+  const type = (params.get('type') as EmailOtpType | null) ?? 'recovery';
+
+  const [ready, setReady] = useState<'checking' | 'ok' | 'invalid'>(
+    tokenHash ? 'ok' : 'checking'
+  );
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [verified, setVerified] = useState(false); // 토큰 1회 검증 후엔 세션으로 재시도 가능
   const [pending, startTransition] = useTransition();
 
-  // 재설정 링크 → /auth/callback이 세션을 만들고 여기로 보냄. 세션 있으면 새 비번 입력 가능.
+  // token_hash가 없으면(직접 접근 등) 기존 세션이 있을 때만 허용
   useEffect(() => {
+    if (tokenHash) return;
     let active = true;
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -30,7 +60,7 @@ export default function ResetPasswordPage() {
     return () => {
       active = false;
     };
-  }, [supabase]);
+  }, [supabase, tokenHash]);
 
   function passwordOk(pw: string): boolean {
     return pw.length >= 8 && /[A-Za-z]/.test(pw) && /\d/.test(pw) && /[^A-Za-z0-9]/.test(pw);
@@ -48,9 +78,19 @@ export default function ResetPasswordPage() {
       return;
     }
     startTransition(async () => {
-      const { error } = await supabase.auth.updateUser({ password });
-      if (error) {
-        setError('비밀번호 변경에 실패했어요. 링크가 만료되었으면 다시 요청해 주세요.');
+      // 1) 링크로 들어왔으면 "제출 시점"에 1회 토큰 검증 → 세션 발급 (이미 검증됐으면 건너뜀 → 재시도 가능)
+      if (tokenHash && !verified) {
+        const { error: vErr } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+        if (vErr) {
+          setError('재설정 링크가 만료되었거나 이미 사용됐어요. 다시 요청해 주세요.');
+          return;
+        }
+        setVerified(true);
+      }
+      // 2) 새 비밀번호 적용
+      const { error: uErr } = await supabase.auth.updateUser({ password });
+      if (uErr) {
+        setError(translateUpdateError(uErr.message));
         return;
       }
       setDone(true);

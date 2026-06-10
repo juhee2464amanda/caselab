@@ -718,7 +718,7 @@ caselab/
 | **D74** | 비밀번호 정책 = **8자 + 영문·숫자·특수문자**. Supabase Email provider 서버 정책 + 클라이언트 실시간 검사(가이드 상시표시·규칙/일치 실시간 색상) 일치. 유출비번 차단(HIBP)은 Pro 전용이라 Free 미적용 | `app/(public)/signup/page.tsx` |
 | **D75** | 동의 UI = `[필수]` 만14세·이용약관·개인정보 / `[선택]` 뉴스레터·마케팅 수신. 소셜은 폼 없어 로그인 화면 간주동의 고지문 + **온보딩에서 마케팅 동의** 수집. 마케팅 = 명시적 옵트인(정보통신망법 §50) | login/signup/onboarding + Footer 이용약관 링크 |
 | **D76** | `profiles.newsletter` 기본값 `true→false`(옵트인), `handle_new_user`가 메타데이터 `newsletter` 동의값 반영 (마이그레이션 **0013**) | 기존 행 영향 없음(신규 insert만) |
-| **D77** | 비밀번호 찾기/재설정 추가 — `/forgot-password`(`resetPasswordForEmail`) + `/reset-password`(`updateUser`). 재설정 링크는 기존 `/auth/callback?next=/reset-password` 재사용(코드 교환 후 세션). 발송 메일 = **Supabase 커스텀 SMTP(Brevo)** 연결 필요 | `/login`에 "비밀번호를 잊으셨나요?" 링크. "아이디 찾기"는 ID=이메일이라 불필요 |
+| **D77** | 비밀번호 찾기/재설정 추가 — `/forgot-password`(`resetPasswordForEmail`) + `/reset-password`. 재설정 링크는 **token_hash 방식**(`{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery`)이고, **검증은 새 비번 제출 시점에만**(`verifyOtp`→`updateUser`) 수행 → 메일 스캐너 prefetch가 일회용 토큰을 소진하는 문제 + PKCE 브라우저 의존 문제를 동시 회피. 발송 메일 = **Supabase 커스텀 SMTP(Brevo)** + 한국어 이메일 템플릿 | `/login`에 "비밀번호를 잊으셨나요?" 링크. "아이디 찾기"는 ID=이메일이라 불필요 |
 
 **영향받는 파일**: `app/(public)/{signup,forgot-password,reset-password}/page.tsx`(신규), `app/(public)/login/page.tsx`, `app/(public)/onboarding/page.tsx`, `components/layout/Footer.tsx`, `supabase/migrations/0013_signup_consent.sql`.
 

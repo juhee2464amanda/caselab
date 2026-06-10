@@ -20,6 +20,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   oauth_denied: '소셜 로그인이 취소되었어요. 다시 시도해 주세요.',
   exchange_failed: '로그인 처리 중 문제가 발생했어요. 다시 시도해 주세요.',
   missing_code: '로그인 정보가 전달되지 않았어요. 다시 시도해 주세요.',
+  reset_link_invalid: '비밀번호 재설정 링크가 만료되었거나 이미 사용됐어요. 다시 요청해 주세요.',
 };
 
 /** 콜백이 차단 시 넘겨주는 provider 값 → 사용자 표기 라벨 */

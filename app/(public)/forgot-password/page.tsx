@@ -18,9 +18,12 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setError(null);
     startTransition(async () => {
-      // 재설정 링크 → /auth/callback(코드 교환) → /reset-password(새 비번 입력)
+      // 재설정 링크 → /reset-password 로 직접. token_hash 검증은 "새 비번 제출 시점"에만 수행
+      // → 메일 스캐너/브라우저 prefetch가 링크를 미리 열어도 토큰이 소진되지 않음 (+ 브라우저 무관).
+      // 이메일 템플릿: href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery"
+      // (RedirectTo에 ?flow=recovery 쿼리가 있어 뒤의 &token_hash 연결이 유효함)
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent('/reset-password')}`,
+        redirectTo: `${window.location.origin}/reset-password?flow=recovery`,
       });
       // 이메일 존재 여부를 노출하지 않기 위해, 에러가 나도 보낸 것으로 안내 (enumeration 방지)
       if (error && !/rate limit|too many/i.test(error.message)) {
