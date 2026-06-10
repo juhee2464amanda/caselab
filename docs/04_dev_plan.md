@@ -552,6 +552,7 @@ caselab/
 - 2026-06-02: **자료실(`/admin/tools`) CRUD 우선 진행 결정** — §18.7 참조
 - 2026-06-02: **Admin 영역 모바일 일괄 적용** — §18.8 참조 (AdminSidebar 드로어 + 8개 페이지 패딩·테이블 overflow + 폼 헤더 wrap)
 - 2026-06-08: **로그인 정책 재정의** — §18.12 참조 (D69 카카오 네이티브 전환·Edge Function 폐기 / D70 소셜 전용·이메일폼 제거 / D71 첫 가입 방식만 허용+차단 / D72 카카오 비즈앱 개인 본인인증)
+- 2026-06-09: **이메일 회원가입 부활 + 동의·비밀번호 정책** — §18.13 참조 (D73 /signup·이메일폼 복원 / D74 비번 8자+영숫특 / D75 동의 UI 필수·선택 / D76 newsletter 옵트인+0013), PR #42
 
 ### 18.6 다른 세션에서 컨텍스트 파악 시 우선순위
 
@@ -702,6 +703,24 @@ caselab/
 **한계 (인지함)**: 구글 이메일 ≠ 카카오 이메일이면 별개 계정 2개 생성은 막을 수 없음(공통 키 부재). 향후 계정통합 안내로 대응.
 
 **영향받는 파일**: `app/(public)/login/page.tsx`, `app/auth/callback/route.ts`, `public/brand/app-icon*`. (Edge Function `supabase/functions/kakao-oauth/` = 폐기 예정 dead code)
+
+### 18.13 이메일 회원가입 부활 + 동의·비밀번호 정책 (PR #42)
+
+**결정 일자**: 2026-06-09
+
+**배경**: §18.12 D70에서 소셜 전용으로 갔다가, 자체 이메일 회원가입을 다시 도입(소셜 없는 사용자 + 자체 계정 수요). 개인정보 수집·마케팅 발송(웨비나·전자책 안내)을 위한 법적 동의 UI와 비밀번호 보안 정책을 함께 정비.
+
+**결정 (D73~D76)**:
+
+| # | 결정 | 영향 |
+|---|---|---|
+| **D73** | `/signup` 신규 (이름·이메일·비번 `signUp`). Confirm email OFF → 가입 즉시 세션 → `/onboarding`. `/login`에 이메일/비번 폼 복원 | D70 소셜 전용 일부 되돌림 — 소셜+이메일 병행 |
+| **D74** | 비밀번호 정책 = **8자 + 영문·숫자·특수문자**. Supabase Email provider 서버 정책 + 클라이언트 실시간 검사(가이드 상시표시·규칙/일치 실시간 색상) 일치. 유출비번 차단(HIBP)은 Pro 전용이라 Free 미적용 | `app/(public)/signup/page.tsx` |
+| **D75** | 동의 UI = `[필수]` 만14세·이용약관·개인정보 / `[선택]` 뉴스레터·마케팅 수신. 소셜은 폼 없어 로그인 화면 간주동의 고지문 + **온보딩에서 마케팅 동의** 수집. 마케팅 = 명시적 옵트인(정보통신망법 §50) | login/signup/onboarding + Footer 이용약관 링크 |
+| **D76** | `profiles.newsletter` 기본값 `true→false`(옵트인), `handle_new_user`가 메타데이터 `newsletter` 동의값 반영 (마이그레이션 **0013**) | 기존 행 영향 없음(신규 insert만) |
+| **D77** | 비밀번호 찾기/재설정 추가 — `/forgot-password`(`resetPasswordForEmail`) + `/reset-password`. 재설정 링크는 **token_hash 방식**(`{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery`)이고, **검증은 새 비번 제출 시점에만**(`verifyOtp`→`updateUser`) 수행 → 메일 스캐너 prefetch가 일회용 토큰을 소진하는 문제 + PKCE 브라우저 의존 문제를 동시 회피. 발송 메일 = **Supabase 커스텀 SMTP(Brevo)** + 한국어 이메일 템플릿 | `/login`에 "비밀번호를 잊으셨나요?" 링크. "아이디 찾기"는 ID=이메일이라 불필요 |
+
+**영향받는 파일**: `app/(public)/{signup,forgot-password,reset-password}/page.tsx`(신규), `app/(public)/login/page.tsx`, `app/(public)/onboarding/page.tsx`, `components/layout/Footer.tsx`, `supabase/migrations/0013_signup_consent.sql`.
 
 ---
 

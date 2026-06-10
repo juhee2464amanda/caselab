@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,6 +33,25 @@ export default function OnboardingPage() {
   const [jobTitle, setJobTitle] = useState('');
   const [interests, setInterests] = useState<string[]>([]);
   const [aiTools, setAiTools] = useState<string[]>([]);
+  const [newsletter, setNewsletter] = useState(false); // 마케팅 수신 동의 (소셜 가입자 옵트인 지점)
+
+  // 현재 동의 상태를 불러와 토글 초기값으로 (이메일 가입자는 가입 시 선택값이 반영돼 있음)
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from('profiles')
+        .select('newsletter')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (active && data) setNewsletter(Boolean(data.newsletter));
+    })();
+    return () => {
+      active = false;
+    };
+  }, [supabase]);
 
   function toggle(arr: string[], v: string): string[] {
     return arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
@@ -55,6 +74,7 @@ export default function OnboardingPage() {
           job_title: jobTitle || null,
           interests,
           ai_tools: aiTools,
+          newsletter,
           onboarded: true,
         })
         .eq('id', user.id);
@@ -176,6 +196,21 @@ export default function OnboardingPage() {
                 );
               })}
             </div>
+          </section>
+
+          {/* 5. 마케팅 수신 동의 (선택) */}
+          <section>
+            <label className="flex items-start gap-2.5 text-sm cursor-pointer">
+              <input
+                type="checkbox"
+                checked={newsletter}
+                onChange={(e) => setNewsletter(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-accent"
+              />
+              <span className="text-ink/80 keepall">
+                <span className="text-ink/40 font-medium">(선택)</span> 뉴스레터·웨비나·새 콘텐츠 안내 등 마케팅 정보 수신에 동의합니다. 마이페이지에서 언제든 변경할 수 있어요.
+              </span>
+            </label>
           </section>
 
           {/* CTA */}
