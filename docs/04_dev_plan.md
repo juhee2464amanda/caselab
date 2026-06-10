@@ -738,11 +738,27 @@ caselab/
 **② Brevo 동기화 — end-to-end 구현·배포 완료**
 - Edge Function `supabase/functions/sync-brevo-contact/` 신설 (Brevo Contacts upsert/blacklist, `BREVO_NEWSLETTER_LIST_ID`).
 - 마이그레이션 `0014_newsletter_brevo_sync.sql`: `newsletter_subscribers` insert/status변경 → 위 함수 호출 트리거.
-- **⚠️ 아키텍처 변경**: Supabase 관리형은 `ALTER DATABASE SET app.*` 가 막힘(42501) → GUC 대신 **Supabase Vault**(`vault.create_secret`/`decrypted_secrets`)로 `sync_brevo_url`·`service_role_key` 보관. 기존 send-ebook/profiles 트리거(0002)도 같은 GUC 의존이라 실제론 미작동 상태였음 → **send-ebook도 같은 Vault 방식 전환 필요(후속)**.
+- **⚠️ 아키텍처 변경**: Supabase 관리형은 `ALTER DATABASE SET app.*` 가 막힘(42501) → GUC 대신 **Supabase Vault**(`vault.create_secret`/`decrypted_secrets`)로 `sync_brevo_url`·`service_role_key` 보관. 기존 send-ebook/profiles 트리거(0002)도 같은 GUC 의존이라 실제론 미작동 상태였음 → **`0015`에서 동일 Vault 방식으로 전환 완료 (§18.15 참조)**.
 - **검증**: 2026-06-10 prod 테스트 insert → Brevo `caselab-newsletter`(list #3)에 컨택 적재 확인(API 직접 검증).
 - **주의**: 붙여넣기 공백 혼입으로 URL/키가 깨지면 `regexp_replace(..., '\s','','g')`로 정리. 검증: `select length(decrypted_secret), decrypted_secret ~ '\s' from vault.decrypted_secrets where name=...`.
 
 **영향받는 파일**: `lib/data/contents.ts`, `app/(public)/page.tsx`, `supabase/functions/sync-brevo-contact/index.ts`, `supabase/migrations/0014_newsletter_brevo_sync.sql`.
+
+---
+
+### 18.15 send-ebook + profiles 트리거 Vault 전환 — 자동발송 복구 (2026-06-10)
+
+**결정 일자**: 2026-06-10
+
+**배경**: §18.14 ②에서 드러난 후속. `0002`의 GUC 의존 트리거 2개 — `trg_send_ebook_on_purchase`(전자책 자동발송), `trg_sync_brevo_contact`(로그인 유저 `profiles.newsletter` → Brevo) — 가 `ALTER DATABASE SET app.*` 차단(42501)으로 prod에 GUC가 안 박혀 **출시 이후 한 번도 작동 안 함(silent skip)**. 전자책 주문은 `purchases`에 쌓이는데 PDF 링크 메일이 안 나갔고, BREVO_API_KEY도 2026-06-10에야 처음 등록됨.
+
+**조치 — 마이그레이션 `0015_send_ebook_vault.sql`**
+- 트리거 함수 2개를 `create or replace`로 GUC → Vault 전환. 시크릿 읽기를 `current_setting('app.*')` → `select decrypted_secret from vault.decrypted_secrets where name=...` 로 교체 (`0014`와 동일 패턴). 트리거 자체(대상 테이블·이벤트·이름)는 불변.
+- Edge Function(`send-ebook`, `sync-brevo-contact`)은 `Deno.env` 의존이라 **무수정** — 고장은 DB 트리거의 시크릿 읽기 한 곳뿐이었음. 클라이언트(`OrderForm.tsx`, `SubscribeModal.tsx`)도 무수정.
+- **운영자 1회 설정**: SQL Editor에서 `select vault.create_secret('https://jsresrgzrsxotopfzpos.supabase.co/functions/v1/send-ebook', 'send_ebook_url');` (`service_role_key`·`sync_brevo_url`은 0014에서 등록 완료 → 재사용). 그 후 `0015` 전체 Run.
+- **검증**: `/ebooks/volume-1/order` 주문 → 1분 내 PDF 링크 메일 + `purchases.status='sent'` 확인. 로그인 유저 뉴스레터 토글 → Brevo list #3 적재 확인.
+
+**영향받는 파일**: `supabase/migrations/0015_send_ebook_vault.sql` (신규). 참고 본보기: `supabase/migrations/0014_newsletter_brevo_sync.sql`.
 
 ---
 
