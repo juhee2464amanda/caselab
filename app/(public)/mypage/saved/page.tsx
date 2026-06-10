@@ -5,8 +5,10 @@ import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase
 type Row = {
   content_id: string | null;
   tool_id: string | null;
+  product_id: string | null;
   contents: { slug: string; track: 'case' | 'trend'; title: string; summary: string | null } | null;
   tools: { slug: string; name: string; description: string | null } | null;
+  products: { slug: string; title: string; description: string | null } | null;
 };
 
 export default async function SavedPage() {
@@ -16,7 +18,7 @@ export default async function SavedPage() {
   if (!user) redirect('/login?next=/mypage/saved');
   const { data } = await supabase
     .from('saves')
-    .select('content_id, tool_id, created_at, contents(slug, track, title, summary), tools(slug, name, description)')
+    .select('content_id, tool_id, product_id, created_at, contents(slug, track, title, summary), tools(slug, name, description), products(slug, title, description)')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
   const items = (data ?? []) as unknown as Row[];
@@ -31,13 +33,18 @@ export default async function SavedPage() {
           {items.map((s, i) => {
             const c = s.contents;
             const t = s.tools;
-            if (!c && !t) return null;
-            const href = c ? `/${c.track === 'case' ? 'cases' : 'trends'}/${c.slug}` : `/tools/${t!.slug}`;
-            const title = c ? c.title : t!.name;
-            const desc = c ? c.summary : t!.description;
-            const badge = c ? (c.track === 'case' ? '케이스' : '트렌드') : '도구';
+            const p = s.products;
+            if (!c && !t && !p) return null;
+            const href = c
+              ? `/${c.track === 'case' ? 'cases' : 'trends'}/${c.slug}`
+              : t
+                ? `/tools/${t.slug}`
+                : `/ebooks/${p!.slug}`;
+            const title = c ? c.title : t ? t.name : p!.title;
+            const desc = c ? c.summary : t ? t.description : p!.description;
+            const badge = c ? (c.track === 'case' ? '케이스' : '트렌드') : t ? '도구' : '전자책';
             return (
-              <li key={s.content_id ?? s.tool_id ?? i} className="card p-4">
+              <li key={s.content_id ?? s.tool_id ?? s.product_id ?? i} className="card p-4">
                 <Link href={href}>
                   <span className="badge mb-1.5">{badge}</span>
                   <h3 className="font-medium">{title}</h3>

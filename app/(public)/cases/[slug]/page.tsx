@@ -8,6 +8,7 @@ import { LeftToc } from '@/components/content/LeftToc';
 import { ContentHeader } from '@/components/content/ContentHeader';
 import { RecommendSidebar } from '@/components/content/RecommendSidebar';
 import { ActionsBar } from '@/components/content/ActionsBar';
+import { ReviewSection } from '@/components/content/ReviewSection';
 import { ContentShareSection } from '@/components/content/ContentShareSection';
 import { ExploreOtherContent } from '@/components/content/ExploreOtherContent';
 import { ForWhoBox } from '@/components/content/ForWhoBox';
@@ -179,6 +180,7 @@ export default async function CaseDetailPage({
 
           <ActionsBar contentId={content.id} />
           <ContentShareSection url={url} title={content.title} />
+          <ReviewSection contentId={content.id} />
           <CommentThread contentId={content.id} />
           <ExploreOtherContent />
         </div>

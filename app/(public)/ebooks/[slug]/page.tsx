@@ -4,10 +4,10 @@ import { Star } from 'lucide-react';
 import { getProductBySlug } from '@/lib/data/products';
 import { EbookDetailNav, type EbookNavTab } from '@/components/ebook/EbookDetailNav';
 import { EbookToc } from '@/components/ebook/EbookToc';
-import { EbookReviewForm } from '@/components/ebook/EbookReviewForm';
+import { EbookReviews } from '@/components/ebook/EbookReviews';
 import { EbookShare } from '@/components/ebook/EbookShare';
 import { EbookSubscribeButton } from '@/components/ebook/EbookSubscribeButton';
-import { EbookWishButton } from '@/components/ebook/EbookWishButton';
+import { EbookActions } from '@/components/ebook/EbookActions';
 import type { ProductRow } from '@/types/product';
 
 export const revalidate = 60;
@@ -91,18 +91,13 @@ export default async function EbookDetailPage({
   ].filter(Boolean) as { label: string; value: string }[];
 
   const hasImages = (body.detailImages?.length ?? 0) > 0;
-  const hasReviews = body.rating != null || (body.reviews?.length ?? 0) > 0;
 
   const tabs: EbookNavTab[] = [
     body.intro?.length && { id: 'intro', label: '책 소개' },
     body.toc?.length && { id: 'toc', label: '목차' },
     hasImages && { id: 'images', label: '상세 이미지' },
-    hasReviews && { id: 'reviews', label: `리뷰${body.reviewCount ? ` ${body.reviewCount}` : ''}` },
+    { id: 'reviews', label: '리뷰' },
   ].filter(Boolean) as EbookNavTab[];
-
-  // 별점 분포 막대 — 최대값 기준 폭 정규화
-  const dist = body.ratingDist ?? [];
-  const distMax = dist.reduce((m, d) => Math.max(m, d.count), 0) || 1;
 
   return (
     <>
@@ -164,7 +159,7 @@ export default async function EbookDetailPage({
             >
               {cta}
             </Link>
-            <EbookWishButton />
+            <EbookActions productId={book.id} />
           </div>
           <p className="text-center text-xs text-ink/40 break-keep">
             {free
@@ -224,70 +219,16 @@ export default async function EbookDetailPage({
           </section>
         )}
 
-        {/* 리뷰 */}
-        {hasReviews && (
-          <section id="reviews" className="scroll-mt-[120px] border-b border-border py-10">
-            <h2 className="mb-4 text-xl font-extrabold tracking-[-0.025em]">
-              리뷰{' '}
-              {body.reviewCount != null && (
-                <span className="ml-1 text-[15px] font-semibold text-ink/40">{body.reviewCount}개</span>
-              )}
-            </h2>
-
-            {/* 요약 */}
-            {body.rating != null && (
-              <div className="mb-6 flex items-center gap-8 rounded-xl bg-muted p-6">
-                <div className="text-center">
-                  <div className="text-[40px] font-extrabold leading-none">{body.rating.toFixed(1)}</div>
-                  <div className="mt-1">
-                    <Stars rating={body.rating} className="h-5 w-5" />
-                  </div>
-                  {body.reviewCount != null && (
-                    <div className="mt-1 text-[13px] text-ink/50">{body.reviewCount}개 리뷰</div>
-                  )}
-                </div>
-                {dist.length > 0 && (
-                  <div className="flex-1">
-                    {dist.map((d) => (
-                      <div key={d.score} className="mb-1 flex items-center gap-2 text-[13px]">
-                        <span className="w-5 text-right font-semibold text-ink/50">{d.score}</span>
-                        <span className="h-2 flex-1 overflow-hidden rounded bg-border">
-                          <span
-                            className="block h-full rounded bg-amber-400"
-                            style={{ width: `${Math.round((d.count / distMax) * 100)}%` }}
-                          />
-                        </span>
-                        <span className="w-6 text-[12px] text-ink/40">{d.count}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* 작성 폼 */}
-            <EbookReviewForm />
-
-            {/* 샘플 리뷰 */}
-            {body.reviews && body.reviews.length > 0 && (
-              <div>
-                {body.reviews.map((r, i) => (
-                  <div key={i} className="border-b border-border py-5 last:border-b-0">
-                    <div className="mb-2 flex items-center gap-2.5">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-[13px] font-bold text-ink/50">
-                        {r.author.slice(0, 1)}
-                      </span>
-                      <span className="text-sm font-semibold">{r.author}</span>
-                      {r.date && <span className="ml-auto text-xs text-ink/40">{r.date}</span>}
-                    </div>
-                    <Stars rating={r.rating} className="h-3.5 w-3.5" />
-                    <p className="mt-1.5 text-sm leading-relaxed text-ink/80 break-keep">{r.text}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-        )}
+        {/* 리뷰 — DB 배선 (구매자만 작성, 실제 리뷰 없으면 seed 표시) */}
+        <section id="reviews" className="scroll-mt-[120px] border-b border-border py-10">
+          <EbookReviews
+            productId={book.id}
+            seedRating={body.rating}
+            seedCount={body.reviewCount}
+            seedDist={body.ratingDist}
+            seedReviews={body.reviews}
+          />
+        </section>
 
         {/* 하단 구독 CTA */}
         <div className="my-8 rounded-2xl border border-border bg-muted px-6 py-10 text-center">
