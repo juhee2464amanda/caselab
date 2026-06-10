@@ -1,23 +1,70 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowRight, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { getProductBySlug } from '@/lib/data/products';
-import { Button } from '@/components/ui/button';
+import { EbookDetailNav, type EbookNavTab } from '@/components/ebook/EbookDetailNav';
+import { EbookToc } from '@/components/ebook/EbookToc';
+import { EbookReviewForm } from '@/components/ebook/EbookReviewForm';
+import { EbookShare } from '@/components/ebook/EbookShare';
+import { EbookSubscribeButton } from '@/components/ebook/EbookSubscribeButton';
+import { EbookWishButton } from '@/components/ebook/EbookWishButton';
+import type { ProductRow } from '@/types/product';
 
 export const revalidate = 60;
 
-function Stars({ rating }: { rating: number }) {
+/** 별점 ★ 표시 (amber) */
+function Stars({ rating, className = 'h-[18px] w-[18px]' }: { rating: number; className?: string }) {
   return (
-    <span className="inline-flex items-center gap-0.5 text-accent">
-      {[0, 1, 2, 3, 4].map((i) => (
+    <span className="inline-flex items-center gap-0.5 text-amber-400">
+      {[1, 2, 3, 4, 5].map((i) => (
         <Star
           key={i}
-          className="h-3.5 w-3.5"
-          fill={i < Math.round(rating) ? 'currentColor' : 'none'}
-          strokeWidth={i < Math.round(rating) ? 0 : 1.5}
+          className={className}
+          fill={i <= Math.round(rating) ? 'currentColor' : 'none'}
+          strokeWidth={i <= Math.round(rating) ? 0 : 1.5}
         />
       ))}
     </span>
+  );
+}
+
+/** 3D 북커버 (mockup .book-3d 정합) — 썸네일 있으면 이미지, 없으면 그라데이션 커버 */
+function BookCover({ book }: { book: ProductRow }) {
+  const free = book.price === 0;
+  if (book.thumbnail_url) {
+    return (
+      <img
+        src={book.thumbnail_url}
+        alt={book.title}
+        className="h-full w-full rounded-[2px_10px_10px_2px] object-cover shadow-[10px_10px_24px_rgba(0,0,0,.25),2px_0_4px_rgba(0,0,0,.1)]"
+      />
+    );
+  }
+  const gradient = free
+    ? 'bg-[linear-gradient(160deg,#0f172a_0%,#1e3a5f_40%,#2563eb_100%)]'
+    : 'bg-[linear-gradient(160deg,#0a0a0a_0%,#1a1a2e_50%,#312e81_100%)]';
+  return (
+    <div
+      className={`flex h-full w-full flex-col rounded-[2px_10px_10px_2px] px-5 py-6 text-white shadow-[10px_10px_24px_rgba(0,0,0,.25),2px_0_4px_rgba(0,0,0,.1)] ${gradient}`}
+    >
+      <div className="flex flex-1 flex-col items-center justify-center text-center">
+        <div className="mb-2.5 text-[9px] font-bold uppercase tracking-[0.1em] opacity-60">
+          Caselab ebook
+        </div>
+        <div className="text-[22px] font-black leading-[1.2] tracking-[-0.03em] break-keep">
+          {book.title}
+        </div>
+        {book.body?.subtitle && (
+          <div className="mt-2 line-clamp-2 text-[12px] font-semibold opacity-70 break-keep">
+            {book.body.subtitle}
+          </div>
+        )}
+      </div>
+      <div className="flex items-center justify-between border-t border-white/10 pt-3">
+        <span className="text-[10px] font-semibold opacity-50">{book.body?.volume ?? 'Caselab'}</span>
+        <span className="font-serif text-[12px] font-bold italic opacity-50">Caselab</span>
+      </div>
+    </div>
   );
 }
 
@@ -31,183 +78,231 @@ export default async function EbookDetailPage({
   if (!book) notFound();
 
   const body = book.body ?? {};
-  const isFree = book.price === 0;
+  const free = book.price === 0;
   const orderHref = `/ebooks/${slug}/order`;
-  const cta = isFree ? '무료로 받기' : '주문하기';
+  const cta = free ? '무료로 받기' : '주문하기';
 
   const meta = [
+    { label: '저자', value: body.author ?? 'Caselab' },
     body.format && { label: '포맷', value: body.format },
     body.volume && { label: '분량', value: body.volume },
     body.jobs && { label: '직무', value: body.jobs },
     body.updated && { label: '업데이트', value: body.updated },
-    { label: '가격', value: isFree ? '무료' : `${book.price.toLocaleString()}원` },
   ].filter(Boolean) as { label: string; value: string }[];
 
-  const tabs = [
+  const hasImages = (body.detailImages?.length ?? 0) > 0;
+  const hasReviews = body.rating != null || (body.reviews?.length ?? 0) > 0;
+
+  const tabs: EbookNavTab[] = [
     body.intro?.length && { id: 'intro', label: '책 소개' },
     body.toc?.length && { id: 'toc', label: '목차' },
-    body.whoFor?.length && { id: 'who', label: '이런 분에게' },
-    body.reviews?.length && { id: 'reviews', label: `리뷰 ${body.reviewCount ?? body.reviews?.length}` },
-  ].filter(Boolean) as { id: string; label: string }[];
+    hasImages && { id: 'images', label: '상세 이미지' },
+    hasReviews && { id: 'reviews', label: `리뷰${body.reviewCount ? ` ${body.reviewCount}` : ''}` },
+  ].filter(Boolean) as EbookNavTab[];
+
+  // 별점 분포 막대 — 최대값 기준 폭 정규화
+  const dist = body.ratingDist ?? [];
+  const distMax = dist.reduce((m, d) => Math.max(m, d.count), 0) || 1;
 
   return (
-    <div className="mx-auto max-w-[1000px] px-6 py-10 pb-20">
-      {/* Hero */}
-      <section className="grid gap-8 md:grid-cols-[260px_1fr] items-start">
-        <div className="aspect-[3/4] rounded-lg bg-white border border-border relative overflow-hidden shadow-elevated">
-          {book.thumbnail_url ? (
-            <img src={book.thumbnail_url} alt={book.title} className="absolute inset-0 h-full w-full object-cover" />
-          ) : (
-            <div className="absolute inset-0 flex flex-col justify-center gap-2 p-6 bg-gradient-to-br from-muted to-border">
-              <div className="font-serif text-xl font-bold leading-snug break-keep">{book.title}</div>
-              {body.subtitle && <div className="text-xs text-ink/50 line-clamp-3">{body.subtitle}</div>}
-            </div>
-          )}
-          <div className="absolute right-0 inset-y-0 w-2 bg-black/10" />
+    <>
+      {/* Product top */}
+      <div className="mx-auto flex max-w-[1100px] flex-col gap-8 px-4 py-10 sm:px-6 md:flex-row md:gap-12 md:py-12">
+        {/* 3D Book */}
+        <div className="flex shrink-0 items-center justify-center rounded-2xl bg-muted px-8 py-12 md:w-[360px]">
+          <div className="h-[280px] w-[200px] [transform:perspective(1000px)_rotateY(-12deg)] [transform-style:preserve-3d] transition-transform duration-500 hover:[transform:perspective(1000px)_rotateY(-4deg)]">
+            <BookCover book={book} />
+          </div>
         </div>
 
-        <div>
-          <span className="inline-block text-[11px] font-bold text-accent bg-accent-50 px-2.5 py-1 rounded mb-3 tracking-[0.04em]">
-            {isFree ? '무료 배포' : 'EBOOK'}
+        {/* Info */}
+        <div className="flex-1">
+          <span
+            className={`mb-3 inline-block rounded-md px-3 py-1 text-xs font-bold ${
+              free ? 'bg-emerald-50 text-emerald-600' : 'bg-accent-50 text-accent'
+            }`}
+          >
+            {free ? '무료 배포' : 'EBOOK'}
           </span>
-          <h1 className="text-[26px] md:text-[32px] font-extrabold tracking-[-0.03em] leading-[1.2] break-keep">
+          <h1 className="text-[26px] font-extrabold leading-[1.3] tracking-[-0.03em] break-keep md:text-[30px]">
             {book.title}
           </h1>
           {body.subtitle && (
-            <p className="mt-2.5 text-[15px] text-ink/60 leading-relaxed break-keep">{body.subtitle}</p>
+            <p className="mt-2 text-[15px] text-ink/60 break-keep">{body.subtitle}</p>
           )}
 
           {body.rating != null && (
-            <div className="mt-4 flex items-center gap-2 text-sm">
+            <div className="mt-5 flex items-center gap-2">
               <Stars rating={body.rating} />
-              <span className="font-bold">{body.rating.toFixed(1)}</span>
+              <span className="text-base font-extrabold">{body.rating.toFixed(1)}</span>
               {body.reviewCount != null && (
-                <span className="text-ink/40">({body.reviewCount}개 리뷰)</span>
+                <span className="text-[13px] text-ink/40">({body.reviewCount}개 리뷰)</span>
               )}
             </div>
           )}
 
-          <dl className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 border-t border-border pt-4">
+          <dl className="my-6 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 border-y border-border py-4 text-sm">
             {meta.map((m) => (
-              <div key={m.label} className="flex gap-3 text-sm">
-                <dt className="w-16 shrink-0 text-ink/40">{m.label}</dt>
-                <dd className="font-medium">{m.value}</dd>
+              <div key={m.label} className="contents">
+                <dt className="font-medium text-ink/50">{m.label}</dt>
+                <dd className="font-semibold">{m.value}</dd>
               </div>
             ))}
           </dl>
 
-          <Link href={orderHref}>
-            <Button variant="accent" size="lg" className="mt-6 w-full sm:w-auto">
+          <div className="mb-6">
+            <div className="mb-1 text-[13px] text-ink/50">가격</div>
+            <div className="text-[28px] font-extrabold text-accent">
+              {free ? '무료' : `${book.price.toLocaleString()}원`}
+            </div>
+          </div>
+
+          <div className="mb-4 flex gap-2.5">
+            <Link
+              href={orderHref}
+              className="flex flex-1 items-center justify-center rounded-[10px] bg-accent px-4 py-4 text-base font-bold tracking-[-0.02em] text-white transition-colors hover:bg-accent-700"
+            >
               {cta}
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
+            </Link>
+            <EbookWishButton />
+          </div>
+          <p className="text-center text-xs text-ink/40 break-keep">
+            {free
+              ? '로그인 후 마이페이지에서 PDF 다운로드 및 뷰어로 읽을 수 있습니다.'
+              : '결제 후 마이페이지에서 PDF 다운로드 및 뷰어로 읽을 수 있습니다.'}
+          </p>
         </div>
-      </section>
-
-      {/* Detail tabs */}
-      {tabs.length > 0 && (
-        <nav className="sticky top-14 z-40 -mx-6 px-6 bg-bg border-b border-border mt-10 mb-8 flex gap-5 overflow-x-auto py-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {tabs.map((t) => (
-            <a key={t.id} href={`#${t.id}`} className="text-sm font-medium text-ink/50 hover:text-ink whitespace-nowrap">
-              {t.label}
-            </a>
-          ))}
-        </nav>
-      )}
-
-      {/* 책 소개 */}
-      {body.intro && body.intro.length > 0 && (
-        <section id="intro" className="mb-12 scroll-mt-28">
-          <h2 className="text-xl font-extrabold tracking-[-0.025em] mb-4">책 소개</h2>
-          <div className="space-y-3.5 max-w-[680px]">
-            {body.intro.map((p, i) => (
-              <p key={i} className="text-[15px] leading-[1.75] text-ink/80 break-keep">{p}</p>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* 목차 */}
-      {body.toc && body.toc.length > 0 && (
-        <section id="toc" className="mb-12 scroll-mt-28">
-          <h2 className="text-xl font-extrabold tracking-[-0.025em] mb-4">목차</h2>
-          <ol className="border-t border-border max-w-[680px]">
-            {body.toc.map((t, i) => (
-              <li key={i} className="flex gap-4 py-3.5 border-b border-border items-start">
-                <span className="text-[13px] font-extrabold text-ink/30 min-w-6">{String(i + 1).padStart(2, '0')}</span>
-                <div>
-                  <div className="text-[15px] font-bold tracking-[-0.02em] mb-0.5 break-keep">{t.title}</div>
-                  <div className="text-[13px] text-ink/60 leading-relaxed break-keep">{t.desc}</div>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </section>
-      )}
-
-      {/* 이런 분에게 */}
-      {body.whoFor && body.whoFor.length > 0 && (
-        <section id="who" className="mb-12 scroll-mt-28">
-          <h2 className="text-xl font-extrabold tracking-[-0.025em] mb-5">이런 분에게 드립니다</h2>
-          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-            {body.whoFor.map((w, i) => (
-              <div key={i} className="p-5 border border-border rounded-xl bg-white">
-                <span className="text-2xl block mb-2">{w.icon}</span>
-                <div className="text-sm font-bold mb-1">{w.title}</div>
-                <div className="text-[13px] text-ink/60 leading-relaxed break-keep">{w.desc}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* 리뷰 */}
-      {body.reviews && body.reviews.length > 0 && (
-        <section id="reviews" className="mb-12 scroll-mt-28">
-          <div className="flex items-baseline gap-3 mb-5">
-            <h2 className="text-xl font-extrabold tracking-[-0.025em]">리뷰</h2>
-            {body.rating != null && (
-              <span className="flex items-center gap-1.5 text-sm">
-                <Stars rating={body.rating} />
-                <span className="font-bold">{body.rating.toFixed(1)}</span>
-                {body.reviewCount != null && <span className="text-ink/40">· {body.reviewCount}개</span>}
-              </span>
-            )}
-          </div>
-          <div className="space-y-3 max-w-[680px]">
-            {body.reviews.map((r, i) => (
-              <div key={i} className="p-4 border border-border rounded-xl bg-white">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-sm font-bold">{r.author}</span>
-                  <Stars rating={r.rating} />
-                </div>
-                <p className="text-[13.5px] text-ink/70 leading-relaxed break-keep">{r.text}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* 하단 CTA */}
-      <section className="card p-8 text-center">
-        <h2 className="text-xl font-extrabold tracking-[-0.02em]">
-          {isFree ? '무료로 받아보세요' : '지금 주문하기'}
-        </h2>
-        <p className="mt-2 text-sm text-ink/60">
-          {isFree ? '이메일을 입력하면 PDF를 바로 보내드립니다.' : '주문서를 작성하면 안내해드립니다.'}
-        </p>
-        <Link href={orderHref}>
-          <Button variant="accent" size="lg" className="mt-5">
-            {cta}
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        </Link>
-      </section>
-
-      <div className="mt-8">
-        <Link href="/ebooks" className="text-xs text-ink/50 hover:text-ink">← 전자책 목록으로</Link>
       </div>
-    </div>
+
+      {/* Detail sections */}
+      <div className="mx-auto max-w-[1100px] px-4 pb-16 sm:px-6">
+        {tabs.length > 0 && <EbookDetailNav tabs={tabs} />}
+
+        {/* 책 소개 */}
+        {body.intro && body.intro.length > 0 && (
+          <section id="intro" className="scroll-mt-[120px] border-b border-border py-10">
+            <h2 className="mb-4 text-xl font-extrabold tracking-[-0.025em]">책 소개</h2>
+            {body.lead && (
+              <div className="mb-6 text-[22px] font-extrabold leading-[1.5] tracking-[-0.025em] break-keep">
+                {body.lead.split('\n').map((line, i) => (
+                  <span key={i} className="block">
+                    {line}
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="max-w-[760px] space-y-3.5">
+              {body.intro.map((p, i) => (
+                <p key={i} className="text-[15px] leading-[1.85] text-ink/80 break-keep">
+                  {p}
+                </p>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* 목차 */}
+        {body.toc && body.toc.length > 0 && (
+          <section id="toc" className="scroll-mt-[120px] border-b border-border py-10">
+            <h2 className="mb-4 text-xl font-extrabold tracking-[-0.025em]">목차</h2>
+            <EbookToc items={body.toc} />
+          </section>
+        )}
+
+        {/* 상세 이미지 */}
+        {hasImages && (
+          <section id="images" className="scroll-mt-[120px] border-b border-border py-10">
+            <h2 className="mb-4 text-xl font-extrabold tracking-[-0.025em]">상세 이미지</h2>
+            <div className="space-y-4">
+              {body.detailImages!.map((src, i) => (
+                <div key={i} className="overflow-hidden rounded-xl border border-border bg-white">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={src} alt={`${book.title} 상세 이미지 ${i + 1}`} className="block h-auto w-full" />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* 리뷰 */}
+        {hasReviews && (
+          <section id="reviews" className="scroll-mt-[120px] border-b border-border py-10">
+            <h2 className="mb-4 text-xl font-extrabold tracking-[-0.025em]">
+              리뷰{' '}
+              {body.reviewCount != null && (
+                <span className="ml-1 text-[15px] font-semibold text-ink/40">{body.reviewCount}개</span>
+              )}
+            </h2>
+
+            {/* 요약 */}
+            {body.rating != null && (
+              <div className="mb-6 flex items-center gap-8 rounded-xl bg-muted p-6">
+                <div className="text-center">
+                  <div className="text-[40px] font-extrabold leading-none">{body.rating.toFixed(1)}</div>
+                  <div className="mt-1">
+                    <Stars rating={body.rating} className="h-5 w-5" />
+                  </div>
+                  {body.reviewCount != null && (
+                    <div className="mt-1 text-[13px] text-ink/50">{body.reviewCount}개 리뷰</div>
+                  )}
+                </div>
+                {dist.length > 0 && (
+                  <div className="flex-1">
+                    {dist.map((d) => (
+                      <div key={d.score} className="mb-1 flex items-center gap-2 text-[13px]">
+                        <span className="w-5 text-right font-semibold text-ink/50">{d.score}</span>
+                        <span className="h-2 flex-1 overflow-hidden rounded bg-border">
+                          <span
+                            className="block h-full rounded bg-amber-400"
+                            style={{ width: `${Math.round((d.count / distMax) * 100)}%` }}
+                          />
+                        </span>
+                        <span className="w-6 text-[12px] text-ink/40">{d.count}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 작성 폼 */}
+            <EbookReviewForm />
+
+            {/* 샘플 리뷰 */}
+            {body.reviews && body.reviews.length > 0 && (
+              <div>
+                {body.reviews.map((r, i) => (
+                  <div key={i} className="border-b border-border py-5 last:border-b-0">
+                    <div className="mb-2 flex items-center gap-2.5">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-[13px] font-bold text-ink/50">
+                        {r.author.slice(0, 1)}
+                      </span>
+                      <span className="text-sm font-semibold">{r.author}</span>
+                      {r.date && <span className="ml-auto text-xs text-ink/40">{r.date}</span>}
+                    </div>
+                    <Stars rating={r.rating} className="h-3.5 w-3.5" />
+                    <p className="mt-1.5 text-sm leading-relaxed text-ink/80 break-keep">{r.text}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* 하단 구독 CTA */}
+        <div className="my-8 rounded-2xl border border-border bg-muted px-6 py-10 text-center">
+          <h3 className="text-[22px] font-extrabold leading-snug tracking-[-0.025em] break-keep">
+            새로운 무료 ebook과 검증된 컨텐츠를
+          </h3>
+          <p className="mx-auto mb-5 mt-2 max-w-[480px] text-sm leading-relaxed text-ink/60 break-keep">
+            가장 먼저 받아보세요. Caselab 뉴스레터를 구독하시면 신규 자료를 메일로 보내드려요.
+          </p>
+          <EbookSubscribeButton />
+        </div>
+
+        {/* 공유 */}
+        <EbookShare title={book.title} imageUrl={book.thumbnail_url ?? body.detailImages?.[0]} />
+      </div>
+    </>
   );
 }
