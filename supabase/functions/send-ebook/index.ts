@@ -5,7 +5,7 @@
 // 작동:
 // 1. purchase + product 조회
 // 2. Storage signed URL 발급 (유효 7일)
-// 3. Gmail SMTP(denomailer)로 다운로드 링크 이메일 발송
+// 3. Gmail SMTP(nodemailer)로 다운로드 링크 이메일 발송
 // 4. purchases.status = 'sent', sent_at = now()
 //
 // 왜 Gmail SMTP인가:
@@ -24,8 +24,8 @@
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
 // @ts-expect-error - Deno runtime
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.1';
-// @ts-expect-error - Deno runtime
-import { SMTPClient } from 'https://deno.land/x/denomailer@1.6.0/mod.ts';
+// @ts-expect-error - Deno runtime (npm 호환). nodemailer = MIME/RFC2047 인코딩 정확.
+import nodemailer from 'npm:nodemailer@6.9.16';
 
 declare const Deno: { env: { get: (k: string) => string | undefined } };
 
@@ -89,26 +89,22 @@ serve(async (req) => {
     </p>
   `;
 
-  const client = new SMTPClient({
-    connection: {
-      hostname: 'smtp.gmail.com',
-      port: 465,
-      tls: true,
-      auth: { username: GMAIL_USER, password: GMAIL_APP_PASSWORD },
-    },
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: { user: GMAIL_USER, pass: GMAIL_APP_PASSWORD },
   });
 
   try {
-    await client.send({
-      from: `${GMAIL_SENDER_NAME} <${GMAIL_USER}>`,
+    await transporter.sendMail({
+      from: { name: GMAIL_SENDER_NAME, address: GMAIL_USER },
       to: purchase.email,
       replyTo: GMAIL_USER,
       subject: `[케이스랩] ${product.title} 다운로드 링크`,
       html: htmlContent,
     });
-    await client.close();
   } catch (e) {
-    try { await client.close(); } catch (_) { /* noop */ }
     await admin.from('purchases').update({ status: 'failed' }).eq('id', purchase_id);
     return new Response(`gmail smtp error: ${e instanceof Error ? e.message : String(e)}`, { status: 500 });
   }
