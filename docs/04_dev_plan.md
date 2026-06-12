@@ -554,6 +554,7 @@ caselab/
 - 2026-06-08: **로그인 정책 재정의** — §18.12 참조 (D69 카카오 네이티브 전환·Edge Function 폐기 / D70 소셜 전용·이메일폼 제거 / D71 첫 가입 방식만 허용+차단 / D72 카카오 비즈앱 개인 본인인증)
 - 2026-06-09: **이메일 회원가입 부활 + 동의·비밀번호 정책** — §18.13 참조 (D73 /signup·이메일폼 복원 / D74 비번 8자+영숫특 / D75 동의 UI 필수·선택 / D76 newsletter 옵트인+0013), PR #42
 - 2026-06-10: **P1 두 건 해결 (Featured 예약노출 + Brevo 동기화)** — §18.14 참조. ① 공개 Hero를 `featured_contents`(slot_type='hero' + featured_from/until 날짜창) 기반 재배선(이전엔 `contents.curated`만 봄). ② `newsletter_subscribers` → Brevo 동기화 트리거+Edge Function(`sync-brevo-contact`) 신설·prod 배포·검증 완료(list #3).
+- 2026-06-12: **send-ebook 발송 Brevo → Gmail SMTP(nodemailer) 재전환** — §18.16 참조. Brevo가 `caselab.kr@gmail.com`(gmail 발신자)을 Gmail 수신함에 silent-drop(DMARC 실패)하는 것을 실측 → Gmail 자체 SMTP로 발송해 INBOX 도달 검증. 2026-06-02의 "Gmail→Brevo 재전환"(L551)을 뒤집음. **트랜잭션 발송만 Gmail SMTP**, 대량 뉴스레터는 별개(Brevo+도메인 필요). PR #51.
 
 ### 18.6 다른 세션에서 컨텍스트 파악 시 우선순위
 
@@ -759,6 +760,21 @@ caselab/
 - **검증**: `/ebooks/volume-1/order` 주문 → 1분 내 PDF 링크 메일 + `purchases.status='sent'` 확인. 로그인 유저 뉴스레터 토글 → Brevo list #3 적재 확인.
 
 **영향받는 파일**: `supabase/migrations/0015_send_ebook_vault.sql` (신규). 참고 본보기: `supabase/migrations/0014_newsletter_brevo_sync.sql`.
+
+---
+
+### 18.16 send-ebook 발송 Brevo → Gmail SMTP(nodemailer) 재전환 (2026-06-12)
+
+**배경**: §18.15로 자동발송 트리거를 복구한 뒤 e2e 테스트하니, Brevo는 `delivered` 이벤트를 주는데 **수신 Gmail 계정에는 메일이 아예 없음**(`in:anywhere`로 스팸·휴지통까지 검색해도 없음 = silent-drop). 원인: 발신자가 `caselab.kr@gmail.com`(@gmail.com 무료주소)인데 인증된 자체 도메인이 0개 → Gmail이 "gmail.com이라면서 구글 서버가 아니네"로 DMARC 실패 처리해 폐기. 대조로 `ju2464@naver.com`은 정상 수신·열람·클릭. 즉 **모든 외부 ESP는 @gmail.com을 발신자로 못 씀**(DMARC 정렬 불가).
+
+**조치**: send-ebook 발송 경로를 **Gmail 자체 SMTP**로 전환. 진짜 구글 서버에서 나가므로 SPF/DKIM/DMARC가 정렬되어 Gmail INBOX 도달.
+- `supabase/functions/send-ebook/index.ts`: Brevo HTTP API fetch → **nodemailer(`npm:nodemailer@6.9.16`) + `smtp.gmail.com:465` TLS**.
+- ⚠️ **라이브러리 함정**: 처음 시도한 `denomailer@1.6.0`은 한글 제목 RFC2047 인코딩-워드 안에 공백을 그대로 넣어(`=?utf-8?Q?...공백...?=`) 잘못된 헤더 생성 → Gmail이 디코딩 포기, 제목·본문이 raw quoted-printable로 깨짐. **nodemailer로 교체 후 정상**(MIME/RFC2047 정확).
+- **secrets 변경**: `BREVO_API_KEY/SENDER_EMAIL/SENDER_NAME` → `GMAIL_USER`(caselab.kr@gmail.com) / `GMAIL_APP_PASSWORD`(구글 2단계 인증 후 앱비번 16자리, 공백 제거) / `GMAIL_SENDER_NAME`. DB 트리거·클라이언트·signed URL 로직 무수정.
+- **2026-06-02 결정(L551) 뒤집음**: 당시 Brevo로 간 사유는 "개인 Gmail 자동발송 약관 회색지대 + 딜리버러빌리티". 실측 결과 **Brevo가 오히려 딜리버러빌리티 실패**, Gmail SMTP가 INBOX 도달. 약관은 **저용량 트랜잭션 발송(App Password SMTP)** 수준에서 허용 범위로 판단. **단, 대량 뉴스레터는 Gmail SMTP 불가**(하루 ~500통·수신거부 관리 X) → 뉴스레터 대량발송은 Brevo 캠페인 + 자체 도메인(DKIM)이 필요하며 도메인 격상 트리거(L530)에 해당.
+- **검증**: prod 배포 후 `juhee2464@gmail.com` 테스트 → **INBOX 도착**(스팸 아님) + 한글 제목·본문·PDF 링크 정상 렌더 + `purchases.status='sent'`.
+
+**영향받는 파일**: `supabase/functions/send-ebook/index.ts`, `.env.example`. 무관: DB 트리거(0015)·클라이언트.
 
 ---
 
