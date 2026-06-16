@@ -8,15 +8,17 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { track } from '@/lib/analytics/track';
 
 /**
- * 좋아요·저장 액션 바 — 콘텐츠(contentId) 또는 도구(toolId) 대상.
+ * 좋아요·저장 액션 바 — 콘텐츠(contentId)·도구(toolId)·제품(productId) 대상.
  * 로그인 시 reactions/saves에 영속(insert/delete). 비로그인 클릭 → /login.
  */
 export function ActionsBar({
   contentId,
   toolId,
+  productId,
 }: {
   contentId?: string;
   toolId?: string;
+  productId?: string;
 }) {
   const supabase = createSupabaseBrowserClient();
   const router = useRouter();
@@ -24,8 +26,8 @@ export function ActionsBar({
   const [saved, setSaved] = useState(false);
   const [pending, startTransition] = useTransition();
 
-  const col = contentId ? 'content_id' : 'tool_id';
-  const id = contentId ?? toolId;
+  const col = contentId ? 'content_id' : toolId ? 'tool_id' : 'product_id';
+  const id = contentId ?? toolId ?? productId;
 
   useEffect(() => {
     if (!id) return;

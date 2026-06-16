@@ -5,7 +5,7 @@ import { PopularSidebar } from '@/components/home/PopularSidebar';
 import { SeriesGrid } from '@/components/home/SeriesGrid';
 import { VoteCompact } from '@/components/home/VoteCompact';
 import { SuggestInline } from '@/components/home/SuggestInline';
-import { listPublishedContents } from '@/lib/data/contents';
+import { listPublishedContents, listFeaturedContents } from '@/lib/data/contents';
 import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
 
 /**
@@ -74,7 +74,7 @@ async function listToolStats() {
 
 export default async function HomePage() {
   const [curated, cases, trends, topics, popular, toolStats, trendCount] = await Promise.all([
-    listPublishedContents({ curated: true, limit: 3 }),
+    listFeaturedContents(5),
     listPublishedContents({ track: 'case', limit: 4 }),
     listPublishedContents({ track: 'trend', limit: 4 }),
     listTopics(),

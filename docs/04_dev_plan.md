@@ -192,7 +192,8 @@ const ContentBodySchema = z.discriminatedUnion('kind', [CaseBodySchema, TrendBod
 | `contents` | id(uuid PK), slug(unique), track('case'\|'trend'), title, summary, **body(jsonb)**, job_tags(text[]), persona_coverage(text[]), read_min, apply_min, status('draft'\|'published'\|'archived'), curated(bool), thumbnail_url, published_at, **author_quote(text)** | author_quote = 헤더에 노출되는 1인칭 톤 인용 |
 | `reactions` | id, user_id(uuid FK), content_id(uuid FK→contents), type('like'\|'up'\|'down'), unique(user_id, content_id, type) | 기존 likes 흡수 |
 | `saves` | id, user_id(uuid FK), content_id(uuid FK), unique(user_id, content_id) | 기존 유지, content_id 타입 정정 |
-| `comments` | id, user_id(uuid FK), content_id(uuid FK), parent_id(uuid nullable), body, status('visible'\|'hidden'\|'reported'), created_at | **신규** — 1단 reply 허용 |
+| `comments` | id, user_id(uuid FK), **content_id(uuid FK nullable)**, **tool_id(uuid FK nullable)**, parent_id(uuid nullable), body, status('visible'\|'hidden'\|'reported'), created_at | 1단 reply 허용. **폴리모픽(content_id\|tool_id 중 정확히 하나)** — 케이스/트렌드/툴 상세 댓글. 0017 / §18.17 |
+| `reviews` | id, user_id(uuid FK), content_id\|tool_id\|product_id(셋 중 하나), rating(1~5), body, status, unique(user_id,타깃) | 별점 리뷰. **현재 ebook(product) 전용** — 콘텐츠/도구는 댓글로 대체(§18.17). 0016 |
 | `opinions` | id, user_id(uuid nullable), content_id(uuid nullable), body, status('new'\|'read'\|'replied'), reply_body, replied_at | **익명 허용** (user_id null) — 페르소나 C |
 | `events` | id, user_id(uuid nullable), content_id(uuid nullable), event_type, metadata(jsonb), created_at | 월별 파티셔닝 |
 | `products` | id, slug, title, type('ebook'), price(int=0 무료), pdf_path(Storage), thumbnail_url, status | price>0은 출시 후 결정 |
@@ -552,6 +553,10 @@ caselab/
 - 2026-06-02: **자료실(`/admin/tools`) CRUD 우선 진행 결정** — §18.7 참조
 - 2026-06-02: **Admin 영역 모바일 일괄 적용** — §18.8 참조 (AdminSidebar 드로어 + 8개 페이지 패딩·테이블 overflow + 폼 헤더 wrap)
 - 2026-06-08: **로그인 정책 재정의** — §18.12 참조 (D69 카카오 네이티브 전환·Edge Function 폐기 / D70 소셜 전용·이메일폼 제거 / D71 첫 가입 방식만 허용+차단 / D72 카카오 비즈앱 개인 본인인증)
+- 2026-06-09: **이메일 회원가입 부활 + 동의·비밀번호 정책** — §18.13 참조 (D73 /signup·이메일폼 복원 / D74 비번 8자+영숫특 / D75 동의 UI 필수·선택 / D76 newsletter 옵트인+0013), PR #42
+- 2026-06-10: **P1 두 건 해결 (Featured 예약노출 + Brevo 동기화)** — §18.14 참조. ① 공개 Hero를 `featured_contents`(slot_type='hero' + featured_from/until 날짜창) 기반 재배선(이전엔 `contents.curated`만 봄). ② `newsletter_subscribers` → Brevo 동기화 트리거+Edge Function(`sync-brevo-contact`) 신설·prod 배포·검증 완료(list #3).
+- 2026-06-12: **send-ebook 발송 Brevo → Gmail SMTP(nodemailer) 재전환** — §18.16 참조. Brevo가 `caselab.kr@gmail.com`(gmail 발신자)을 Gmail 수신함에 silent-drop(DMARC 실패)하는 것을 실측 → Gmail 자체 SMTP로 발송해 INBOX 도달 검증. 2026-06-02의 "Gmail→Brevo 재전환"(L551)을 뒤집음. **트랜잭션 발송만 Gmail SMTP**, 대량 뉴스레터는 별개(Brevo+도메인 필요). PR #51.
+- 2026-06-16: **상세페이지 별점 리뷰 → 댓글 전용 전환** — §18.17 참조. 케이스/트렌드/툴 상세에서 `ReviewSection`(별점) 제거, `CommentThread`만 노출. 툴 상세는 댓글 신규 배선(`comments` 폴리모픽화 0017). 별점 리뷰는 **ebook(구매자) 전용**으로 축소(PR #48에서 전체 도입했다가 번복). PR #52.
 
 ### 18.6 다른 세션에서 컨텍스트 파악 시 우선순위
 
@@ -702,6 +707,93 @@ caselab/
 **한계 (인지함)**: 구글 이메일 ≠ 카카오 이메일이면 별개 계정 2개 생성은 막을 수 없음(공통 키 부재). 향후 계정통합 안내로 대응.
 
 **영향받는 파일**: `app/(public)/login/page.tsx`, `app/auth/callback/route.ts`, `public/brand/app-icon*`. (Edge Function `supabase/functions/kakao-oauth/` = 폐기 예정 dead code)
+
+### 18.13 이메일 회원가입 부활 + 동의·비밀번호 정책 (PR #42)
+
+**결정 일자**: 2026-06-09
+
+**배경**: §18.12 D70에서 소셜 전용으로 갔다가, 자체 이메일 회원가입을 다시 도입(소셜 없는 사용자 + 자체 계정 수요). 개인정보 수집·마케팅 발송(웨비나·전자책 안내)을 위한 법적 동의 UI와 비밀번호 보안 정책을 함께 정비.
+
+**결정 (D73~D76)**:
+
+| # | 결정 | 영향 |
+|---|---|---|
+| **D73** | `/signup` 신규 (이름·이메일·비번 `signUp`). Confirm email OFF → 가입 즉시 세션 → `/onboarding`. `/login`에 이메일/비번 폼 복원 | D70 소셜 전용 일부 되돌림 — 소셜+이메일 병행 |
+| **D74** | 비밀번호 정책 = **8자 + 영문·숫자·특수문자**. Supabase Email provider 서버 정책 + 클라이언트 실시간 검사(가이드 상시표시·규칙/일치 실시간 색상) 일치. 유출비번 차단(HIBP)은 Pro 전용이라 Free 미적용 | `app/(public)/signup/page.tsx` |
+| **D75** | 동의 UI = `[필수]` 만14세·이용약관·개인정보 / `[선택]` 뉴스레터·마케팅 수신. 소셜은 폼 없어 로그인 화면 간주동의 고지문 + **온보딩에서 마케팅 동의** 수집. 마케팅 = 명시적 옵트인(정보통신망법 §50) | login/signup/onboarding + Footer 이용약관 링크 |
+| **D76** | `profiles.newsletter` 기본값 `true→false`(옵트인), `handle_new_user`가 메타데이터 `newsletter` 동의값 반영 (마이그레이션 **0013**) | 기존 행 영향 없음(신규 insert만) |
+| **D77** | 비밀번호 찾기/재설정 추가 — `/forgot-password`(`resetPasswordForEmail`) + `/reset-password`. 재설정 링크는 **token_hash 방식**(`{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery`)이고, **검증은 새 비번 제출 시점에만**(`verifyOtp`→`updateUser`) 수행 → 메일 스캐너 prefetch가 일회용 토큰을 소진하는 문제 + PKCE 브라우저 의존 문제를 동시 회피. 발송 메일 = **Supabase 커스텀 SMTP(Brevo)** + 한국어 이메일 템플릿 | `/login`에 "비밀번호를 잊으셨나요?" 링크. "아이디 찾기"는 ID=이메일이라 불필요 |
+
+**영향받는 파일**: `app/(public)/{signup,forgot-password,reset-password}/page.tsx`(신규), `app/(public)/login/page.tsx`, `app/(public)/onboarding/page.tsx`, `components/layout/Footer.tsx`, `supabase/migrations/0013_signup_consent.sql`.
+
+### 18.14 P1 두 건 — Featured 예약노출 + Brevo 동기화 (2026-06-10)
+
+**결정 일자**: 2026-06-10
+
+**배경**: 출시 점검에서 P1 두 건 발견 — ① admin이 `featured_contents`(slot/날짜)에 큐레이션해도 공개 Hero는 `contents.curated` 플래그만 봐서 슬롯·예약노출이 전부 무시됨. ② 구독모달이 `newsletter_subscribers`에 적재만 하고 Brevo 리스트 동기화가 미구현(0007 주석의 "Day 9 트리거"가 빈 칸).
+
+**① Featured 예약 노출 — 공개 Hero 재배선**
+- `lib/data/contents.ts`에 `listFeaturedContents()` 신설: `featured_contents`(slot_type='hero', active=true) 읽고 **예약창**(`featured_from <= now <= featured_until`, null=상시) 필터 + slot 순 정렬 + contents `!inner`(published만). 비거나 미구성이면 `curated` 폴백.
+- `app/(public)/page.tsx` Hero가 `listFeaturedContents(5)` 사용.
+- **남은 후속(caselab_admin 레포)**: `CurationManager`는 현재 `sort_label`만 쓰고 `featured_from/until` 입력 UI가 없음 → admin에 날짜 프리셋(1주/2달) 입력 추가해야 예약이 실제로 채워짐. ([[project_admin_crud_queue]]에 누적)
+- **스키마 drift 주의**: repo 마이그레이션(0010)은 `featured_contents.slot`/`unique(slot)`만 있으나 prod/admin은 `slot_type`/`unique(slot_type,slot)` 사용. 쿼리는 prod 실스키마에 맞춤. 정합 마이그레이션 별도 필요.
+
+**② Brevo 동기화 — end-to-end 구현·배포 완료**
+- Edge Function `supabase/functions/sync-brevo-contact/` 신설 (Brevo Contacts upsert/blacklist, `BREVO_NEWSLETTER_LIST_ID`).
+- 마이그레이션 `0014_newsletter_brevo_sync.sql`: `newsletter_subscribers` insert/status변경 → 위 함수 호출 트리거.
+- **⚠️ 아키텍처 변경**: Supabase 관리형은 `ALTER DATABASE SET app.*` 가 막힘(42501) → GUC 대신 **Supabase Vault**(`vault.create_secret`/`decrypted_secrets`)로 `sync_brevo_url`·`service_role_key` 보관. 기존 send-ebook/profiles 트리거(0002)도 같은 GUC 의존이라 실제론 미작동 상태였음 → **`0015`에서 동일 Vault 방식으로 전환 완료 (§18.15 참조)**.
+- **검증**: 2026-06-10 prod 테스트 insert → Brevo `caselab-newsletter`(list #3)에 컨택 적재 확인(API 직접 검증).
+- **주의**: 붙여넣기 공백 혼입으로 URL/키가 깨지면 `regexp_replace(..., '\s','','g')`로 정리. 검증: `select length(decrypted_secret), decrypted_secret ~ '\s' from vault.decrypted_secrets where name=...`.
+
+**영향받는 파일**: `lib/data/contents.ts`, `app/(public)/page.tsx`, `supabase/functions/sync-brevo-contact/index.ts`, `supabase/migrations/0014_newsletter_brevo_sync.sql`.
+
+---
+
+### 18.15 send-ebook + profiles 트리거 Vault 전환 — 자동발송 복구 (2026-06-10)
+
+**결정 일자**: 2026-06-10
+
+**배경**: §18.14 ②에서 드러난 후속. `0002`의 GUC 의존 트리거 2개 — `trg_send_ebook_on_purchase`(전자책 자동발송), `trg_sync_brevo_contact`(로그인 유저 `profiles.newsletter` → Brevo) — 가 `ALTER DATABASE SET app.*` 차단(42501)으로 prod에 GUC가 안 박혀 **출시 이후 한 번도 작동 안 함(silent skip)**. 전자책 주문은 `purchases`에 쌓이는데 PDF 링크 메일이 안 나갔고, BREVO_API_KEY도 2026-06-10에야 처음 등록됨.
+
+**조치 — 마이그레이션 `0015_send_ebook_vault.sql`**
+- 트리거 함수 2개를 `create or replace`로 GUC → Vault 전환. 시크릿 읽기를 `current_setting('app.*')` → `select decrypted_secret from vault.decrypted_secrets where name=...` 로 교체 (`0014`와 동일 패턴). 트리거 자체(대상 테이블·이벤트·이름)는 불변.
+- Edge Function(`send-ebook`, `sync-brevo-contact`)은 `Deno.env` 의존이라 **무수정** — 고장은 DB 트리거의 시크릿 읽기 한 곳뿐이었음. 클라이언트(`OrderForm.tsx`, `SubscribeModal.tsx`)도 무수정.
+- **운영자 1회 설정**: SQL Editor에서 `select vault.create_secret('https://jsresrgzrsxotopfzpos.supabase.co/functions/v1/send-ebook', 'send_ebook_url');` (`service_role_key`·`sync_brevo_url`은 0014에서 등록 완료 → 재사용). 그 후 `0015` 전체 Run.
+- **검증**: `/ebooks/volume-1/order` 주문 → 1분 내 PDF 링크 메일 + `purchases.status='sent'` 확인. 로그인 유저 뉴스레터 토글 → Brevo list #3 적재 확인.
+
+**영향받는 파일**: `supabase/migrations/0015_send_ebook_vault.sql` (신규). 참고 본보기: `supabase/migrations/0014_newsletter_brevo_sync.sql`.
+
+---
+
+### 18.16 send-ebook 발송 Brevo → Gmail SMTP(nodemailer) 재전환 (2026-06-12)
+
+**배경**: §18.15로 자동발송 트리거를 복구한 뒤 e2e 테스트하니, Brevo는 `delivered` 이벤트를 주는데 **수신 Gmail 계정에는 메일이 아예 없음**(`in:anywhere`로 스팸·휴지통까지 검색해도 없음 = silent-drop). 원인: 발신자가 `caselab.kr@gmail.com`(@gmail.com 무료주소)인데 인증된 자체 도메인이 0개 → Gmail이 "gmail.com이라면서 구글 서버가 아니네"로 DMARC 실패 처리해 폐기. 대조로 `ju2464@naver.com`은 정상 수신·열람·클릭. 즉 **모든 외부 ESP는 @gmail.com을 발신자로 못 씀**(DMARC 정렬 불가).
+
+**조치**: send-ebook 발송 경로를 **Gmail 자체 SMTP**로 전환. 진짜 구글 서버에서 나가므로 SPF/DKIM/DMARC가 정렬되어 Gmail INBOX 도달.
+- `supabase/functions/send-ebook/index.ts`: Brevo HTTP API fetch → **nodemailer(`npm:nodemailer@6.9.16`) + `smtp.gmail.com:465` TLS**.
+- ⚠️ **라이브러리 함정**: 처음 시도한 `denomailer@1.6.0`은 한글 제목 RFC2047 인코딩-워드 안에 공백을 그대로 넣어(`=?utf-8?Q?...공백...?=`) 잘못된 헤더 생성 → Gmail이 디코딩 포기, 제목·본문이 raw quoted-printable로 깨짐. **nodemailer로 교체 후 정상**(MIME/RFC2047 정확).
+- **secrets 변경**: `BREVO_API_KEY/SENDER_EMAIL/SENDER_NAME` → `GMAIL_USER`(caselab.kr@gmail.com) / `GMAIL_APP_PASSWORD`(구글 2단계 인증 후 앱비번 16자리, 공백 제거) / `GMAIL_SENDER_NAME`. DB 트리거·클라이언트·signed URL 로직 무수정.
+- **2026-06-02 결정(L551) 뒤집음**: 당시 Brevo로 간 사유는 "개인 Gmail 자동발송 약관 회색지대 + 딜리버러빌리티". 실측 결과 **Brevo가 오히려 딜리버러빌리티 실패**, Gmail SMTP가 INBOX 도달. 약관은 **저용량 트랜잭션 발송(App Password SMTP)** 수준에서 허용 범위로 판단. **단, 대량 뉴스레터는 Gmail SMTP 불가**(하루 ~500통·수신거부 관리 X) → 뉴스레터 대량발송은 Brevo 캠페인 + 자체 도메인(DKIM)이 필요하며 도메인 격상 트리거(L530)에 해당.
+- **검증**: prod 배포 후 `juhee2464@gmail.com` 테스트 → **INBOX 도착**(스팸 아님) + 한글 제목·본문·PDF 링크 정상 렌더 + `purchases.status='sent'`.
+
+**영향받는 파일**: `supabase/functions/send-ebook/index.ts`, `.env.example`. 무관: DB 트리거(0015)·클라이언트.
+
+---
+
+### 18.17 상세페이지 별점 리뷰 → 댓글 전용 전환 (2026-06-16)
+
+**배경**: PR #48(2026-06-10, [[project_reviews_wishlist_shipped]])에서 별점 리뷰(`ReviewSection`)를 콘텐츠(case/trend)·도구·ebook **전체**에 도입했으나, 운영자가 상세페이지에 별점 리뷰와 댓글이 **둘 다** 떠서 중복·혼란이라 판단. 별점은 거래성 콘텐츠(ebook)에만 의미가 있고, 일반 글/도구는 토론형 댓글이 적합.
+
+**결정**: 상세페이지는 **댓글만**, 별점 리뷰는 **ebook(구매자) 전용**으로 축소.
+
+| # | 결정 | 영향 |
+|---|---|---|
+| 1 | 케이스·트렌드·툴 상세에서 `ReviewSection`(별점 폼) 제거, `CommentThread`만 노출 | 케이스/트렌드는 이미 댓글 보유 → 리뷰만 제거. **툴 상세는 댓글 신규 배선** |
+| 2 | `comments` 폴리모픽화 — `content_id` nullable로 완화 + `tool_id` 추가, `content_id\|tool_id` 정확히 하나 제약(`comments_one_target`) | 마이그레이션 **0017**. 기존 행은 전부 content_id 보유 → 자동 충족. RLS는 user_id/status 기반이라 무수정. prod SQL Editor 적용 success |
+| 3 | `CommentThread`가 `contentId`/`toolId` 둘 다 받도록 확장(타깃 컬럼 자동 선택) | `components/content/CommentThread.tsx` |
+| 4 | 고아가 된 `ReviewSection.tsx` 삭제. ebook은 별도 `EbookReviews`(구매 게이트) 사용이라 무관, `reviews` 테이블·0016 그대로 유지 | `components/tools/ToolDetail.tsx`는 `CommentThread`로 교체 |
+
+**영향받는 파일**: `app/(public)/{cases,trends}/[slug]/page.tsx`, `components/tools/ToolDetail.tsx`, `components/content/CommentThread.tsx`, `supabase/migrations/0017_comments_polymorphic.sql`. 삭제: `components/content/ReviewSection.tsx`. PR #52.
 
 ---
 

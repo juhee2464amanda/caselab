@@ -10,7 +10,8 @@ import { formatDate } from '@/lib/utils';
 interface Comment {
   id: string;
   user_id: string;
-  content_id: string;
+  content_id: string | null;
+  tool_id: string | null;
   parent_id: string | null;
   body: string;
   status: 'visible' | 'hidden' | 'reported';
@@ -19,38 +20,46 @@ interface Comment {
 }
 
 interface Props {
-  contentId: string;
+  contentId?: string;
+  toolId?: string;
 }
 
-export function CommentThread({ contentId }: Props) {
+const SELECT = 'id, user_id, content_id, tool_id, parent_id, body, status, created_at, profiles(name, avatar_url)';
+
+export function CommentThread({ contentId, toolId }: Props) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [body, setBody] = useState('');
   const [pending, startTransition] = useTransition();
   const [user, setUser] = useState<{ id: string } | null>(null);
   const supabase = createSupabaseBrowserClient();
 
+  // 타깃 컬럼: 콘텐츠(case/trend) 또는 도구(tool) 중 하나
+  const targetColumn = toolId ? 'tool_id' : 'content_id';
+  const targetId = toolId ?? contentId;
+
   useEffect(() => {
+    if (!targetId) return;
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
       const { data } = await supabase
         .from('comments')
-        .select('id, user_id, content_id, parent_id, body, status, created_at, profiles(name, avatar_url)')
-        .eq('content_id', contentId)
+        .select(SELECT)
+        .eq(targetColumn, targetId)
         .eq('status', 'visible')
         .order('created_at', { ascending: true })
         .limit(100);
       setComments((data ?? []) as unknown as Comment[]);
     })();
-  }, [contentId, supabase]);
+  }, [targetColumn, targetId, supabase]);
 
   function submit() {
-    if (!body.trim() || !user) return;
+    if (!body.trim() || !user || !targetId) return;
     startTransition(async () => {
       const { data, error } = await supabase
         .from('comments')
-        .insert({ content_id: contentId, body: body.trim(), user_id: user.id })
-        .select('id, user_id, content_id, parent_id, body, status, created_at, profiles(name, avatar_url)')
+        .insert({ [targetColumn]: targetId, body: body.trim(), user_id: user.id })
+        .select(SELECT)
         .single();
       if (!error && data) {
         setComments((c) => [...c, data as unknown as Comment]);

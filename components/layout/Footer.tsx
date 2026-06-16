@@ -17,6 +17,9 @@ export function Footer() {
           <Link href="/ebooks" className="hover:text-ink/80 transition-colors">
             ebook
           </Link>
+          <Link href="/legal/terms" className="hover:text-ink/80 transition-colors">
+            이용약관
+          </Link>
           <Link href="/legal/privacy" className="hover:text-ink/80 transition-colors">
             개인정보 처리방침
           </Link>

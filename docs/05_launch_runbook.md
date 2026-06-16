@@ -22,10 +22,11 @@
 |---|---|---|
 | 도메인 | **Vercel 무료 서브도메인** (예: `caselab.vercel.app`) | Day 10 Vercel 가입 시 결정 |
 | 운영자 메일 | `caselab.kr@gmail.com` | Day 0 (이미 보유) |
-| 사이트 발송 이메일 | **Brevo HTTP API** (단일 발신자 인증, 발신: `caselab.kr@gmail.com`, 일 300건·월 9,000건 무료) | Day 9 |
+| 전자책 발송(트랜잭션) | **Gmail SMTP / nodemailer** (발신: `caselab.kr@gmail.com`, ~500통/일 무료, INBOX 도달 검증) | Day 9 |
+| 뉴스레터 명단 동기화 | **Brevo Contacts API** (`sync-brevo-contact`) | Day 9 |
 | Cloudflare | **사용 안 함** | — |
-| Resend | **사용 안 함** (Brevo로 대체) | — |
-| Brevo | **사용** (단일 발신자 인증, 무료) | Day 9 |
+| Resend | **사용 안 함** | — |
+| Brevo | **사용** (뉴스레터 명단 동기화 + 비번재설정 SMTP. 발송은 Gmail SMTP로 분리) | Day 9 |
 | Anthropic API (AI 초안) | **출시 후 도입 예정** | — |
 | Supabase | 사용 (Free) | Day 1 |
 | Vercel | 사용 (Hobby 무료) | Day 10 |
@@ -250,15 +251,26 @@ Authentication → **URL Configuration**:
 3. 플랫폼 키 → REST API 키 수정 → **카카오 로그인 Redirect URI** = `https://<supabase-ref>.supabase.co/auth/v1/callback` + Client Secret 코드 생성·사용함
 4. Supabase Dashboard → Authentication → Providers → **Kakao** Enable → REST API Key + Client Secret 입력 → `Allow users without an email` ON → Save
 
-### 📋 로그인 정책 설정 (§18.12 D70·D71)
-- 로그인 = **소셜 전용**(구글·카카오). 이메일/비번 폼 제거됨
+### 📋 로그인 정책 설정 (§18.12 / §18.13)
+- 로그인 = **소셜(구글·카카오) + 이메일/비번**. `/signup` 자체 회원가입 있음 (§18.13 D73)
 - **첫 가입 방식만 허용**: Supabase Dashboard → Authentication → Sign In/Providers → **Allow manual linking = ON** (콜백의 unlinkIdentity 동작에 필요)
 - `Confirm email = OFF` 유지
+- **비밀번호 정책** (§18.13 D74): Authentication → Providers → **Email** → Minimum length **8** + Password Requirements **"letters, digits and symbols"** → Save
+- **마이그레이션 0013** (§18.13 D76): SQL Editor에 `supabase/migrations/0013_signup_consent.sql` Run (newsletter 옵트인 + 트리거 동의값 반영)
+- **비밀번호 재설정용 커스텀 SMTP** (§18.13 D77): Authentication → Emails → **Custom SMTP** 활성화 → Brevo SMTP(host `smtp-relay.brevo.com`, port 587, login=Brevo SMTP 로그인, password=Brevo SMTP key, sender=`caselab.kr@gmail.com`/케이스랩). 미연결 시 기본 메일은 rate-limit이라 재설정 메일 미도달 위험
 
 ### 🔍 검증
 - `npm run dev` → `/login` → Google·Kakao 로그인 → `/onboarding`
 - Supabase Studio → profiles → 본인 row ✓
 - 같은 이메일로 다른 provider 로그인 시도 → `/login?error=email_in_use` 차단 + identities 1개 유지 확인
+
+---
+
+### 📋 리뷰·댓글 마이그레이션 (§18.17)
+출시 후 추가된 DB 변경. SQL Editor에 전체 복붙 → Run → "Success".
+- **마이그레이션 0016** (별점 리뷰, PR #48): `supabase/migrations/0016_reviews.sql` Run. `reviews` 테이블(폴리모픽). 정책상 **현재 ebook 구매자 리뷰에만 사용**.
+- **마이그레이션 0017** (댓글 폴리모픽화, PR #52): `supabase/migrations/0017_comments_polymorphic.sql` Run. `comments.content_id` nullable + `tool_id` 추가 → 툴 상세 댓글 작동. (2026-06-16 prod 적용 success ✓)
+- 검증: 툴 상세(`/tools/[slug]`)에서 로그인 후 댓글 등록 → `comments`에 `tool_id` 채워진 행 확인. 케이스/트렌드/툴 상세에 별점 리뷰 폼 **미노출**(ebook 상세에만 노출).
 
 ---
 
@@ -453,38 +465,65 @@ open http://localhost:3000/sitemap.xml
 
 ---
 
-## Day 9 — Brevo + 전자책 발송 ([Issue #5](https://github.com/juhee2464amanda/caselab/issues/5))
+## Day 9 — 전자책 발송(Gmail SMTP) + Brevo 명단 동기화 ([Issue #5](https://github.com/juhee2464amanda/caselab/issues/5))
 
-> 2026-06-02 결정 변경: Gmail SMTP → Brevo HTTP API. 사유는 `docs/04_dev_plan.md` §18.5 참조.
+> 2026-06-12 결정 변경: **전자책 발송 = Gmail SMTP(nodemailer)**. Brevo는 gmail 발신자를 Gmail에 silent-drop(DMARC 실패)해서 인박스 미도달 → Gmail 자체 SMTP로 전환해 INBOX 도달 검증. 사유는 `docs/04_dev_plan.md` §18.16 참조.
+> ⚠️ Brevo는 **뉴스레터 명단 동기화(Contacts API)** 와 **비밀번호 재설정 커스텀 SMTP(§18.13 D77)** 에 계속 사용 — 그 두 절차의 Brevo 설정은 그대로 둔다.
 
 ### ✅ 끝났을 때
-- Brevo 가입 + `caselab.kr@gmail.com` 단일 발신자 인증 완료
-- Brevo API Key 발급 + Supabase secrets 3종 등록 완료
-- `send-ebook` Edge Function 배포 (Brevo HTTP API 사용)
-- 본인 이메일로 전자책 주문 → 1분 내 PDF 다운로드 링크 도착
-- **(이월) `newsletter_subscribers`(0007) → Brevo Contact 동기화 트리거 추가** — 비로그인 구독자도 Brevo 리스트 반영. 기존 `trg_sync_brevo_contact`(profiles) 패턴 재사용. SubscribeModal은 이미 `newsletter_subscribers`에 적재 중.
+- 발신 Gmail 계정(`caselab.kr@gmail.com`) 2단계 인증 + 앱 비밀번호 발급 완료
+- Supabase secrets `GMAIL_USER/GMAIL_APP_PASSWORD/GMAIL_SENDER_NAME` 등록 완료
+- `send-ebook` Edge Function 배포 (Gmail SMTP / nodemailer 사용)
+- 본인 Gmail로 전자책 주문 → 1분 내 PDF 다운로드 링크 **INBOX** 도착(한글 제목·본문 정상)
+- ✅ **(2026-06-10 완료) `newsletter_subscribers` → Brevo 동기화** — 아래 "newsletter 동기화" 절차 참조. prod 배포·검증 완료(§18.14).
+- ✅ **(2026-06-10 완료) send-ebook 자동발송 트리거 Vault 전환** — `0002`의 GUC 트리거가 prod에서 미작동이던 것을 `0015`로 복구. 아래 "send-ebook Vault 설정" 절차 참조 (§18.15).
 
-### 📋 Brevo 단일 발신자 인증 (~5분)
-1. [brevo.com](https://www.brevo.com/) 가입 (Google 로그인 가능). Day 0에 이미 가입했으면 패스.
-2. Dashboard → **Senders, Domains & Dedicated IPs** → **Senders** → **Add a sender**
-   - From name: `케이스랩`
-   - From email: `caselab.kr@gmail.com`
-3. 등록 즉시 `caselab.kr@gmail.com`으로 인증 메일 도착 → **Confirm** 클릭
-4. Senders 목록에 `Verified ✓` 표시되면 완료
-
-### 📋 Brevo API Key 발급 (~2분)
-1. Dashboard 우상단 프로필 → **SMTP & API** → **API Keys** 탭
-2. **Generate a new API key** → name: `caselab-edge` → Generate
-3. **`xkeysib-...`로 시작하는 키 복사·메모** (한 번만 표시)
+### 📋 Gmail 앱 비밀번호 발급 (~5분)
+1. 발신 계정 `caselab.kr@gmail.com`으로 로그인 → [myaccount.google.com](https://myaccount.google.com) → **보안**
+2. **2단계 인증**을 켠다 (이미 켜져 있으면 패스 — 켜야만 앱 비밀번호 메뉴가 생김)
+3. 주소창에 `myaccount.google.com/apppasswords` 직접 이동 (또는 보안 검색창에 "앱 비밀번호")
+4. 앱 이름 입력(예: `caselab`) → **만들기** → **16자리** 비밀번호 복사 (창 닫으면 다시 못 봄)
 
 ### 📋 Supabase Edge Function 배포 (~5분)
 ```bash
 # Day 1에서 supabase login + link 이미 했다는 전제
-supabase secrets set BREVO_API_KEY=xkeysib-xxxxxxxxxxxxxxxx
-supabase secrets set BREVO_SENDER_EMAIL=caselab.kr@gmail.com
-supabase secrets set BREVO_SENDER_NAME=케이스랩
+supabase secrets set GMAIL_USER=caselab.kr@gmail.com
+supabase secrets set GMAIL_APP_PASSWORD=xxxxxxxxxxxxxxxx   # 앱 비밀번호 16자리, 공백 제거
+supabase secrets set GMAIL_SENDER_NAME=케이스랩
 supabase secrets set SITE_URL=https://<your>.vercel.app   # Day 10 후 갱신
 supabase functions deploy send-ebook
+```
+> 무료 Gmail 발송 한도 ~500통/일. 대량 뉴스레터는 이 경로로 불가(Brevo 캠페인 + 자체 도메인 필요).
+
+### 📋 send-ebook Vault 설정 — 자동발송 트리거 (2026-06-10 `0015`로 복구)
+> ⚠️ `0002`의 send-ebook 트리거는 GUC(`current_setting('app.*')`) 의존이라 prod에서 GUC 차단(42501)으로 **출시 이후 미작동**이었음. `0015`에서 Vault 방식으로 전환. 위 secrets 등록·함수 배포 외에 **아래 Vault 시크릿 등록이 있어야 자동발송이 작동**한다.
+```sql
+-- SQL Editor에서 (마이그레이션 0015 전체 Run 전/후):
+select vault.create_secret('https://<ref>.supabase.co/functions/v1/send-ebook', 'send_ebook_url');
+-- service_role_key 는 newsletter 동기화(아래)에서 이미 등록했으면 재사용 — 없으면 같이 등록
+-- 검증: send_ebook_url has_space=false 여야 함
+select name, length(decrypted_secret) len, decrypted_secret ~ '\s' has_space
+from vault.decrypted_secrets where name in ('send_ebook_url','service_role_key');
+```
+> 미설정 시 트리거는 silent skip — 주문 적재(`purchases`)는 정상, 메일 발송만 보류. 그땐 아래 "검증"의 수동 curl 트리거로 함수 자체는 점검 가능.
+
+### 📋 newsletter 동기화 — `sync-brevo-contact` 배포 (2026-06-10 완료, 재현용)
+> 비로그인 구독자(`newsletter_subscribers`)를 Brevo 리스트에 자동 적재. SubscribeModal은 이미 적재 중.
+> ⚠️ Supabase 관리형은 `ALTER DATABASE SET app.*`가 막힘(42501) → **Vault**로 시크릿 보관.
+```bash
+# 1) Brevo Contacts → Lists 에서 뉴스레터 리스트 생성, 숫자 ID 확인 (prod = #3 caselab-newsletter)
+supabase secrets set BREVO_NEWSLETTER_LIST_ID=3 --project-ref <ref>   # BREVO_API_KEY는 send-ebook과 공유
+supabase functions deploy sync-brevo-contact --project-ref <ref>
+```
+SQL Editor에서 (마이그레이션 `0014` 전체 Run 후):
+```sql
+-- Vault에 시크릿 2개 (붙여넣기 공백 혼입 주의 — 깨지면 regexp_replace로 정리)
+select vault.create_secret('https://<ref>.supabase.co/functions/v1/sync-brevo-contact', 'sync_brevo_url');
+select vault.create_secret('<SERVICE_ROLE_KEY eyJ...>', 'service_role_key');
+-- 검증: sync_brevo_url len=72, has_space=false 여야 함
+select name, length(decrypted_secret) len, decrypted_secret ~ '\s' has_space
+from vault.decrypted_secrets where name in ('sync_brevo_url','service_role_key');
+-- 테스트: insert into newsletter_subscribers(...) → Brevo 리스트에 컨택 적재 확인
 ```
 
 ### 📋 전자책 PDF 업로드 (첫 책 한 번)
@@ -507,22 +546,20 @@ supabase functions deploy send-ebook
      -H "Content-Type: application/json" \
      -d '{"purchase_id": "<위 row의 id>"}'
    ```
-4. 본인 메일함에서 1분 내 도착 확인 (**스팸/프로모션 탭도 꼭 확인**). 발신: `케이스랩 <caselab.kr@gmail.com>` (`via brevo.com` 꼬리표 표시될 수 있음)
+4. 본인 Gmail에서 1분 내 도착 확인. 발신: `케이스랩 <caselab.kr@gmail.com>` (Gmail SMTP라 INBOX 도달, 한글 제목·본문 정상)
 5. PDF 다운로드 링크 클릭 → 다운로드 성공
 6. Supabase Studio에서 row `status='sent'`, `sent_at` 채워짐 확인
 
 ### 🛠️ 자주 막히는 지점
-- **단일 발신자 인증 메일 안 옴**: Gmail 모든 폴더(받은편지함·소셜·프로모션·스팸) 검색. 5분 지나도 없으면 Brevo Senders 화면에서 Resend 클릭
-- **`api-key` 401**: 키 복사 시 앞뒤 공백·줄바꿈 포함 여부 확인. `xkeysib-`로 시작하는지
-- **Brevo 응답 400 `Invalid sender`**: 단일 발신자 인증 완료 후 `BREVO_SENDER_EMAIL`이 인증된 주소와 정확히 동일한지 확인
-- **스팸/프로모션 탭으로 빠짐**: 본인 inbox에서 "스팸 아님" 표시 + 발신주소 주소록 추가. 첫 발송은 흔함. 도메인 도입 시(§18.3) DKIM/SPF 추가하면 격감
-- **일 300건 한도 초과**: 운영자 1인 + 출시 직후엔 도달 안 함. 도달 시 도메인 구입 + Brevo 도메인 인증(DKIM/SPF)으로 격상
+- **SMTP 535 인증 실패**: `GMAIL_APP_PASSWORD`가 앱 비밀번호(16자리, 공백 제거)인지 확인. 일반 계정 비번 아님. 2단계 인증이 켜져 있어야 발급 가능
+- **함수가 sent인데 메일 안 옴**: ① 트리거 Vault(`send_ebook_url`) 미설정 → 아래 "send-ebook Vault 설정" 확인. ② 발송 한도(~500/일) 초과
+- **denomailer로 보내면 제목·본문 깨짐**: RFC2047 인코딩 버그 → **nodemailer**를 써야 함(§18.16). 현재 코드는 nodemailer
+- **대량 발송 필요**: Gmail SMTP는 ~500통/일 + 수신거부 관리 없음 → 뉴스레터는 Brevo 캠페인 + 자체 도메인(DKIM) 필요(아래 트레이드오프)
 
-### Brevo 단일 발신자 인증의 트레이드오프 (인지하고 진행)
-- 발신: `caselab.kr@gmail.com` (도메인 인증이 아니라 단일 발신자 인증 → 인박스에 `via brevo.com` 꼬리표 표시 가능)
-- 일부 수신자(특히 기업 outlook·국내 daum/naver 일부 정책)에서 프로모션/스팸 탭으로 분류 가능 (~20%)
-- → 대신 **연 운영비 $0** + 도메인 없이 즉시 사용 + 일 300건/월 9k 무료 + 뉴스레터 캠페인 UI 동봉
-- **전환 트리거** (§18.3): 구독자 500명 / 월 발송 8k / 스팸 불만 / 딜리버러빌리티 < 80% 도달 시 → 도메인 구입 + Brevo 도메인 인증(DKIM/SPF)으로 격상
+### 발송 채널 분리 (인지하고 진행)
+- **전자책(트랜잭션) = Gmail SMTP**: `caselab.kr@gmail.com`이 진짜 구글 서버에서 발송 → SPF/DKIM/DMARC 정렬 → Gmail INBOX 도달. 연 운영비 $0, 도메인 불필요. 한도 ~500통/일(운영자 1인 출시엔 충분).
+- **뉴스레터(대량) = Brevo 캠페인(추후)**: gmail 발신자는 Brevo로 보내면 silent-drop(§18.16) → 대량은 **자체 도메인 + Brevo 도메인 인증(DKIM/SPF)** 이 전제.
+- **전환 트리거** (§18.3): 구독자 500명 / 월 발송 8k / 스팸 불만 / 뉴스레터 실발송 착수 시 → 도메인 구입 + DKIM/SPF 격상.
 
 ---
 
@@ -639,9 +676,11 @@ https://<your>.vercel.app/sitemap.xml  # 200
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | GA4 | Day 8 | 선택 |
 | `KAKAO_REST_API_KEY` (Edge Function secret) | Kakao 디벨로퍼스 | Day 2 (선택) | Kakao 도입 시 |
 | `KAKAO_CLIENT_SECRET` (Edge Function secret) | Kakao 디벨로퍼스 | Day 2 (선택) | 동일 |
-| `BREVO_API_KEY` (Edge Function secret) | Brevo → SMTP & API → API Keys (`xkeysib-...`) | Day 9 | 필수 (전자책 발송) |
-| `BREVO_SENDER_EMAIL` (Edge Function secret) | `caselab.kr@gmail.com` (Brevo 단일 발신자 인증 완료한 주소) | Day 9 | 필수 |
-| `BREVO_SENDER_NAME` (Edge Function secret) | `케이스랩` | Day 9 | 필수 |
+| `GMAIL_USER` (Edge Function secret) | `caselab.kr@gmail.com` (발신 Gmail 계정) | Day 9 | 필수 (전자책 발송) |
+| `GMAIL_APP_PASSWORD` (Edge Function secret) | 구글 2단계 인증 후 앱 비밀번호 16자리(공백 제거) | Day 9 | 필수 (전자책 발송) |
+| `GMAIL_SENDER_NAME` (Edge Function secret) | `케이스랩` | Day 9 | 필수 (전자책 발송) |
+| `BREVO_API_KEY` (Edge Function secret) | Brevo → SMTP & API → API Keys (`xkeysib-...`) | Day 9 | 필수 (뉴스레터 명단 동기화 `sync-brevo-contact`) |
+| `BREVO_NEWSLETTER_LIST_ID` (Edge Function secret) | Brevo Contacts → Lists 숫자 ID (prod=3) | Day 9 | 필수 (뉴스레터 명단 동기화) |
 | `ANTHROPIC_API_KEY` | Anthropic Console | **출시 후** | 보류 |
 | `NEXT_PUBLIC_AI_DRAFT_ENABLED` | `true` | **출시 후** | 보류 (AI 초안 버튼 토글) |
 

@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { useAuth } from '@/lib/hooks/use-auth';
 
 interface Props {
   open: boolean;
@@ -13,31 +14,66 @@ interface Props {
 }
 
 export function SubscribeModal({ open, onOpenChange }: Props) {
+  const { user } = useAuth();
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [consented, setConsented] = useState(false);
   const [done, setDone] = useState(false);
+  const [already, setAlready] = useState(false); // 로그인 유저가 이미 구독 중
   const [pending, startTransition] = useTransition();
   const supabase = createSupabaseBrowserClient();
+
+  // 모달 열림 + 로그인 → 계정 정보 자동 채움 + 구독 여부 확인.
+  // 닫히면 입력값 초기화.
+  useEffect(() => {
+    if (!open) {
+      setEmail('');
+      setName('');
+      setConsented(false);
+      setDone(false);
+      setAlready(false);
+      return;
+    }
+    if (!user) return;
+    setEmail(user.email ?? '');
+    const displayName =
+      (user.user_metadata?.full_name as string | undefined) ||
+      (user.user_metadata?.name as string | undefined) ||
+      '';
+    setName(displayName);
+    let active = true;
+    supabase
+      .from('profiles')
+      .select('newsletter')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (active && data?.newsletter) setAlready(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [open, user, supabase]);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!email || !consented) return;
     startTransition(async () => {
-      // 비로그인 구독자 → newsletter_subscribers (중복 이메일은 무시)
-      await supabase
-        .from('newsletter_subscribers')
-        .upsert(
-          { email, name: name || null, source: 'modal', consented: true },
-          { onConflict: 'email', ignoreDuplicates: true },
-        );
+      if (user && email === user.email) {
+        // 로그인 유저(계정 이메일) → profiles.newsletter (트리거가 Brevo 동기화)
+        await supabase.from('profiles').update({ newsletter: true }).eq('id', user.id);
+      } else {
+        // 비로그인 또는 다른 이메일 입력 → newsletter_subscribers (중복 이메일은 무시)
+        await supabase
+          .from('newsletter_subscribers')
+          .upsert(
+            { email, name: name || null, source: 'modal', consented: true },
+            { onConflict: 'email', ignoreDuplicates: true },
+          );
+      }
       setDone(true);
       setTimeout(() => {
         onOpenChange(false);
-        setDone(false);
-        setEmail('');
-        setName('');
-        setConsented(false);
       }, 1500);
     });
   }
@@ -54,6 +90,13 @@ export function SubscribeModal({ open, onOpenChange }: Props) {
         {done ? (
           <div className="py-6 text-center">
             <p className="text-sm">구독해 주셔서 고마워요. 첫 메일로 인사드릴게요. 🙏</p>
+          </div>
+        ) : already ? (
+          <div className="space-y-4 py-4 text-center">
+            <p className="text-sm">이미 구독 중이에요 ✓<br />새 콘텐츠가 나오면 메일로 알려드릴게요.</p>
+            <Button variant="accent" className="w-full" onClick={() => onOpenChange(false)}>
+              닫기
+            </Button>
           </div>
         ) : (
           <form onSubmit={submit} className="space-y-3">

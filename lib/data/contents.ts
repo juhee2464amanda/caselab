@@ -41,6 +41,36 @@ export async function listPublishedContents(opts: ListOpts = {}): Promise<Conten
   return rows.length ? rows : devFallback(opts);
 }
 
+/**
+ * Hero 큐레이션 — admin이 featured_contents(slot_type='hero')에 배정한 슬롯을 읽는다.
+ * - active=true + 예약 노출 창(featured_from<=now<=featured_until, null=상시) 필터.
+ * - slot 순서대로 정렬, contents는 published만(!inner).
+ * - 비어있거나(예약 만료/미배정) Supabase 미구성이면 contents.curated 폴백.
+ *   → admin 큐레이션이 비로소 공개 Hero에 반영됨 (이전엔 curated 플래그만 봤음).
+ */
+export async function listFeaturedContents(limit = 5): Promise<ContentRow[]> {
+  if (!isSupabaseConfigured()) return devFallback({ curated: true, limit });
+  const supabase = await createSupabaseServerClient();
+  const nowIso = new Date().toISOString();
+  const { data, error } = await supabase
+    .from('featured_contents')
+    .select(`slot, contents:content_id!inner(${PUBLIC_FIELDS})`)
+    .eq('slot_type', 'hero')
+    .eq('active', true)
+    .eq('contents.status', 'published')
+    .or(`featured_from.is.null,featured_from.lte.${nowIso}`)
+    .or(`featured_until.is.null,featured_until.gte.${nowIso}`)
+    .order('slot', { ascending: true })
+    .limit(limit);
+  if (error) {
+    console.warn('[listFeaturedContents]', error.message);
+    return listPublishedContents({ curated: true, limit });
+  }
+  const rows = (data ?? []) as unknown as Array<{ contents: ContentRow }>;
+  const contents = rows.map((r) => r.contents).filter(Boolean);
+  return contents.length ? contents : listPublishedContents({ curated: true, limit });
+}
+
 export async function getContentBySlug(slug: string): Promise<ContentRow | null> {
   const devHit = () => (IS_DEV ? caseSeed.find((c) => c.slug === slug) ?? null : null);
   if (!isSupabaseConfigured()) return devHit();
