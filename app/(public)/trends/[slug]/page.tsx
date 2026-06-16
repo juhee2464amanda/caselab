@@ -6,7 +6,6 @@ import { renderBlocks } from '@/lib/content-render';
 import { ContentHeader } from '@/components/content/ContentHeader';
 import { AuthorQuote } from '@/components/content/AuthorQuote';
 import { ActionsBar } from '@/components/content/ActionsBar';
-import { ReviewSection } from '@/components/content/ReviewSection';
 import { ContentShareSection } from '@/components/content/ContentShareSection';
 import { CommentThread } from '@/components/content/CommentThread';
 import { ExploreOtherContent } from '@/components/content/ExploreOtherContent';
@@ -175,7 +174,6 @@ export default async function TrendDetailPage({
 
           <ActionsBar contentId={content.id} />
           <ContentShareSection url={url} title={content.title} />
-          <ReviewSection contentId={content.id} />
           <CommentThread contentId={content.id} />
           <ExploreOtherContent />
         </div>
