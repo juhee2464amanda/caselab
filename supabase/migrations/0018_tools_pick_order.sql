@@ -1,4 +1,4 @@
--- 0013_tools_pick_order.sql
+-- 0018_tools_pick_order.sql (구 0013, 번호중복 정리로 리네임 2026-06-16)
 -- Date: 2026-06-09
 -- 관련 PR: feat(prompts) — 바로 쓰는 프롬프트 "에디터 PICK" 상단노출
 -- 목적: tools에 pick_order 컬럼 추가. 운영자가 특정 프롬프트를 골라(pick)

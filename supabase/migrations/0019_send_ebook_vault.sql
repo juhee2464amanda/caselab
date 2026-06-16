@@ -1,4 +1,4 @@
--- 0015_send_ebook_vault.sql
+-- 0019_send_ebook_vault.sql (구 0015, 번호중복 정리로 리네임 2026-06-16)
 -- 작성일: 2026-06-10
 -- 목적: 0002의 GUC 기반 트리거 2개를 Vault 방식으로 전환 — prod 복구.
 --       ① trg_send_ebook_on_purchase  (purchases insert → send-ebook 자동 발송)
