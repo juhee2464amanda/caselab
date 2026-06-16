@@ -192,7 +192,8 @@ const ContentBodySchema = z.discriminatedUnion('kind', [CaseBodySchema, TrendBod
 | `contents` | id(uuid PK), slug(unique), track('case'\|'trend'), title, summary, **body(jsonb)**, job_tags(text[]), persona_coverage(text[]), read_min, apply_min, status('draft'\|'published'\|'archived'), curated(bool), thumbnail_url, published_at, **author_quote(text)** | author_quote = 헤더에 노출되는 1인칭 톤 인용 |
 | `reactions` | id, user_id(uuid FK), content_id(uuid FK→contents), type('like'\|'up'\|'down'), unique(user_id, content_id, type) | 기존 likes 흡수 |
 | `saves` | id, user_id(uuid FK), content_id(uuid FK), unique(user_id, content_id) | 기존 유지, content_id 타입 정정 |
-| `comments` | id, user_id(uuid FK), content_id(uuid FK), parent_id(uuid nullable), body, status('visible'\|'hidden'\|'reported'), created_at | **신규** — 1단 reply 허용 |
+| `comments` | id, user_id(uuid FK), **content_id(uuid FK nullable)**, **tool_id(uuid FK nullable)**, parent_id(uuid nullable), body, status('visible'\|'hidden'\|'reported'), created_at | 1단 reply 허용. **폴리모픽(content_id\|tool_id 중 정확히 하나)** — 케이스/트렌드/툴 상세 댓글. 0017 / §18.17 |
+| `reviews` | id, user_id(uuid FK), content_id\|tool_id\|product_id(셋 중 하나), rating(1~5), body, status, unique(user_id,타깃) | 별점 리뷰. **현재 ebook(product) 전용** — 콘텐츠/도구는 댓글로 대체(§18.17). 0016 |
 | `opinions` | id, user_id(uuid nullable), content_id(uuid nullable), body, status('new'\|'read'\|'replied'), reply_body, replied_at | **익명 허용** (user_id null) — 페르소나 C |
 | `events` | id, user_id(uuid nullable), content_id(uuid nullable), event_type, metadata(jsonb), created_at | 월별 파티셔닝 |
 | `products` | id, slug, title, type('ebook'), price(int=0 무료), pdf_path(Storage), thumbnail_url, status | price>0은 출시 후 결정 |
@@ -555,6 +556,7 @@ caselab/
 - 2026-06-09: **이메일 회원가입 부활 + 동의·비밀번호 정책** — §18.13 참조 (D73 /signup·이메일폼 복원 / D74 비번 8자+영숫특 / D75 동의 UI 필수·선택 / D76 newsletter 옵트인+0013), PR #42
 - 2026-06-10: **P1 두 건 해결 (Featured 예약노출 + Brevo 동기화)** — §18.14 참조. ① 공개 Hero를 `featured_contents`(slot_type='hero' + featured_from/until 날짜창) 기반 재배선(이전엔 `contents.curated`만 봄). ② `newsletter_subscribers` → Brevo 동기화 트리거+Edge Function(`sync-brevo-contact`) 신설·prod 배포·검증 완료(list #3).
 - 2026-06-12: **send-ebook 발송 Brevo → Gmail SMTP(nodemailer) 재전환** — §18.16 참조. Brevo가 `caselab.kr@gmail.com`(gmail 발신자)을 Gmail 수신함에 silent-drop(DMARC 실패)하는 것을 실측 → Gmail 자체 SMTP로 발송해 INBOX 도달 검증. 2026-06-02의 "Gmail→Brevo 재전환"(L551)을 뒤집음. **트랜잭션 발송만 Gmail SMTP**, 대량 뉴스레터는 별개(Brevo+도메인 필요). PR #51.
+- 2026-06-16: **상세페이지 별점 리뷰 → 댓글 전용 전환** — §18.17 참조. 케이스/트렌드/툴 상세에서 `ReviewSection`(별점) 제거, `CommentThread`만 노출. 툴 상세는 댓글 신규 배선(`comments` 폴리모픽화 0017). 별점 리뷰는 **ebook(구매자) 전용**으로 축소(PR #48에서 전체 도입했다가 번복). PR #52.
 
 ### 18.6 다른 세션에서 컨텍스트 파악 시 우선순위
 
@@ -775,6 +777,23 @@ caselab/
 - **검증**: prod 배포 후 `juhee2464@gmail.com` 테스트 → **INBOX 도착**(스팸 아님) + 한글 제목·본문·PDF 링크 정상 렌더 + `purchases.status='sent'`.
 
 **영향받는 파일**: `supabase/functions/send-ebook/index.ts`, `.env.example`. 무관: DB 트리거(0015)·클라이언트.
+
+---
+
+### 18.17 상세페이지 별점 리뷰 → 댓글 전용 전환 (2026-06-16)
+
+**배경**: PR #48(2026-06-10, [[project_reviews_wishlist_shipped]])에서 별점 리뷰(`ReviewSection`)를 콘텐츠(case/trend)·도구·ebook **전체**에 도입했으나, 운영자가 상세페이지에 별점 리뷰와 댓글이 **둘 다** 떠서 중복·혼란이라 판단. 별점은 거래성 콘텐츠(ebook)에만 의미가 있고, 일반 글/도구는 토론형 댓글이 적합.
+
+**결정**: 상세페이지는 **댓글만**, 별점 리뷰는 **ebook(구매자) 전용**으로 축소.
+
+| # | 결정 | 영향 |
+|---|---|---|
+| 1 | 케이스·트렌드·툴 상세에서 `ReviewSection`(별점 폼) 제거, `CommentThread`만 노출 | 케이스/트렌드는 이미 댓글 보유 → 리뷰만 제거. **툴 상세는 댓글 신규 배선** |
+| 2 | `comments` 폴리모픽화 — `content_id` nullable로 완화 + `tool_id` 추가, `content_id\|tool_id` 정확히 하나 제약(`comments_one_target`) | 마이그레이션 **0017**. 기존 행은 전부 content_id 보유 → 자동 충족. RLS는 user_id/status 기반이라 무수정. prod SQL Editor 적용 success |
+| 3 | `CommentThread`가 `contentId`/`toolId` 둘 다 받도록 확장(타깃 컬럼 자동 선택) | `components/content/CommentThread.tsx` |
+| 4 | 고아가 된 `ReviewSection.tsx` 삭제. ebook은 별도 `EbookReviews`(구매 게이트) 사용이라 무관, `reviews` 테이블·0016 그대로 유지 | `components/tools/ToolDetail.tsx`는 `CommentThread`로 교체 |
+
+**영향받는 파일**: `app/(public)/{cases,trends}/[slug]/page.tsx`, `components/tools/ToolDetail.tsx`, `components/content/CommentThread.tsx`, `supabase/migrations/0017_comments_polymorphic.sql`. 삭제: `components/content/ReviewSection.tsx`. PR #52.
 
 ---
 

@@ -266,6 +266,14 @@ Authentication → **URL Configuration**:
 
 ---
 
+### 📋 리뷰·댓글 마이그레이션 (§18.17)
+출시 후 추가된 DB 변경. SQL Editor에 전체 복붙 → Run → "Success".
+- **마이그레이션 0016** (별점 리뷰, PR #48): `supabase/migrations/0016_reviews.sql` Run. `reviews` 테이블(폴리모픽). 정책상 **현재 ebook 구매자 리뷰에만 사용**.
+- **마이그레이션 0017** (댓글 폴리모픽화, PR #52): `supabase/migrations/0017_comments_polymorphic.sql` Run. `comments.content_id` nullable + `tool_id` 추가 → 툴 상세 댓글 작동. (2026-06-16 prod 적용 success ✓)
+- 검증: 툴 상세(`/tools/[slug]`)에서 로그인 후 댓글 등록 → `comments`에 `tool_id` 채워진 행 확인. 케이스/트렌드/툴 상세에 별점 리뷰 폼 **미노출**(ebook 상세에만 노출).
+
+---
+
 ## Day 2-B — Analytics 인프라 + events.search 적재 + editor 초대 (2026-06-02 신설)
 
 ### ✅ 끝났을 때
