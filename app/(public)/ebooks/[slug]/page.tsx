@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Star } from 'lucide-react';
 import { getProductBySlug } from '@/lib/data/products';
@@ -8,6 +7,11 @@ import { EbookReviews } from '@/components/ebook/EbookReviews';
 import { EbookShare } from '@/components/ebook/EbookShare';
 import { EbookSubscribeButton } from '@/components/ebook/EbookSubscribeButton';
 import { EbookActions } from '@/components/ebook/EbookActions';
+import { ProductViewTracker } from '@/components/analytics/ProductViewTracker';
+import { DeepReadTracker } from '@/components/analytics/DeepReadTracker';
+import { ScrollTracker } from '@/components/analytics/ScrollTracker';
+import { DwellTracker } from '@/components/analytics/DwellTracker';
+import { TrackedCtaLink } from '@/components/analytics/TrackedCtaLink';
 import type { ProductRow } from '@/types/product';
 
 export const revalidate = 60;
@@ -101,6 +105,12 @@ export default async function EbookDetailPage({
 
   return (
     <>
+      {/* 구매 퍼널 계측 — product_view + 정독/스크롤 */}
+      <ProductViewTracker productId={book.id} />
+      <DeepReadTracker contentId={book.id} />
+      <ScrollTracker contentId={book.id} />
+      <DwellTracker contentId={book.id} />
+
       {/* Product top */}
       <div className="mx-auto flex max-w-[1100px] flex-col gap-8 px-4 py-10 sm:px-6 md:flex-row md:gap-12 md:py-12">
         {/* 3D Book */}
@@ -153,12 +163,14 @@ export default async function EbookDetailPage({
           </div>
 
           <div className="mb-4 flex gap-2.5">
-            <Link
+            <TrackedCtaLink
               href={orderHref}
+              label="ebook_order_cta"
+              meta={{ product_id: book.id }}
               className="flex flex-1 items-center justify-center rounded-[10px] bg-accent px-4 py-4 text-base font-bold tracking-[-0.02em] text-white transition-colors hover:bg-accent-700"
             >
               {cta}
-            </Link>
+            </TrackedCtaLink>
             <EbookActions productId={book.id} />
           </div>
           <p className="text-center text-xs text-ink/40 break-keep">
@@ -242,7 +254,11 @@ export default async function EbookDetailPage({
         </div>
 
         {/* 공유 */}
-        <EbookShare title={book.title} imageUrl={book.thumbnail_url ?? body.detailImages?.[0]} />
+        <EbookShare
+          title={book.title}
+          imageUrl={book.thumbnail_url ?? body.detailImages?.[0]}
+          productId={book.id}
+        />
       </div>
     </>
   );

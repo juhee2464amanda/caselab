@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Heart, Bookmark } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { track } from '@/lib/analytics/track';
 
 /**
  * 좋아요·저장 액션 바 — 콘텐츠(contentId)·도구(toolId)·제품(productId) 대상.
@@ -66,6 +67,7 @@ export function ActionsBar({
         } else {
           await supabase.from('reactions').insert({ user_id: user.id, [col]: id, type: 'like' });
           setLiked(true);
+          void track('react_up', { [col]: id });
         }
       } else {
         if (saved) {
@@ -74,6 +76,7 @@ export function ActionsBar({
         } else {
           await supabase.from('saves').insert({ user_id: user.id, [col]: id });
           setSaved(true);
+          void track('save', { [col]: id });
         }
       }
     });

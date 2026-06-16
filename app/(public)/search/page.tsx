@@ -3,6 +3,7 @@ import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase
 import { Input } from '@/components/ui/input';
 import { TimeBadge } from '@/components/content/TimeBadge';
 import { JobTags } from '@/components/content/JobTags';
+import { SearchTracker } from '@/components/analytics/SearchTracker';
 
 export default async function SearchPage({
   searchParams,
@@ -17,6 +18,7 @@ export default async function SearchPage({
 
   return (
     <div className="container-wide py-10">
+      {query && <SearchTracker keyword={query} resultsCount={results.length} />}
       <header className="mb-8">
         <h1 className="font-serif text-3xl font-semibold">검색</h1>
         <form action="/search" method="get" className="mt-4 flex gap-2 max-w-xl">

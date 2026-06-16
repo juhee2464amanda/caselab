@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { TrackedCtaLink } from '@/components/analytics/TrackedCtaLink';
 
 /**
  * 무료 전자책 배포 배너 — mockup index L385~394 정합
@@ -25,12 +25,13 @@ export function FreeBookBanner() {
             첫 번째 ebook을 무료로 드립니다. 다운로드 후 바로 읽어보세요.
           </p>
         </div>
-        <Link
+        <TrackedCtaLink
           href="/ebooks"
+          label="free_ebook_banner"
           className="inline-flex items-center text-[15px] font-bold text-ink bg-white hover:bg-muted px-7 py-3 rounded-[10px] transition-colors whitespace-nowrap shrink-0 tracking-tight"
         >
           무료로 받기 →
-        </Link>
+        </TrackedCtaLink>
       </div>
     </section>
   );

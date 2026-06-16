@@ -778,6 +778,31 @@ caselab/
 
 ---
 
+### 18.17 분석 태깅 풀배선 — events-first + 익명 식별 + 구매/채널 퍼널 (feat/ga4-tagging, 2026-06-16)
+
+**배경**: §18.9에서 `track()` wrapper·GA4 매핑·UTM 캡처 인프라는 깔렸으나 실제 `track()` 호출이 `PromptBlock` 하나뿐이라 `events` 테이블이 비어 admin 위젯·퍼널이 0. 사용자 우선순위 = **광고 채널별 유입분석 + 구매 퍼널**.
+
+**결정 표 (6건)**:
+
+| # | 결정 | 영향 |
+|---|---|---|
+| **D78** | 데이터 원천 = **Supabase `events` + UTM metadata (events-first)**. GA4 Data API는 보류(채널 어트리뷰션 정말 필요 시 feature flag 뒤로). GA4 gtag은 측정ID 확정 시 자동 활성(코드 ready) | 추가 인프라 0. 채널분석 = `metadata->>'utm_source'` GROUP BY |
+| **D79** | **익명 식별자 도입** — `anonymous_id`(localStorage 영속) + `session_id`(30분 슬라이딩). `track()`가 모든 이벤트 metadata에 자동 부착 → UV·세션·리텐션·익명→가입 퍼널 추적 가능 | `lib/analytics/anon.ts`(신설). 기존 `pv`는 페이지뷰 수 → 이제 방문자 수로 식별 |
+| **D80** | 전환·구매 컴포넌트 **전수 계측**. 구매 퍼널 `pv→product_view→ebook_order→ebook_download`, 보조 활성화 `pv→deep_read→prompt_copy/save→subscribe→signup` | 토글은 add 경로만·성공 후 발화(중복집계 방지) |
+| **D81** | `ebook_download` = **리다이렉트 프록시** (`/api/ebook/download`, HMAC=`SERVICE_ROLE_KEY` 재사용 → 별도 시크릿 0). send-ebook 이메일 링크가 프록시 경유 → 클릭=실제 다운로드 적재 | ⚠️ **prod 활성화엔 `supabase functions deploy send-ebook` 재배포 필요** |
+| **D82** | **완독(`ebook_read_page`/`ebook_finish`) 보류** — 인앱 PDF 뷰어 부재(이메일 서명URL 전달만). 뷰어 출시 시점으로 이월 | EventType은 유지(미사용) |
+| **D83** | 체류·배너·추천 태깅. EventType 추가: `dwell`·`banner_view`·`product_view`·`subscribe`·`signup`·`login`·`review`·`share`. `cta_click` 라벨: `free_ebook_banner`·`ebook_order_cta`·`main_banner`·`main_banner_nav`·`recommend`. 메인배너는 `slot`(#순서)으로 슬라이드별 노출·클릭·넘김 분석 | `event_type`은 text라 DB enum 변경 없음 |
+
+**미포함 / 다음(admin) 세션**:
+- ⚠️ **admin SQL 이름 정합 마이그레이션 `0017`** — `weekly_kpi`·`get_daily_trend`가 `'pageview'`/`'react'`를 읽는데 `track()`은 `'pv'`/`'react_up'` 적재 → **정합 전엔 admin UV/PV/react=0**. + 신규 RPC `get_purchase_funnel`·`get_channel_acquisition` + Tremor 위젯
+- `ebook_download` prod 활성화: send-ebook 재배포
+
+**영향받는 파일**: `lib/analytics/{track,anon}.ts`, `components/analytics/{PageviewTracker,ScrollTracker,DwellTracker,TrackedCtaLink,ProductViewTracker,SearchTracker}.tsx`(신설), `app/api/ebook/download/route.ts`(신설), `supabase/functions/send-ebook/index.ts`, 전환 컴포넌트 ~12개 + `HeroCarousel`/`FreeBookBanner`/`RecommendSidebar`.
+
+**검증**: `tsc --noEmit` 통과 · dev e2e(events 적재·`anonymous_id` 15/15 부착·UV 식별) · 다운로드 프록시 HMAC 403.
+
+---
+
 ## 19. Admin 풀스택 결정 매트릭스 (정합본)
 
 **결정 일자**: 2026-05-28 ~ 2026-06-02 (점진)

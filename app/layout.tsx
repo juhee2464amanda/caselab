@@ -4,6 +4,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import './globals.css';
 import { GA4Provider } from '@/components/analytics/GA4Provider';
 import { UtmCapture } from '@/components/analytics/UtmCapture';
+import { PageviewTracker } from '@/components/analytics/PageviewTracker';
 
 export const metadata: Metadata = {
   title: {
@@ -30,6 +31,7 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <GA4Provider />
           <UtmCapture />
+          <PageviewTracker />
         </Suspense>
         <SpeedInsights />
       </body>

@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/hooks/use-auth';
+import { track } from '@/lib/analytics/track';
 
 interface Props {
   open: boolean;
@@ -71,6 +72,7 @@ export function SubscribeModal({ open, onOpenChange }: Props) {
             { onConflict: 'email', ignoreDuplicates: true },
           );
       }
+      void track('subscribe', { source: 'modal', logged_in: !!user });
       setDone(true);
       setTimeout(() => {
         onOpenChange(false);

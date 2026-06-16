@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { track } from '@/lib/analytics/track';
 
 interface Review {
   id: string;
@@ -122,6 +123,7 @@ export function ReviewSection({ contentId, toolId, productId, requirePurchase }:
           .single();
         if (!error && data) {
           setReviews((rs) => [data as unknown as Review, ...rs]);
+          void track('review', { content_id: id, rating });
         }
       }
     });
