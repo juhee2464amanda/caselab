@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
 import { ActionsBar } from '@/components/content/ActionsBar';
-import { ReviewSection } from '@/components/content/ReviewSection';
+import { CommentThread } from '@/components/content/CommentThread';
 import { ToolToc } from '@/components/tools/ToolToc';
 import { TOOL_CATEGORY_LABELS, type Tool } from '@/types/tool';
 
@@ -200,7 +200,7 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
 
       <ActionsBar toolId={tool.id} />
 
-      <ReviewSection toolId={tool.id} />
+      <CommentThread toolId={tool.id} />
 
       {/* Other tools — 모바일/태블릿 (데스크톱은 우측 사이드바) */}
       {related.length > 0 && (
