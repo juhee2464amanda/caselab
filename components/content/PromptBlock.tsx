@@ -2,15 +2,16 @@
 
 import { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
-import { track } from '@/lib/analytics/ga4';
-import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { track } from '@/lib/analytics/track';
 
 interface Props {
   label?: string;
   prompt: string;
+  /** 복사 집계용 — 프롬프트 순위·북극성(prompt_copy) 원천 */
+  contentId?: string;
 }
 
-export function PromptBlock({ label, prompt }: Props) {
+export function PromptBlock({ label, prompt, contentId }: Props) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -18,11 +19,8 @@ export function PromptBlock({ label, prompt }: Props) {
       await navigator.clipboard.writeText(prompt);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-      track('prompt_copy', { label });
-      createSupabaseBrowserClient()
-        .from('events')
-        .insert({ event_type: 'copy', metadata: { label } })
-        .then(() => undefined, () => undefined);
+      // 단일 경로(track.ts): event_type='prompt_copy' + content_id + user_id 적재 + GA4
+      void track('prompt_copy', { content_id: contentId, label });
     } catch {
       /* noop */
     }

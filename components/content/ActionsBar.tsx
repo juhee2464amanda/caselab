@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Heart, Bookmark } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { track } from '@/lib/analytics/track';
 
 /**
  * 좋아요·저장 액션 바 — 콘텐츠(contentId)·도구(toolId)·제품(productId) 대상.
@@ -59,6 +60,8 @@ export function ActionsBar({
         router.push('/login');
         return;
       }
+      // events 적재 메타 — content는 content_id(FK), tool은 metadata.tool_id
+      const evMeta = contentId ? { content_id: contentId } : { tool_id: toolId };
       if (kind === 'like') {
         if (liked) {
           await supabase.from('reactions').delete().eq('user_id', user.id).eq(col, id).eq('type', 'like');
@@ -66,6 +69,7 @@ export function ActionsBar({
         } else {
           await supabase.from('reactions').insert({ user_id: user.id, [col]: id, type: 'like' });
           setLiked(true);
+          void track('react_up', evMeta); // weekly_kpi 도움률 원천 (DB event_type='react')
         }
       } else {
         if (saved) {
@@ -74,6 +78,7 @@ export function ActionsBar({
         } else {
           await supabase.from('saves').insert({ user_id: user.id, [col]: id });
           setSaved(true);
+          void track('save', evMeta); // weekly_kpi 저장률·퍼널 원천
         }
       }
     });

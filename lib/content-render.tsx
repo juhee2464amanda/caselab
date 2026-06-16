@@ -10,7 +10,11 @@ import { ResultCompare } from '@/components/content/ResultCompare';
 import { RoleCard } from '@/components/content/RoleCard';
 import { FrameworkRef } from '@/components/content/FrameworkRef';
 
-export function renderBlock(block: Block, key: string | number): React.ReactElement {
+export function renderBlock(
+  block: Block,
+  key: string | number,
+  contentId?: string,
+): React.ReactElement {
   switch (block.type) {
     case 'text':
       return (
@@ -29,7 +33,7 @@ export function renderBlock(block: Block, key: string | number): React.ReactElem
         </h3>
       );
     case 'prompt':
-      return <PromptBlock key={key} label={block.label} prompt={block.prompt} />;
+      return <PromptBlock key={key} label={block.label} prompt={block.prompt} contentId={contentId} />;
     case 'result-compare':
       return <ResultCompare key={key} good={block.good} bad={block.bad} />;
     case 'role-card':
@@ -61,7 +65,7 @@ export function renderBlock(block: Block, key: string | number): React.ReactElem
     case 'failure':
       return (
         <FailureSection key={key} title={block.title}>
-          {block.blocks.map((b, i) => renderBlock(b, `${key}-${i}`))}
+          {block.blocks.map((b, i) => renderBlock(b, `${key}-${i}`, contentId))}
         </FailureSection>
       );
     default: {
@@ -71,6 +75,10 @@ export function renderBlock(block: Block, key: string | number): React.ReactElem
   }
 }
 
-export function renderBlocks(blocks: Block[], keyPrefix = 'b'): React.ReactElement[] {
-  return blocks.map((b, i) => renderBlock(b, `${keyPrefix}-${i}`));
+export function renderBlocks(
+  blocks: Block[],
+  keyPrefix = 'b',
+  contentId?: string,
+): React.ReactElement[] {
+  return blocks.map((b, i) => renderBlock(b, `${keyPrefix}-${i}`, contentId));
 }

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Star } from 'lucide-react';
 import { getProductBySlug } from '@/lib/data/products';
+import { ProductViewTracker } from '@/components/analytics/ProductViewTracker';
 import { EbookDetailNav, type EbookNavTab } from '@/components/ebook/EbookDetailNav';
 import { EbookToc } from '@/components/ebook/EbookToc';
 import { EbookReviews } from '@/components/ebook/EbookReviews';
@@ -101,6 +102,7 @@ export default async function EbookDetailPage({
 
   return (
     <>
+      <ProductViewTracker productId={book.id} />
       {/* Product top */}
       <div className="mx-auto flex max-w-[1100px] flex-col gap-8 px-4 py-10 sm:px-6 md:flex-row md:gap-12 md:py-12">
         {/* 3D Book */}
