@@ -647,6 +647,8 @@ https://<your>.vercel.app/sitemap.xml  # 200
 - 가입자 ≥ 3명
 - 에러 로그 0건
 
+> **참고 — 주제 후보 받기(`/topics`) 라이브**: GNB "이런 거 어때요" 메뉴로 노출(2026-06-26, PR #58, [[§18.18]]). 독자가 다뤘으면 하는 콘텐츠 주제를 제안·투표. 오픈 직후엔 후보가 비어 있어도 빈 상태 안내가 떠 정상. 들어온 후보는 admin에서 `topic_suggestions.status`(open→planned/published/rejected)로 관리.
+
 ---
 
 ## 출시 이후 — 도입 로드맵
