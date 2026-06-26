@@ -27,6 +27,8 @@ const NAV = [
   { label: '바로 쓰는 프롬프트', href: '/prompts' },
   // ebook 목록으로 (상품 없을 때 404 방지 — 목록은 빈 상태 안내)
   { label: 'ebook', href: '/ebooks' },
+  // 콘텐츠 주제 후보 받기(투표·제안) — /topics
+  { label: '이런 거 어때요', href: '/topics' },
 ];
 
 export function GNB() {
