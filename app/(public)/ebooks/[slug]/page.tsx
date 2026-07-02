@@ -249,7 +249,7 @@ export default async function EbookDetailPage({
         </div>
 
         {/* 공유 */}
-        <EbookShare title={book.title} imageUrl={book.thumbnail_url ?? body.detailImages?.[0]} />
+        <EbookShare title={book.title} imageUrl={book.thumbnail_url ?? body.detailImages?.[0]} productId={book.id} />
       </div>
     </>
   );

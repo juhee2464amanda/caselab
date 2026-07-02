@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import type { ContentRow, JobTag } from '@/types/content';
 import { JOB_LABELS } from '@/types/content';
+import { TrackedCtaLink } from '@/components/analytics/TrackedCtaLink';
 
 export function RecommendSidebar({ items }: { items: ContentRow[] }) {
   if (!items.length) return null;
@@ -11,10 +11,12 @@ export function RecommendSidebar({ items }: { items: ContentRow[] }) {
           이런 컨텐츠는 어때요?
         </h3>
         <div>
-          {items.slice(0, 3).map((it) => (
-            <Link
+          {items.slice(0, 3).map((it, i) => (
+            <TrackedCtaLink
               key={it.id}
               href={`/cases/${it.slug}`}
+              label="recommend"
+              meta={{ slug: it.slug, slot: i + 1 }}
               className="block py-3 border-b border-muted group"
             >
               {it.job_tags[0] && (
@@ -35,7 +37,7 @@ export function RecommendSidebar({ items }: { items: ContentRow[] }) {
                 </div>
               )}
               <div className="text-[11px] text-ink/40">읽는데 {it.read_min}분</div>
-            </Link>
+            </TrackedCtaLink>
           ))}
         </div>
       </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Check, Link2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { track } from '@/lib/analytics/track';
 
 const KAKAO_JS_KEY = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
 
@@ -13,7 +14,15 @@ const KAKAO_JS_KEY = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
  *   키가 없으면 — 모바일은 네이티브 공유시트(→ 카카오톡 선택), 데스크탑은 링크 복사로 폴백.
  *   (deprecated story.kakao 링크, 데스크탑 OS 공유시트 같은 혼란 요소 제거)
  */
-export function EbookShare({ title, imageUrl }: { title?: string; imageUrl?: string }) {
+export function EbookShare({
+  title,
+  imageUrl,
+  productId,
+}: {
+  title?: string;
+  imageUrl?: string;
+  productId?: string;
+}) {
   const [copied, setCopied] = useState(false);
   const [kakaoCopied, setKakaoCopied] = useState(false);
 
@@ -64,6 +73,7 @@ export function EbookShare({ title, imageUrl }: { title?: string; imageUrl?: str
         },
         buttons: [{ title: '보러가기', link: { mobileWebUrl: href(), webUrl: href() } }],
       });
+      void track('share', { product_id: productId, channel: 'kakao' });
       return;
     }
     // 2) 모바일: 네이티브 공유시트(카카오톡 포함)
@@ -71,6 +81,7 @@ export function EbookShare({ title, imageUrl }: { title?: string; imageUrl?: str
       typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     if (isMobile && navigator.share) {
       navigator.share({ title: shareTitle(), url: href() }).catch(() => {});
+      void track('share', { product_id: productId, channel: 'kakao' });
       return;
     }
     // 3) 데스크탑: 링크 복사 폴백
@@ -78,17 +89,20 @@ export function EbookShare({ title, imageUrl }: { title?: string; imageUrl?: str
       setKakaoCopied(true);
       setTimeout(() => setKakaoCopied(false), 2200);
     });
+    void track('share', { product_id: productId, channel: 'kakao' });
   }
 
   function shareX() {
     const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareTitle())}&url=${encodeURIComponent(href())}`;
     window.open(url, '_blank', 'noopener,noreferrer,width=600,height=420');
+    void track('share', { product_id: productId, channel: 'x' });
   }
   function copyLink() {
     copyToClipboard(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
     });
+    void track('share', { product_id: productId, channel: 'copy' });
   }
 
   const base =

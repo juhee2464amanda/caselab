@@ -3,13 +3,16 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { shareToKakao } from '@/lib/kakao';
+import { track } from '@/lib/analytics/track';
 
 export function ContentShareSection({
   url,
   title,
+  contentId,
 }: {
   url: string;
   title: string;
+  contentId?: string;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -18,6 +21,7 @@ export function ContentShareSection({
       await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+      void track('share', { content_id: contentId, channel: 'copy' });
     } catch {
       /* noop */
     }
@@ -27,7 +31,11 @@ export function ContentShareSection({
     if (typeof window === 'undefined') return;
     // Kakao JS SDK 공유 팝업. SDK 불가(키 없음/로드 실패) 시 링크 복사로 폴백.
     const ok = await shareToKakao({ url, title });
-    if (!ok) await copyLink();
+    if (ok) {
+      void track('share', { content_id: contentId, channel: 'kakao' });
+    } else {
+      await copyLink();
+    }
   }
 
   function shareTwitter() {
@@ -39,6 +47,7 @@ export function ContentShareSection({
       '_blank',
       'width=600,height=400'
     );
+    void track('share', { content_id: contentId, channel: 'x' });
   }
 
   return (

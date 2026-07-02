@@ -5,6 +5,7 @@ import { Heart, Bookmark } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { track } from '@/lib/analytics/track';
 
 /**
  * ebook 좋아요(♡)·저장(🔖) 버튼 — 콘텐츠/도구 ActionsBar와 동일 동작.
@@ -50,6 +51,7 @@ export function EbookActions({ productId }: { productId: string }) {
         } else {
           await supabase.from('reactions').insert({ user_id: user.id, product_id: productId, type: 'like' });
           setLiked(true);
+          void track('react_up', { product_id: productId });
         }
       } else {
         if (saved) {
@@ -58,6 +60,7 @@ export function EbookActions({ productId }: { productId: string }) {
         } else {
           await supabase.from('saves').insert({ user_id: user.id, product_id: productId });
           setSaved(true);
+          void track('save', { product_id: productId });
         }
       }
     });

@@ -177,7 +177,7 @@ export default async function TrendDetailPage({
           </div>
 
           <ActionsBar contentId={content.id} />
-          <ContentShareSection url={url} title={content.title} />
+          <ContentShareSection url={url} title={content.title} contentId={content.id} />
           <CommentThread contentId={content.id} />
           <ExploreOtherContent />
         </div>
