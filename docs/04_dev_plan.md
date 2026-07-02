@@ -618,7 +618,7 @@ caselab/
 - `lib/analytics/track.ts` (신설)
 - `lib/analytics/utm.ts` (신설, [[D25]]와 연동)
 - `lib/analytics/scroll-tracker.ts` (신설)
-- `components/analytics/GA4Provider.tsx` (Consent Mode v2 패치 — default denied → update granted)
+- `components/analytics/GA4Provider.tsx` (Consent Mode v2 패치 — default denied → update granted) ⛔ **2026-07-02 §18.20에서 폐기**: 동의 UI 없이 default `granted`(고지 기반 수집)로 전환
 - `app/layout.tsx` (`<SpeedInsights />` 추가)
 - `package.json` (`@vercel/speed-insights` 추가)
 - `lib/analytics/deep-read.ts` (점진 — wrapper 경유로 변경, 이번 세션엔 보류)
@@ -829,6 +829,26 @@ caselab/
 | 5 | 마이그레이션·환경변수 추가 **없음** | 실측정 활성화는 `NEXT_PUBLIC_GA_MEASUREMENT_ID`를 실제 `G-XXXX`로 교체(.env.local + Vercel) + 재배포. 절차는 [[docs/05_launch_runbook.md]] 참조 |
 
 **영향받는 파일**: `components/analytics/GA4Provider.tsx`, `components/analytics/PageviewTracker.tsx`(삭제), `app/layout.tsx`, `lib/analytics/ga4.ts`, `components/prompts/PromptsBrowser.tsx`, `components/content/PromptInline.tsx`, `components/content/StepCard.tsx`, `app/(public)/cases/[slug]/page.tsx`.
+
+---
+
+### 18.20 GA4 동의(consent) UI 제거 — 고지 기반 수집으로 전환 (2026-07-02)
+
+**배경**: §18.19에 이어 GA4 실측정 활성화의 마지막 blocker였던 "동의 브리지 끊김"(07 함정②)을 어떻게 배선할지 결정. 점검 결과 (a) `GA4Provider.setAnalyticsConsent()`가 **아무데서도 호출 안 됨**(정의만 존재), (b) CookieConsent 배너 **부재**, (c) `ProfileForm`의 "익명 분석 동의" 토글은 DB 컬럼만 갱신하고 GA4엔 무연결 → consent 영구 `denied` → 실 ID를 넣어도 쿠키리스 모델링만 됐음.
+
+**결정 (사용자)**: **동의/거부 UI를 두지 않는다.** 한국(PIPA)은 EU식 쿠키 동의 배너를 법으로 강제하지 않으므로, 비식별 익명 통계는 **개인정보처리방침 고지 + 브라우저/Google opt-out 안내**로 갈음. 배너·토글 모두 만들지 않음. → **§18.9의 "Consent Mode v2 default `denied` → 동의 시 `granted`" 방침 폐기.**
+
+| # | 결정 | 영향 |
+|---|---|---|
+| 1 | `GA4Provider` Consent Mode default `analytics_storage: 'granted'` (광고류는 계속 `denied`) | 페이지 로드 즉시 쿠키 기반 정식 수집. 배너 불필요 |
+| 2 | consent 기계장치 제거 — `getAnalyticsConsent`/`setAnalyticsConsent`/`CONSENT_KEY`/`caselab:consent-change`/`consented` state 삭제 | 모두 GA4Provider 내부에서만 쓰이던 죽은 코드(외부 import 0) |
+| 3 | `ProfileForm`의 "익명 분석 동의" 토글 **UI·state·저장 필드 제거** (§19 D4 토글 폐기) | `profiles.analytics_consent` DB 컬럼은 유지(마이그레이션 없음, admin 참조 안전). 본가 select에서도 제외 |
+| 4 | `privacy/page.tsx` §5 + 위탁처리자 항목 **고지 기반으로 재작성** | "동의 배너로 묻고 동의 안 하면 GA4 미동작" → "익명 통계 수집 + 쿠키 사용 + 브라우저/[GA opt-out 도구](https://tools.google.com/dlpage/gaoptout) 차단 가능". 문서-코드 모순 제거 |
+| 5 | 마이그레이션·환경변수 추가 **없음** | `analytics_consent` 컬럼 drop은 하지 않음(무해·보류) |
+
+> ⚠️ 법적 판단 주의: 저작 시점 국내 관행 기준(비식별·고지 기반)이며 최종 법률 검토는 별도. GA4 `_ga` 쿠키가 pseudonymous ID를 심는 점은 회색지대.
+
+**영향받는 파일**: `components/analytics/GA4Provider.tsx`, `app/(public)/mypage/profile/ProfileForm.tsx`, `app/(public)/mypage/profile/page.tsx`, `app/(public)/legal/privacy/page.tsx`. 브랜치 `feat/ga4-consent-bridge`.
 
 ---
 

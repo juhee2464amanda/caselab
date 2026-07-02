@@ -11,7 +11,7 @@ export default async function MypageProfile() {
   if (!user) redirect('/login?next=/mypage/profile');
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, name, email, job, job_title, interests, ai_tools, newsletter, analytics_consent')
+    .select('id, name, email, job, job_title, interests, ai_tools, newsletter')
     .eq('id', user.id)
     .single();
 

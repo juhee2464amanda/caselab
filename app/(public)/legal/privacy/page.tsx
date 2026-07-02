@@ -55,16 +55,18 @@ export default function PrivacyPage() {
       <ul>
         <li><strong>Supabase (Supabase, Inc.)</strong> — 데이터베이스 호스팅 (위치: 서울)</li>
         <li><strong>Vercel (Vercel Inc.)</strong> — 웹 호스팅</li>
-        <li><strong>Google LLC</strong> — Google OAuth, Google Analytics (이용자가 동의한 경우), Gmail SMTP를 통한 전자책 다운로드 링크 발송</li>
+        <li><strong>Google LLC</strong> — Google OAuth, Google Analytics(익명 통계), Gmail SMTP를 통한 전자책 다운로드 링크 발송</li>
         <li><strong>Kakao Corp.</strong> — Kakao OAuth</li>
         <li><strong>Anthropic, PBC</strong> — AI 초안 생성 <em>(운영자 기능, 도입 시점에 활성화)</em></li>
       </ul>
 
       <h2>5. 쿠키·분석 도구</h2>
       <p>
-        서비스는 Google Analytics 4(GA4)를 이용해 익명 통계를 수집합니다.
-        브라우저 첫 방문 시 동의 배너로 묻고, 동의하지 않으면 GA4는 동작하지 않습니다.
-        쿠키는 언제든 브라우저 설정에서 차단할 수 있습니다.
+        서비스는 Google Analytics 4(GA4)를 이용해 개인을 식별하지 않는 익명 통계
+        (접속 기록·이용 패턴 등)를 수집합니다. 이 과정에서 분석용 쿠키가 사용됩니다.
+        수집을 원하지 않으시면 브라우저 설정에서 쿠키를 차단하거나
+        <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">Google Analytics 차단(opt-out) 도구</a>를
+        이용하실 수 있습니다.
       </p>
 
       <h2>6. 이용자 권리</h2>

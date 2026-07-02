@@ -31,7 +31,6 @@ interface Initial {
   interests: string[] | null;
   ai_tools: string[] | null;
   newsletter: boolean;
-  analytics_consent: boolean;
 }
 
 /**
@@ -40,7 +39,7 @@ interface Initial {
  * 결정 출처:
  *   §19 D38 — /mypage/profile 풀 설정 (출시 포함)
  *   §19 D37 — profiles 컬럼 확장 (job_title, interests[], ai_tools[])
- *   §19 D4 — analytics_consent 토글
+ *   §18.20 — 분석 동의 UI 제거(고지 기반 수집). analytics_consent 토글 삭제
  */
 export function ProfileForm({ initial }: { initial: Initial | null }) {
   const supabase = createSupabaseBrowserClient();
@@ -50,9 +49,6 @@ export function ProfileForm({ initial }: { initial: Initial | null }) {
   const [interests, setInterests] = useState<string[]>(initial?.interests ?? []);
   const [aiTools, setAiTools] = useState<string[]>(initial?.ai_tools ?? []);
   const [newsletter, setNewsletter] = useState(initial?.newsletter ?? true);
-  const [analyticsConsent, setAnalyticsConsent] = useState(
-    initial?.analytics_consent ?? false
-  );
   const [pending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
 
@@ -75,7 +71,6 @@ export function ProfileForm({ initial }: { initial: Initial | null }) {
           interests,
           ai_tools: aiTools,
           newsletter,
-          analytics_consent: analyticsConsent,
         })
         .eq('id', initial!.id);
       setSaved(true);
@@ -212,20 +207,6 @@ export function ProfileForm({ initial }: { initial: Initial | null }) {
             <strong>뉴스레터 받기</strong>
             <span className="block text-xs text-ink/60 mt-0.5">
               새 콘텐츠·후보 카드 결과를 주 1회 받아요.
-            </span>
-          </span>
-        </label>
-        <label className="flex items-start gap-3 text-sm cursor-pointer">
-          <input
-            type="checkbox"
-            className="mt-0.5"
-            checked={analyticsConsent}
-            onChange={(e) => setAnalyticsConsent(e.target.checked)}
-          />
-          <span>
-            <strong>익명 분석 동의</strong>
-            <span className="block text-xs text-ink/60 mt-0.5">
-              어떻게 읽으시는지 익명 통계로 살펴봐요. 개인 식별 X.
             </span>
           </span>
         </label>

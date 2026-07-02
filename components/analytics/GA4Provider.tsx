@@ -1,56 +1,25 @@
 'use client';
 
 import Script from 'next/script';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { GA_ID } from '@/lib/analytics/ga4';
 import { track } from '@/lib/analytics/track';
 
-const CONSENT_KEY = 'caselab.consent.analytics';
-
-export function getAnalyticsConsent(): boolean {
-  if (typeof window === 'undefined') return false;
-  return window.localStorage.getItem(CONSENT_KEY) === 'granted';
-}
-
-export function setAnalyticsConsent(granted: boolean) {
-  if (typeof window === 'undefined') return;
-  window.localStorage.setItem(CONSENT_KEY, granted ? 'granted' : 'denied');
-  // Consent Mode v2 update — 즉시 gtag에도 전파
-  if (typeof window.gtag === 'function') {
-    window.gtag('consent', 'update', {
-      analytics_storage: granted ? 'granted' : 'denied',
-      ad_storage: 'denied',
-      ad_user_data: 'denied',
-      ad_personalization: 'denied',
-    });
-  }
-  window.dispatchEvent(new Event('caselab:consent-change'));
-}
-
 /**
- * Consent Mode v2 + GA4 Script.
+ * GA4 Script + SPA page_view.
  *
- * 결정 출처: §19 D24 (Consent Mode v2 default denied → update granted, §18.9)
+ * 결정 출처: §18.20 (동의 UI 제거 — 고지 기반 수집. §18.9 "Consent Mode default denied → update granted" 방침 폐기)
  *
- * - 페이지 진입 즉시 GA4 Script 로드 + `consent('default', { all: 'denied' })`
- *   → cookieless modeling으로 보강 (사용자가 거부 상태에서도 통계 일부 수집)
- * - 사용자가 CookieConsent에서 동의 → `setAnalyticsConsent(true)` → `consent('update', granted)`
- * - env 키 없으면 아예 렌더 안 함
+ * - 한국(PIPA)은 EU식 쿠키 동의 배너 강제 없음 → 개인정보처리방침 고지 +
+ *   브라우저 쿠키 차단(opt-out)으로 갈음. 별도 동의/거부 UI 없음.
+ * - Consent Mode v2는 유지하되 default `analytics_storage: 'granted'` →
+ *   페이지 로드 즉시 쿠키 기반 정식 수집. 광고 관련은 계속 denied.
+ * - env 키 없으면 아예 렌더 안 함.
  */
 export function GA4Provider() {
   const pathname = usePathname();
   const params = useSearchParams();
-  const [consented, setConsented] = useState(false);
-
-  useEffect(() => {
-    setConsented(getAnalyticsConsent());
-    function onChange() {
-      setConsented(getAnalyticsConsent());
-    }
-    window.addEventListener('caselab:consent-change', onChange);
-    return () => window.removeEventListener('caselab:consent-change', onChange);
-  }, []);
 
   useEffect(() => {
     const path = pathname + (params.toString() ? `?${params}` : '');
@@ -76,8 +45,7 @@ export function GA4Provider() {
             ad_storage: 'denied',
             ad_user_data: 'denied',
             ad_personalization: 'denied',
-            analytics_storage: '${consented ? 'granted' : 'denied'}',
-            wait_for_update: 500
+            analytics_storage: 'granted'
           });
         `}
       </Script>
