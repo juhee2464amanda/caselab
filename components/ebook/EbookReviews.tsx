@@ -5,6 +5,7 @@ import { Star } from 'lucide-react';
 import Link from 'next/link';
 import { cn, formatDate } from '@/lib/utils';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { track } from '@/lib/analytics/track';
 import type { EbookRatingBucket, EbookReview } from '@/types/product';
 
 interface DbReview {
@@ -137,7 +138,10 @@ export function EbookReviews({ productId, seedRating, seedCount, seedDist, seedR
           .insert({ product_id: productId, user_id: user!.id, rating, body: text.trim() })
           .select(SELECT)
           .single();
-        if (data) setReviews((rs) => [data as unknown as DbReview, ...rs]);
+        if (data) {
+          setReviews((rs) => [data as unknown as DbReview, ...rs]);
+          void track('review', { product_id: productId, rating });
+        }
       }
     });
   }

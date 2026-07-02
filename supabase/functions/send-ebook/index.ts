@@ -38,6 +38,23 @@ const SITE_URL = Deno.env.get('SITE_URL') ?? 'https://caselab.vercel.app';
 
 const SEVEN_DAYS = 60 * 60 * 24 * 7;
 
+// 다운로드 추적 프록시용 토큰. Next route(/api/ebook/download)가 같은 SERVICE_ROLE_KEY로 검증.
+// HMAC-SHA256(purchase_id) → 소문자 hex (Node crypto digest('hex')와 동일 포맷).
+async function hmacHex(message: string, secret: string): Promise<string> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(message));
+  return Array.from(new Uint8Array(sig))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 serve(async (req) => {
   if (req.method !== 'POST') return new Response('method not allowed', { status: 405 });
   const { purchase_id } = await req.json();
@@ -75,15 +92,19 @@ serve(async (req) => {
     return new Response('sign error: ' + signErr?.message, { status: 500 });
   }
 
+  // 다운로드 추적 프록시 URL (직접 서명URL 대신 사용 → 클릭 시 events.ebook_download 적재)
+  const downloadToken = await hmacHex(purchase_id, SUPABASE_SERVICE_KEY);
+  const downloadUrl = `${SITE_URL}/api/ebook/download?p=${encodeURIComponent(purchase_id)}&t=${downloadToken}`;
+
   // 3. Gmail SMTP 발송
   const htmlContent = `
     <p>안녕하세요 ${purchase.name}님,</p>
     <p>저도 처음에 AI를 적용하기 어려웠어요. 이 책에 그 고민을 정리했어요.</p>
     <p>아래 링크로 7일 동안 다운로드받으실 수 있어요.</p>
-    <p><a href="${signed.signedUrl}" style="display:inline-block;padding:12px 20px;background:#1E40AF;color:#fff;border-radius:6px;text-decoration:none">PDF 다운로드</a></p>
+    <p><a href="${downloadUrl}" style="display:inline-block;padding:12px 20px;background:#1E40AF;color:#fff;border-radius:6px;text-decoration:none">PDF 다운로드</a></p>
     <hr style="margin:24px 0;border:none;border-top:1px solid #E5E5E0" />
     <p style="font-size:12px;color:#737373">
-      혹시 안 열리면 ${signed.signedUrl}<br />
+      혹시 안 열리면 ${downloadUrl}<br />
       답장 주시면 운영자(저)가 직접 회신드려요.<br />
       — 케이스랩 (${SITE_URL})
     </p>

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { track } from '@/lib/analytics/track';
 import { cn } from '@/lib/utils';
 
 export default function SignupPage() {
@@ -84,6 +85,7 @@ function SignupInner() {
         setError(translateSignupError(error.message));
         return;
       }
+      void track('signup', { method: 'email' });
       // Confirm email OFF 정책 → 가입 즉시 세션 발급 → middleware가 /onboarding으로 유도
       router.push(next);
     });

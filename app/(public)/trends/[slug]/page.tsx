@@ -12,6 +12,8 @@ import { ExploreOtherContent } from '@/components/content/ExploreOtherContent';
 import { RecommendSidebar } from '@/components/content/RecommendSidebar';
 import { ToolToc } from '@/components/tools/ToolToc';
 import { DeepReadTracker } from '@/components/analytics/DeepReadTracker';
+import { DwellTracker } from '@/components/analytics/DwellTracker';
+import { ScrollTracker } from '@/components/analytics/ScrollTracker';
 
 export const revalidate = 60;
 
@@ -58,6 +60,8 @@ export default async function TrendDetailPage({
   return (
     <article>
       <DeepReadTracker contentId={content.id} />
+      <DwellTracker contentId={content.id} />
+      <ScrollTracker contentId={content.id} />
       <div className="mx-auto max-w-[1200px] px-6 flex gap-0">
         <ToolToc items={toc} />
 
@@ -173,7 +177,7 @@ export default async function TrendDetailPage({
           </div>
 
           <ActionsBar contentId={content.id} />
-          <ContentShareSection url={url} title={content.title} />
+          <ContentShareSection url={url} title={content.title} contentId={content.id} />
           <CommentThread contentId={content.id} />
           <ExploreOtherContent />
         </div>

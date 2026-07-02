@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { track } from '@/lib/analytics/track';
 
 export function OrderForm({
   book,
@@ -51,6 +52,8 @@ export function OrderForm({
         setError(error.message);
         return;
       }
+      // 주문 성공 → 구매 퍼널 하단(ebook_order) 적재
+      void track('ebook_order', { product_id: book.id });
       setDone(true);
     });
   }

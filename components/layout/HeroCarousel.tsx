@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { ContentRow } from '@/types/content';
+import { track } from '@/lib/analytics/track';
 
 /**
  * HeroCarousel — mockup index.html L318~381 정합 (2026-06-03 재작성)
@@ -32,6 +33,18 @@ export function HeroCarousel({ items }: Props) {
   const [idx, setIdx] = useState(0);
   const total = items.length;
 
+  // 슬라이드 노출(impression) — 마운트(#1) + 슬라이드 전환마다. "어떤 배너를 더 보는지".
+  useEffect(() => {
+    const cur = items[idx];
+    if (!cur) return;
+    void track('banner_view', {
+      label: 'main_banner',
+      slot: idx + 1, // #1, #2 ... 순서
+      slug: cur.slug,
+      content_track: cur.track,
+    });
+  }, [idx, items]);
+
   if (total === 0) {
     return (
       <section className="border-b border-border bg-white">
@@ -43,7 +56,14 @@ export function HeroCarousel({ items }: Props) {
   }
 
   function go(dir: number) {
-    setIdx((idx + dir + total) % total);
+    const to = (idx + dir + total) % total;
+    void track('cta_click', {
+      label: 'main_banner_nav', // 옆으로 넘기는 클릭
+      direction: dir > 0 ? 'next' : 'prev',
+      from: idx + 1,
+      to: to + 1,
+    });
+    setIdx(to);
   }
 
   return (
@@ -54,7 +74,7 @@ export function HeroCarousel({ items }: Props) {
             className="flex transition-transform duration-300 ease-out"
             style={{ transform: `translateX(-${idx * 100}%)` }}
           >
-            {items.map((it) => {
+            {items.map((it, i) => {
               const trackLabel = it.track === 'case' ? '실전 케이스' : 'AI 트렌드';
               const job = it.job_tags?.[0] ? JOB_LABEL[it.job_tags[0]] : '';
               const eye = job ? `${trackLabel} · ${job}` : trackLabel;
@@ -64,6 +84,14 @@ export function HeroCarousel({ items }: Props) {
                 <div key={it.slug} className="min-w-full">
                   <Link
                     href={href}
+                    onClick={() =>
+                      void track('cta_click', {
+                        label: 'main_banner',
+                        slot: i + 1, // #1, #2 ... 클릭된 슬라이드 순서
+                        slug: it.slug,
+                        content_track: it.track,
+                      })
+                    }
                     className="flex flex-col md:flex-row md:items-center gap-6 md:gap-12 py-10 md:py-14 md:pb-7"
                   >
                     <div className="flex-1 min-w-0">

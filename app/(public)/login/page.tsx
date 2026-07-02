@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { track } from '@/lib/analytics/track';
 
 export default function LoginPage() {
   return (
@@ -87,6 +88,8 @@ function LoginInner() {
   const supabase = createSupabaseBrowserClient();
 
   function loginWith(provider: 'google' | 'kakao') {
+    // OAuth는 리다이렉트로 성공 직후 코드가 실행 안 될 수 있어 클릭 의도 시점에 발화
+    void track('login', { method: provider });
     startTransition(async () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
@@ -107,7 +110,10 @@ function LoginInner() {
     startTransition(async () => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) setError(translateLoginError(error.message));
-      else router.push(next);
+      else {
+        void track('login', { method: 'email' });
+        router.push(next);
+      }
     });
   }
 

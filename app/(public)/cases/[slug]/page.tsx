@@ -17,6 +17,8 @@ import { StepCard } from '@/components/content/StepCard';
 import { ProsConsGrid } from '@/components/content/ProsConsGrid';
 import { TakingPointsList } from '@/components/content/TakingPointsList';
 import { DeepReadTracker } from '@/components/analytics/DeepReadTracker';
+import { DwellTracker } from '@/components/analytics/DwellTracker';
+import { ScrollTracker } from '@/components/analytics/ScrollTracker';
 
 export const revalidate = 60;
 
@@ -58,6 +60,8 @@ export default async function CaseDetailPage({
   return (
     <article>
       <DeepReadTracker contentId={content.id} />
+      <DwellTracker contentId={content.id} />
+      <ScrollTracker contentId={content.id} />
       <div className="mx-auto max-w-[1200px] px-6 flex gap-0">
         <LeftToc />
 
@@ -178,7 +182,7 @@ export default async function CaseDetailPage({
           </div>
 
           <ActionsBar contentId={content.id} />
-          <ContentShareSection url={url} title={content.title} />
+          <ContentShareSection url={url} title={content.title} contentId={content.id} />
           <CommentThread contentId={content.id} />
           <ExploreOtherContent />
         </div>

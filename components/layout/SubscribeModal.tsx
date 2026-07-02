@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/hooks/use-auth';
+import { track } from '@/lib/analytics/track';
 
 interface Props {
   open: boolean;
@@ -71,6 +72,8 @@ export function SubscribeModal({ open, onOpenChange }: Props) {
             { onConflict: 'email', ignoreDuplicates: true },
           );
       }
+      // 구독 성공 → 뉴스레터 퍼널(subscribe) 적재. 로그인 계정이면 'profile', 그 외 입력은 'modal'.
+      void track('subscribe', { source: user && email === user.email ? 'profile' : 'modal' });
       setDone(true);
       setTimeout(() => {
         onOpenChange(false);

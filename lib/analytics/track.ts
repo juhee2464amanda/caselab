@@ -3,6 +3,7 @@
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { GA_ID } from './ga4';
 import { attachUtmToMetadata } from './utm';
+import { attachIdentity } from './anon';
 
 /**
  * events 테이블 + GA4 통합 적재 wrapper.
@@ -34,7 +35,14 @@ export type EventType =
   | 'scroll_50'
   | 'scroll_100'
   | 'search'
-  | 'product_view';
+  | 'product_view'
+  | 'subscribe'
+  | 'signup'
+  | 'login'
+  | 'review'
+  | 'share'
+  | 'dwell'
+  | 'banner_view';
 
 /**
  * GA4 event name 매핑. D21 결정 — Phase 4 PG 도입 시점에 ebook_order → 'purchase' 매핑 활성.
@@ -56,6 +64,13 @@ const GA4_EVENT_NAME: Record<EventType, string> = {
   scroll_100: 'scroll',
   search: 'search',
   product_view: 'product_view',
+  subscribe: 'newsletter_subscribe',
+  signup: 'sign_up',
+  login: 'login',
+  review: 'post_review',
+  share: 'share',
+  dwell: 'user_engagement', // GA4 표준 체류시간 이벤트
+  banner_view: 'view_promotion', // GA4 표준 프로모션 노출
 };
 
 /**
@@ -79,6 +94,13 @@ const DB_EVENT_NAME: Record<EventType, string> = {
   scroll_100: 'scroll_100',
   search: 'search',
   product_view: 'product_view',
+  subscribe: 'subscribe',
+  signup: 'signup',
+  login: 'login',
+  review: 'review',
+  share: 'share',
+  dwell: 'dwell',
+  banner_view: 'banner_view',
 };
 
 /**
@@ -89,7 +111,7 @@ export async function track(
   eventType: EventType,
   metadata: Record<string, unknown> = {}
 ): Promise<void> {
-  const merged = attachUtmToMetadata(metadata);
+  const merged = attachIdentity(attachUtmToMetadata(metadata));
 
   // 1) events 테이블 적재 (anon RLS 허용, 익명 사용자도 적재 가능)
   try {
