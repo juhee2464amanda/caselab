@@ -618,7 +618,7 @@ caselab/
 - `lib/analytics/track.ts` (신설)
 - `lib/analytics/utm.ts` (신설, [[D25]]와 연동)
 - `lib/analytics/scroll-tracker.ts` (신설)
-- `components/analytics/GA4Provider.tsx` (Consent Mode v2 패치 — default denied → update granted)
+- `components/analytics/GA4Provider.tsx` (Consent Mode v2 패치 — default denied → update granted) ⛔ **2026-07-02 §18.20에서 폐기**: 동의 UI 없이 default `granted`(고지 기반 수집)로 전환
 - `app/layout.tsx` (`<SpeedInsights />` 추가)
 - `package.json` (`@vercel/speed-insights` 추가)
 - `lib/analytics/deep-read.ts` (점진 — wrapper 경유로 변경, 이번 세션엔 보류)
@@ -809,6 +809,46 @@ caselab/
 | 2 | 마이그레이션·환경변수 추가 **없음** | 기능이 이미 prod에 존재 → 4-location의 .env/스키마 항목 해당 없음 |
 
 **영향받는 파일**: `components/layout/GNB.tsx` (2줄). PR #58.
+
+---
+
+### 18.19 GA4 실측정 켜기 전 계측 정합 — pv 이중발화 제거 + prompt_copy 누락 보강 (2026-07-02)
+
+**배경**: 유저앱에 GA4 실측정을 켜기 직전 점검(§18.9 D21 인프라 검수) 중 두 가지 결함 발견.
+1. **pv 이중(사실상 삼중) 발화** — `GA4Provider`와 `PageviewTracker`가 layout에 동시 마운트돼 라우트 1회 이동당 `track('pv')`가 두 번 발화. 추가로 `GA4Provider`가 `pageview(path)`(`gtag('config',…)` 재호출)까지 돌려, events 테이블 pv 2건 INSERT + GA4 `page_view` 2~3회. GA4를 켜는 순간 PV/UV·익명 UV 북극성 원천이 2~3배로 과다 집계됨.
+2. **prompt_copy 커버리지 구멍** — 북극성(D5·D32·D68 = 주간 `prompt_copy` UV) 최대 발생원인 `/prompts` 라이브러리(`PromptsBrowser`)와 단계별 인라인 프롬프트(`PromptInline`)의 복사 버튼이 **완전 미계측**(`track` import 자체 없음). 본문 프롬프트 블록(`PromptBlock`)만 잡히고 있었음.
+
+**결정**: 켜기 전 선행 수정으로 처리. 신규 이벤트·이름 규약 변경 없음(§18.9 D21의 GA4 event name 매핑 그대로 유지 → admin 해석 정합).
+
+| # | 결정 | 영향 |
+|---|---|---|
+| 1 | **pv 단일 발화원 = `GA4Provider`의 `track('pv')` 하나**로 고정 | `PageviewTracker.tsx` 삭제 + layout 마운트 제거. `GA4Provider`의 `pageview(path)`(config 재호출) 제거. `send_page_view:false` config라 event 방식이 정합 |
+| 2 | 안 쓰이게 된 `lib/analytics/ga4.ts`의 `pageview`/`track`/`isGAEnabled` 제거, `GA_ID`만 유지 | 실사용 wrapper는 `lib/analytics/track.ts` 단일 경로뿐임을 코드로 확정 |
+| 3 | `/prompts` 라이브러리 복사 계측 추가 — `track('prompt_copy', { prompt_id, label, category, source: 'library_pick\|list' })` | `PromptsBrowser.tsx`. tools(category='prompt') 항목이라 `content_id` 없음(FK 안전) → 식별자는 metadata로 |
+| 4 | 단계별 인라인 프롬프트 복사 계측 추가 — `track('prompt_copy', { content_id, label, source: 'step_inline' })` | `PromptInline.tsx`. `contentId`를 `cases/[slug] → StepCard → PromptInline`로 배선 |
+| 5 | 마이그레이션·환경변수 추가 **없음** | 실측정 활성화는 `NEXT_PUBLIC_GA_MEASUREMENT_ID`를 실제 `G-XXXX`로 교체(.env.local + Vercel) + 재배포. 절차는 [[docs/05_launch_runbook.md]] 참조 |
+
+**영향받는 파일**: `components/analytics/GA4Provider.tsx`, `components/analytics/PageviewTracker.tsx`(삭제), `app/layout.tsx`, `lib/analytics/ga4.ts`, `components/prompts/PromptsBrowser.tsx`, `components/content/PromptInline.tsx`, `components/content/StepCard.tsx`, `app/(public)/cases/[slug]/page.tsx`.
+
+---
+
+### 18.20 GA4 동의(consent) UI 제거 — 고지 기반 수집으로 전환 (2026-07-02)
+
+**배경**: §18.19에 이어 GA4 실측정 활성화의 마지막 blocker였던 "동의 브리지 끊김"(07 함정②)을 어떻게 배선할지 결정. 점검 결과 (a) `GA4Provider.setAnalyticsConsent()`가 **아무데서도 호출 안 됨**(정의만 존재), (b) CookieConsent 배너 **부재**, (c) `ProfileForm`의 "익명 분석 동의" 토글은 DB 컬럼만 갱신하고 GA4엔 무연결 → consent 영구 `denied` → 실 ID를 넣어도 쿠키리스 모델링만 됐음.
+
+**결정 (사용자)**: **동의/거부 UI를 두지 않는다.** 한국(PIPA)은 EU식 쿠키 동의 배너를 법으로 강제하지 않으므로, 비식별 익명 통계는 **개인정보처리방침 고지 + 브라우저/Google opt-out 안내**로 갈음. 배너·토글 모두 만들지 않음. → **§18.9의 "Consent Mode v2 default `denied` → 동의 시 `granted`" 방침 폐기.**
+
+| # | 결정 | 영향 |
+|---|---|---|
+| 1 | `GA4Provider` Consent Mode default `analytics_storage: 'granted'` (광고류는 계속 `denied`) | 페이지 로드 즉시 쿠키 기반 정식 수집. 배너 불필요 |
+| 2 | consent 기계장치 제거 — `getAnalyticsConsent`/`setAnalyticsConsent`/`CONSENT_KEY`/`caselab:consent-change`/`consented` state 삭제 | 모두 GA4Provider 내부에서만 쓰이던 죽은 코드(외부 import 0) |
+| 3 | `ProfileForm`의 "익명 분석 동의" 토글 **UI·state·저장 필드 제거** (§19 D4 토글 폐기) | `profiles.analytics_consent` DB 컬럼은 유지(마이그레이션 없음, admin 참조 안전). 본가 select에서도 제외 |
+| 4 | `privacy/page.tsx` §5 + 위탁처리자 항목 **고지 기반으로 재작성** | "동의 배너로 묻고 동의 안 하면 GA4 미동작" → "익명 통계 수집 + 쿠키 사용 + 브라우저/[GA opt-out 도구](https://tools.google.com/dlpage/gaoptout) 차단 가능". 문서-코드 모순 제거 |
+| 5 | 마이그레이션·환경변수 추가 **없음** | `analytics_consent` 컬럼 drop은 하지 않음(무해·보류) |
+
+> ⚠️ 법적 판단 주의: 저작 시점 국내 관행 기준(비식별·고지 기반)이며 최종 법률 검토는 별도. GA4 `_ga` 쿠키가 pseudonymous ID를 심는 점은 회색지대.
+
+**영향받는 파일**: `components/analytics/GA4Provider.tsx`, `app/(public)/mypage/profile/ProfileForm.tsx`, `app/(public)/mypage/profile/page.tsx`, `app/(public)/legal/privacy/page.tsx`. 브랜치 `feat/ga4-consent-bridge`.
 
 ---
 

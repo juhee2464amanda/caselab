@@ -131,7 +131,7 @@ export default async function CaseDetailPage({
                 <SectionLead text='단계마다 사람이 먼저 손으로 만든 입력이 있어야 AI 출력이 쓸 만합니다. 각 단계는 "사람이 할 일 / AI에 시킬 일 / 프롬프트 / 결과 비교" 4개로 구성됩니다.' />
                 <div className="flex flex-col gap-3.5 mt-3.5">
                   {body.stepCards.map((step) => (
-                    <StepCard key={step.num} step={step} />
+                    <StepCard key={step.num} step={step} contentId={content.id} />
                   ))}
                 </div>
               </section>

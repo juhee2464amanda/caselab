@@ -280,7 +280,7 @@ Authentication → **URL Configuration**:
 - `lib/analytics/track.ts` wrapper (events 테이블 + GA4 매핑)
 - `lib/analytics/utm.ts` (URL 파싱 → sessionStorage)
 - `lib/analytics/scroll-tracker.ts` (25/50/100% scroll → GA4 fire)
-- `components/analytics/GA4Provider.tsx` Consent Mode v2 패치 (default denied → update granted)
+- `components/analytics/GA4Provider.tsx` Consent Mode v2 패치 (default denied → update granted) ⛔ 2026-07-02 §18.20에서 폐기 → default `granted`(동의 UI 없음)
 - `app/layout.tsx`에 `<SpeedInsights />` 추가 (D24)
 - EventType에 `search` 추가 (D55 인기 검색어 적재)
 - `/admin/users/invite` 페이지 + Supabase `inviteUserByEmail` + role=editor 자동 (D47)
@@ -439,17 +439,23 @@ where email = 'caselab.kr@gmail.com';
 ### ✅ 끝났을 때
 - 브라우저 탭에 favicon
 - `/legal/privacy`, `/legal/terms`, `/robots.txt`, `/sitemap.xml`, `/opengraph-image` 모두 200
-- GA4 측정 ID 등록 후 동의하면 실시간에 본인 방문 보임
+- GA4 측정 ID 등록 후 실시간에 본인 방문 보임 (§18.20 — 동의 절차 없이 즉시 수집)
 
 ### 🚨 의사결정 트리거
-**쿠키 배너 표시?** — 권장: 표시 + 동의 후 GA4. 한국 가이드 권고.
+**쿠키 배너 표시?** — ❌ **표시 안 함 (2026-07-02 §18.20 확정)**. 한국(PIPA)은 EU식 동의 배너 강제 없음 → 개인정보처리방침 고지 + 브라우저/Google opt-out 안내로 갈음. GA4는 default `granted`로 페이지 로드 즉시 수집. (동의 배너·프로필 토글 모두 제거됨)
+
+> ⚠️ **켜기 전 계측 정합 선행 완료 (§18.19, 2026-07-02)**: GA4를 실제로 켜면 pv 이중발화로 PV/UV가 2~3배 뻥튀기되던 버그와, 북극성(`prompt_copy`)의 최대 발생원인 `/prompts`·단계별 인라인 프롬프트 복사가 미계측이던 구멍을 미리 고쳤음. 아래 절차대로 켜면 됨.
 
 ### 📋 GA4
 1. [analytics.google.com](https://analytics.google.com) → 관리 → 속성 만들기
    - 속성 이름: `Caselab`
    - 시간대: Asia/Seoul
 2. 데이터 스트림 → 웹 → `http://localhost:3000` (도메인 결정 전이라 임시) → 측정 ID 복사
-3. `.env.local`에 `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-...`
+3. `.env.local`의 placeholder `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX` → 복사한 실제 `G-...`로 교체
+   - 키가 placeholder면 `GA4Provider`가 `if (!GA_ID) return null`로 아예 렌더 안 됨(=꺼짐). 실키를 넣어야 활성화됨.
+4. **로컬 검증**: `npm run dev` → 페이지 2~3개 이동 → GA4 **실시간(Realtime)**에서 활성 사용자 1명 + `page_view`가 **라우트당 1회씩만**(이중 아님) 뜨는지 확인 (§18.20 — 동의 클릭 없이 바로 수집돼야 정상)
+5. **Vercel 등록 + 배포** (Day 10에서 처리 — 아래 참조): 유저앱 프로젝트 Environment Variables에 `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-...` 등록(Production+Preview). `NEXT_PUBLIC_` 접두사라 빌드타임 주입 → **재배포 필수**
+6. **prod 실시간 확인**: 배포된 URL에서 라우트 이동 + 프롬프트 복사 → 실시간 이벤트에 `page_view` / `prompt_copy`(`source=library_pick|list|step_inline`) / `deep_read` / `save` / `search`가 뜨는지 확인. 이벤트 이름 규약은 §18.9 D21 매핑 그대로라 admin 해석과 정합.
 
 ### 📋 약관 검수
 - `app/(public)/legal/privacy/page.tsx` — “운영자: 개인 운영자” 부분 본인 이름 또는 운영명으로 변경
