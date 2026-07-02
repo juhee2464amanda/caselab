@@ -444,12 +444,18 @@ where email = 'caselab.kr@gmail.com';
 ### 🚨 의사결정 트리거
 **쿠키 배너 표시?** — 권장: 표시 + 동의 후 GA4. 한국 가이드 권고.
 
+> ⚠️ **켜기 전 계측 정합 선행 완료 (§18.19, 2026-07-02)**: GA4를 실제로 켜면 pv 이중발화로 PV/UV가 2~3배 뻥튀기되던 버그와, 북극성(`prompt_copy`)의 최대 발생원인 `/prompts`·단계별 인라인 프롬프트 복사가 미계측이던 구멍을 미리 고쳤음. 아래 절차대로 켜면 됨.
+
 ### 📋 GA4
 1. [analytics.google.com](https://analytics.google.com) → 관리 → 속성 만들기
    - 속성 이름: `Caselab`
    - 시간대: Asia/Seoul
 2. 데이터 스트림 → 웹 → `http://localhost:3000` (도메인 결정 전이라 임시) → 측정 ID 복사
-3. `.env.local`에 `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-...`
+3. `.env.local`의 placeholder `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX` → 복사한 실제 `G-...`로 교체
+   - 키가 placeholder면 `GA4Provider`가 `if (!GA_ID) return null`로 아예 렌더 안 됨(=꺼짐). 실키를 넣어야 활성화됨.
+4. **로컬 검증**: `npm run dev` → 페이지 2~3개 이동 + 쿠키 배너 동의 → GA4 **실시간(Realtime)**에서 활성 사용자 1명 + `page_view`가 **라우트당 1회씩만**(이중 아님) 뜨는지 확인
+5. **Vercel 등록 + 배포** (Day 10에서 처리 — 아래 참조): 유저앱 프로젝트 Environment Variables에 `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-...` 등록(Production+Preview). `NEXT_PUBLIC_` 접두사라 빌드타임 주입 → **재배포 필수**
+6. **prod 실시간 확인**: 배포된 URL에서 라우트 이동 + 프롬프트 복사 → 실시간 이벤트에 `page_view` / `prompt_copy`(`source=library_pick|list|step_inline`) / `deep_read` / `save` / `search`가 뜨는지 확인. 이벤트 이름 규약은 §18.9 D21 매핑 그대로라 admin 해석과 정합.
 
 ### 📋 약관 검수
 - `app/(public)/legal/privacy/page.tsx` — “운영자: 개인 운영자” 부분 본인 이름 또는 운영명으로 변경

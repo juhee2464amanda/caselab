@@ -1,7 +1,13 @@
 import type { StepCard as StepCardType } from '@/types/content';
 import { PromptInline } from './PromptInline';
 
-export function StepCard({ step }: { step: StepCardType }) {
+export function StepCard({
+  step,
+  contentId,
+}: {
+  step: StepCardType;
+  contentId?: string;
+}) {
   return (
     <div className="p-6 bg-white border border-border rounded-2xl">
       <div className="pb-3.5 mb-4 border-b border-border flex items-center gap-2">
@@ -34,7 +40,7 @@ export function StepCard({ step }: { step: StepCardType }) {
         </div>
       </div>
 
-      <PromptInline content={step.prompt} />
+      <PromptInline content={step.prompt} contentId={contentId} label={step.label} />
 
       {(step.goodResult || step.badResult) && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">

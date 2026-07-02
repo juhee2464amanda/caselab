@@ -10,6 +10,7 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { track } from '@/lib/analytics/track';
 import {
   PROMPT_CATEGORIES,
   PROMPT_CATEGORY_LABELS,
@@ -140,13 +141,21 @@ export function PromptsBrowser({ prompts }: { prompts: PromptItem[] }) {
   );
 }
 
-function useCopy(text: string) {
+function useCopy(prompt: PromptItem, band: 'pick' | 'list') {
   const [copied, setCopied] = useState(false);
   function copy() {
-    navigator.clipboard?.writeText(text).then(
+    navigator.clipboard?.writeText(prompt.prompt).then(
       () => {
         setCopied(true);
         setTimeout(() => setCopied(false), 1200);
+        // 북극성(prompt_copy) 원천 — /prompts 라이브러리 복사 계측.
+        // tools(category='prompt') 항목이라 content_id 없음 → 식별자는 metadata로.
+        void track('prompt_copy', {
+          prompt_id: prompt.id,
+          label: prompt.title,
+          category: prompt.category,
+          source: `library_${band}`,
+        });
       },
       () => {},
     );
@@ -209,7 +218,7 @@ function PromptBody({ text }: { text: string }) {
 }
 
 function PickCard({ prompt }: { prompt: PromptItem }) {
-  const { copied, copy } = useCopy(prompt.prompt);
+  const { copied, copy } = useCopy(prompt, 'pick');
 
   return (
     <article className="flex flex-col rounded-xl border border-accent-100 bg-white p-4 transition-shadow hover:shadow-[0_2px_12px_rgba(49,130,246,0.08)]">
@@ -252,7 +261,7 @@ function PickCard({ prompt }: { prompt: PromptItem }) {
 }
 
 function PromptCard({ prompt }: { prompt: PromptItem }) {
-  const { copied, copy } = useCopy(prompt.prompt);
+  const { copied, copy } = useCopy(prompt, 'list');
 
   return (
     <article className="flex gap-5 py-6 border-b border-border first:pt-0">

@@ -812,6 +812,26 @@ caselab/
 
 ---
 
+### 18.19 GA4 실측정 켜기 전 계측 정합 — pv 이중발화 제거 + prompt_copy 누락 보강 (2026-07-02)
+
+**배경**: 유저앱에 GA4 실측정을 켜기 직전 점검(§18.9 D21 인프라 검수) 중 두 가지 결함 발견.
+1. **pv 이중(사실상 삼중) 발화** — `GA4Provider`와 `PageviewTracker`가 layout에 동시 마운트돼 라우트 1회 이동당 `track('pv')`가 두 번 발화. 추가로 `GA4Provider`가 `pageview(path)`(`gtag('config',…)` 재호출)까지 돌려, events 테이블 pv 2건 INSERT + GA4 `page_view` 2~3회. GA4를 켜는 순간 PV/UV·익명 UV 북극성 원천이 2~3배로 과다 집계됨.
+2. **prompt_copy 커버리지 구멍** — 북극성(D5·D32·D68 = 주간 `prompt_copy` UV) 최대 발생원인 `/prompts` 라이브러리(`PromptsBrowser`)와 단계별 인라인 프롬프트(`PromptInline`)의 복사 버튼이 **완전 미계측**(`track` import 자체 없음). 본문 프롬프트 블록(`PromptBlock`)만 잡히고 있었음.
+
+**결정**: 켜기 전 선행 수정으로 처리. 신규 이벤트·이름 규약 변경 없음(§18.9 D21의 GA4 event name 매핑 그대로 유지 → admin 해석 정합).
+
+| # | 결정 | 영향 |
+|---|---|---|
+| 1 | **pv 단일 발화원 = `GA4Provider`의 `track('pv')` 하나**로 고정 | `PageviewTracker.tsx` 삭제 + layout 마운트 제거. `GA4Provider`의 `pageview(path)`(config 재호출) 제거. `send_page_view:false` config라 event 방식이 정합 |
+| 2 | 안 쓰이게 된 `lib/analytics/ga4.ts`의 `pageview`/`track`/`isGAEnabled` 제거, `GA_ID`만 유지 | 실사용 wrapper는 `lib/analytics/track.ts` 단일 경로뿐임을 코드로 확정 |
+| 3 | `/prompts` 라이브러리 복사 계측 추가 — `track('prompt_copy', { prompt_id, label, category, source: 'library_pick\|list' })` | `PromptsBrowser.tsx`. tools(category='prompt') 항목이라 `content_id` 없음(FK 안전) → 식별자는 metadata로 |
+| 4 | 단계별 인라인 프롬프트 복사 계측 추가 — `track('prompt_copy', { content_id, label, source: 'step_inline' })` | `PromptInline.tsx`. `contentId`를 `cases/[slug] → StepCard → PromptInline`로 배선 |
+| 5 | 마이그레이션·환경변수 추가 **없음** | 실측정 활성화는 `NEXT_PUBLIC_GA_MEASUREMENT_ID`를 실제 `G-XXXX`로 교체(.env.local + Vercel) + 재배포. 절차는 [[docs/05_launch_runbook.md]] 참조 |
+
+**영향받는 파일**: `components/analytics/GA4Provider.tsx`, `components/analytics/PageviewTracker.tsx`(삭제), `app/layout.tsx`, `lib/analytics/ga4.ts`, `components/prompts/PromptsBrowser.tsx`, `components/content/PromptInline.tsx`, `components/content/StepCard.tsx`, `app/(public)/cases/[slug]/page.tsx`.
+
+---
+
 ## 19. Admin 풀스택 결정 매트릭스 (정합본)
 
 **결정 일자**: 2026-05-28 ~ 2026-06-02 (점진)

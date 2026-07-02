@@ -2,8 +2,17 @@
 
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { track } from '@/lib/analytics/track';
 
-export function PromptInline({ content }: { content: string }) {
+export function PromptInline({
+  content,
+  contentId,
+  label,
+}: {
+  content: string;
+  contentId?: string;
+  label?: string;
+}) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -11,6 +20,8 @@ export function PromptInline({ content }: { content: string }) {
       await navigator.clipboard.writeText(content);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
+      // 북극성(prompt_copy) 원천 — 단계별 인라인 프롬프트 복사 계측
+      void track('prompt_copy', { content_id: contentId, label, source: 'step_inline' });
     } catch {
       /* noop */
     }
