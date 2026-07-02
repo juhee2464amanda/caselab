@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { Star } from 'lucide-react';
 import { getProductBySlug } from '@/lib/data/products';
 import { ProductViewTracker } from '@/components/analytics/ProductViewTracker';
+import { DwellTracker } from '@/components/analytics/DwellTracker';
+import { ScrollTracker } from '@/components/analytics/ScrollTracker';
 import { EbookDetailNav, type EbookNavTab } from '@/components/ebook/EbookDetailNav';
 import { EbookToc } from '@/components/ebook/EbookToc';
 import { EbookReviews } from '@/components/ebook/EbookReviews';
@@ -103,6 +105,9 @@ export default async function EbookDetailPage({
   return (
     <>
       <ProductViewTracker productId={book.id} />
+      {/* ebook 읽기 퍼널 — 체류시간 + 스크롤 깊이(상세 정독 신호) */}
+      <DwellTracker />
+      <ScrollTracker />
       {/* Product top */}
       <div className="mx-auto flex max-w-[1100px] flex-col gap-8 px-4 py-10 sm:px-6 md:flex-row md:gap-12 md:py-12">
         {/* 3D Book */}
