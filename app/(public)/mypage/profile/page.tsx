@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
 import { ProfileForm } from './ProfileForm';
+import { DeleteAccountSection } from './DeleteAccountSection';
 
 export default async function MypageProfile() {
   if (!isSupabaseConfigured()) {
@@ -15,5 +16,10 @@ export default async function MypageProfile() {
     .eq('id', user.id)
     .single();
 
-  return <ProfileForm initial={profile} />;
+  return (
+    <>
+      <ProfileForm initial={profile} />
+      <DeleteAccountSection />
+    </>
+  );
 }
