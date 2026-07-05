@@ -24,7 +24,8 @@ interface Props {
   toolId?: string;
 }
 
-const SELECT = 'id, user_id, content_id, tool_id, parent_id, body, status, created_at, profiles(name, avatar_url)';
+// 작성자 표시는 public_profiles 뷰(안전 컬럼만) 경유 — profiles 직접 select는 본인+admin으로 제한됨(0023)
+const SELECT = 'id, user_id, content_id, tool_id, parent_id, body, status, created_at, profiles:public_profiles(name, avatar_url)';
 
 export function CommentThread({ contentId, toolId }: Props) {
   const [comments, setComments] = useState<Comment[]>([]);

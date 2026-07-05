@@ -26,7 +26,8 @@ interface Props {
   seedReviews?: EbookReview[];
 }
 
-const SELECT = 'id, user_id, rating, body, created_at, profiles(name)';
+// 작성자 표시는 public_profiles 뷰(안전 컬럼만) 경유 — profiles 직접 select는 본인+admin으로 제한됨(0023)
+const SELECT = 'id, user_id, rating, body, created_at, profiles:public_profiles(name)';
 
 /** 별점 ★ 표시 (amber) — mockup 정합 */
 function Stars({ rating, className = 'h-[18px] w-[18px]' }: { rating: number; className?: string }) {
