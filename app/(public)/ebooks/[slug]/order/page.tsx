@@ -14,6 +14,7 @@ export default async function OrderPage({
 
   // 로그인 필수 — 비로그인 시 로그인 후 이 주문서로 복귀
   let defaults = { name: '', email: '' };
+  let alreadySubscribed = false;
   if (isSupabaseConfigured()) {
     const supabase = await createSupabaseServerClient();
     const {
@@ -26,12 +27,20 @@ export default async function OrderPage({
       name: (user.user_metadata?.name ?? user.user_metadata?.full_name ?? '') as string,
       email: user.email ?? '',
     };
+    // 이미 뉴스레터 구독 중이면 주문 폼의 [선택] 구독 체크박스를 숨긴다
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('newsletter')
+      .eq('id', user.id)
+      .maybeSingle();
+    alreadySubscribed = !!profile?.newsletter;
   }
 
   return (
     <OrderForm
       book={{ id: book.id, title: book.title, price: book.price }}
       defaults={defaults}
+      alreadySubscribed={alreadySubscribed}
     />
   );
 }
