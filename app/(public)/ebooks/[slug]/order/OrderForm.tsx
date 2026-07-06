@@ -12,9 +12,12 @@ import { track } from '@/lib/analytics/track';
 export function OrderForm({
   book,
   defaults,
+  alreadySubscribed = false,
 }: {
   book: { id: string; title: string; price: number };
   defaults?: { name: string; email: string };
+  /** 이미 뉴스레터 구독 중(profiles.newsletter=true) — [선택] 구독 체크박스 숨김 */
+  alreadySubscribed?: boolean;
 }) {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
@@ -22,6 +25,7 @@ export function OrderForm({
   const [email, setEmail] = useState(defaults?.email ?? '');
   const [phone, setPhone] = useState('');
   const [agreed, setAgreed] = useState(false);
+  const [newsletter, setNewsletter] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -54,6 +58,11 @@ export function OrderForm({
       }
       // 주문 성공 → 구매 퍼널 하단(ebook_order) 적재
       void track('ebook_order', { product_id: book.id });
+      // [선택] 뉴스레터 동의 → 본인 profiles.newsletter=true (RLS 본인 update).
+      // 0019 트리거가 Brevo 구독까지 전파. 실패해도 주문은 이미 완료라 막지 않음.
+      if (newsletter && user) {
+        await supabase.from('profiles').update({ newsletter: true }).eq('id', user.id);
+      }
       setDone(true);
     });
   }
@@ -66,6 +75,9 @@ export function OrderForm({
           입력하신 이메일로 다운로드 링크를 보내드릴게요.<br />
           (보통 1분 내 도착. 스팸 폴더도 확인해주세요)
         </p>
+        {newsletter && (
+          <p className="mt-2 text-sm text-ink/50">뉴스레터 구독도 완료됐어요. 언제든 마이페이지에서 바꿀 수 있어요.</p>
+        )}
         <Button onClick={() => router.push('/mypage/ebooks')} variant="accent" className="mt-8">
           구매한 전자책 보기
         </Button>
@@ -134,6 +146,23 @@ export function OrderForm({
             </span>
           </span>
         </label>
+
+        {!alreadySubscribed && (
+          <label className="flex items-start gap-2.5 rounded-lg border border-border p-3.5 text-sm">
+            <input
+              type="checkbox"
+              checked={newsletter}
+              onChange={(e) => setNewsletter(e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 accent-accent"
+            />
+            <span className="text-ink/80">
+              <span className="font-semibold text-ink/50">[선택]</span> 케이스랩 뉴스레터도 받아볼게요.
+              <span className="mt-1 block text-xs text-ink/45">
+                새 콘텐츠·AI 활용 사례를 주 1회 보내드려요. 마케팅 정보 수신 동의이며, 언제든 수신거부할 수 있어요.
+              </span>
+            </span>
+          </label>
+        )}
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 
