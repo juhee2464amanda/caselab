@@ -191,7 +191,7 @@ function PromptBody({ text }: { text: string }) {
         ref={ref}
         className={cn(
           'text-[13px] text-ink/50 leading-relaxed font-mono bg-muted px-3.5 py-2.5 rounded-lg border border-border whitespace-pre-wrap break-keep',
-          expanded ? '' : 'line-clamp-3',
+          expanded ? '' : 'line-clamp-2',
         )}
       >
         {text}
@@ -287,7 +287,7 @@ function PromptCard({ prompt }: { prompt: PromptItem }) {
               </span>
             ))}
         </div>
-        <h2 className="text-[18px] md:text-xl font-bold tracking-[-0.02em] leading-snug mb-1.5 break-keep">
+        <h2 className="text-[18px] md:text-xl font-bold tracking-[-0.02em] leading-snug mb-1.5 truncate">
           {prompt.title}
         </h2>
         {prompt.description && (
