@@ -65,7 +65,7 @@ export function GuidesBrowser({ guides }: { guides: GuideItem[] }) {
               <p className="text-sm text-ink/60 mb-4 max-w-[600px] leading-relaxed break-keep">
                 {GUIDE_SECTIONS[c].desc}
               </p>
-              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="-mx-6 flex gap-4 overflow-x-auto px-6 pb-1 snap-x [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {items.map((g) => (
                   <GuideCard key={g.id} guide={g} />
                 ))}
@@ -115,7 +115,7 @@ function GuideCard({ guide }: { guide: GuideItem }) {
       href={guide.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group block border border-border rounded-[10px] overflow-hidden bg-white transition-all hover:border-accent hover:shadow-[0_4px_14px_rgba(49,130,246,0.06)] hover:-translate-y-px"
+      className="group block w-[240px] sm:w-[264px] shrink-0 snap-start border border-border rounded-[10px] overflow-hidden bg-white transition-all hover:border-accent hover:shadow-[0_4px_14px_rgba(49,130,246,0.06)] hover:-translate-y-px"
     >
       <div
         className="h-20 flex items-center justify-center px-3.5 overflow-hidden"
