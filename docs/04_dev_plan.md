@@ -527,7 +527,7 @@ caselab/
 
 | 항목 | 도입 시점 |
 |---|---|
-| 커스텀 도메인 (Cloudflare 또는 가비아) | 인스타 유입 안정화 + 브랜드 강화 필요 시 |
+| 커스텀 도메인 (Cloudflare 또는 가비아) | 인스타 유입 안정화 + 브랜드 강화 필요 시. 구매 시 Google OAuth 브랜드 인증 함께 처리(§18.22 #4) |
 | Brevo 도메인 인증 (DKIM/SPF로 격상) | 구독자 500명 / 월 발송 8,000건 / 스팸 불만 / 딜리버러빌리티 < 80% 도달 시 (도메인 구입 동반) |
 | Resend (이메일 발송 인프라 강화) | Brevo 한도(월 9k) 초과 + 도메인 도입 후 추가 전환 검토 |
 | Anthropic Claude API (AI 초안) | 콘텐츠 월 5건+ 안정화 + Max 복붙 피로 누적 |
@@ -865,6 +865,19 @@ caselab/
 > ⚠️ **배포 후 수동 작업 (GA4 콘솔)**: 관리 → 데이터 설정 → **데이터 필터** → 기본 제공 "Internal Traffic" 필터(`traffic_type=internal`)를 **테스트 → 활성(Active)** 으로 전환해야 보고서에서 실제 제외됨. 필터는 활성화 시점 이후 데이터만 제외(소급 없음).
 
 **영향받는 파일**: `lib/analytics/internal-traffic.ts`(신설), `app/api/analytics/internal/route.ts`(신설), `lib/analytics/track.ts`. 브랜치 `feat/ga4-internal-traffic`.
+
+### 18.22 Google OAuth 동의화면 브랜딩 — 게시 완료, 앱 이름 표시는 도메인 구매 시로 이월 (2026-07-11)
+
+**배경**: 구글 로그인 계정 선택 화면에 앱 이름 대신 `jsresrgzrsxotopfzpos.supabase.co(으)로 이동`이 표시됨. 원인은 구글 정책 — 앱 이름·로고는 **브랜드 인증(brand verification)** 통과 후에만 표시되고, 미인증 앱은 게시 여부와 무관하게 redirect URI의 도메인을 표시(피싱 방지). 코드·배포와 무관, Google Cloud 콘솔 설정 사안.
+
+| # | 결정 | 근거 |
+|---|---|---|
+| 1 | 게시 상태 **Testing → 프로덕션 전환 완료** (2026-07-11) | 기본 scope(email/profile/openid)만이라 심사 없이 즉시 게시. 브랜드 인증의 선행 조건이므로 헛일 아님. ⚠️ 기존 기록의 "이미 게시 상태"는 오인 — Testing이었음(Testing이어도 기본 scope는 임의 계정 로그인 동작해 착각) |
+| 2 | 앱 이름 표시(브랜드 인증)는 **보류** — 도메인 미구매 방침 유지 (사용자 확정 2026-07-11) | 인증 제출에 소유 도메인 필수(홈페이지·개인정보처리방침 URL + Search Console 소유권). `supabase.co`·`vercel.app` 모두 우리 소유 아님 → 제출 자체 불가 |
+| 3 | **로고 업로드 금지** (도메인 구매 전까지) | 프로덕션 앱에 로고 업로드 시 브랜드 인증 심사가 강제로 걸림 |
+| 4 | 도메인 구매 시 함께 처리(이월분): Search Console 소유권 인증 → 브랜딩의 승인된 도메인에서 `supabase.co` 제거(클라이언트의 redirect URI에는 유지 — 로그인 계속 동작) → 홈페이지·개인정보처리방침 링크 입력 + 로고 업로드 → 인증 제출(2~3영업일, "Supabase는 서드파티 인증 제공자" 답변으로 통과 사례 다수). 완전한 브랜딩 원하면 Supabase Custom Domain($10/월)로 콜백 도메인까지 교체 | [Google brand verification 문서](https://developers.google.com/identity/verification/authentication-verification), [Supabase Discussion #2532](https://github.com/orgs/supabase/discussions/2532) |
+
+**영향받는 파일**: 없음(코드 변경 0). GCP 프로젝트는 표시명 `caseload`(오타, 무해) / ID `caselab-498704` / 번호 `336491190376` — Supabase prod에 배선된 클라이언트 ID(`336491190376-…`)와 프로젝트 번호 대조로 검증 완료.
 
 ---
 

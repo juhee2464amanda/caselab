@@ -243,6 +243,7 @@ Authentication → **URL Configuration**:
      - `https://<supabase-project-ref>.supabase.co/auth/v1/callback`
      - `http://localhost:3000/auth/callback`
 5. Supabase Dashboard → Authentication → Providers → Google → Enable → 키 입력 → Save
+6. Google Auth Platform → 대상 → **앱 게시(프로덕션)** — 2026-07-11 완료. ⚠️ 계정 선택 화면의 "supabase.co(으)로 이동" 표시는 브랜드 인증 전까지 정상이며 도메인 구매 시 함께 해결(§18.22). **로고 업로드 금지**(인증 심사 강제됨)
 
 ### 📋 Kakao OAuth (Supabase 기본 provider — 2026-06-08 완료)
 > 기존 "Edge Function 프록시" 방식 폐기. Supabase 공식 Kakao provider 사용 (§18.12 D69).
@@ -666,7 +667,7 @@ https://<your>.vercel.app/sitemap.xml  # 200
 | 항목 | 도입 트리거 |
 |---|---|
 | Kakao OAuth | 한국 사용자 비중 70%↑ 확인 시 |
-| 커스텀 도메인 | 인스타 유입 안정화 + 브랜드 강화 필요 시 |
+| 커스텀 도메인 | 인스타 유입 안정화 + 브랜드 강화 필요 시. 구매 시 Google OAuth 브랜드 인증도 함께 처리(§18.22 #4 — Search Console 인증 + 로고 + 인증 제출) |
 | Brevo 도메인 인증(DKIM/SPF 격상) | 구독자 500명 / 월 발송 8k / 스팸 불만 / 딜리버러빌리티 < 80% 도달 시 (도메인 구입 동반) |
 | Resend 전환 검토 | Brevo 월 9k 한도 초과 + 도메인 도입 후 추가 인프라 필요 시 |
 | Anthropic AI 초안 | 콘텐츠 월 5건 이상 + Max 복붙 피로 |
