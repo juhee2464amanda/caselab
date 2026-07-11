@@ -850,6 +850,22 @@ caselab/
 
 **영향받는 파일**: `components/analytics/GA4Provider.tsx`, `app/(public)/mypage/profile/ProfileForm.tsx`, `app/(public)/mypage/profile/page.tsx`, `app/(public)/legal/privacy/page.tsx`. 브랜치 `feat/ga4-consent-bridge`.
 
+### 18.21 관리자 세션의 본가 행동을 분석에서 제외 — GA4 `traffic_type=internal` + events 스킵 (2026-07-11)
+
+**배경**: 운영자가 관리자 계정(`caselab.kr@gmail.com`)으로 본가에 접속해 확인 작업을 할 때마다 GA4와 `events` 테이블(admin 행동 인사이트 원천)이 오염됨. admin 사이트 쪽은 Vercel env 제거로 기해결 — 이번엔 **본가에서 관리자 세션의 행동만 제외**.
+
+| # | 결정 | 구현 |
+|---|---|---|
+| 1 | GA4는 **스크립트 유지 + `traffic_type=internal` 태깅** (스크립트 자체를 안 심는 방식 기각 — 관리자 계정으로 DebugView 테스트 불가해짐) | `lib/analytics/internal-traffic.ts` — 관리자 판별 시 `gtag('set', { traffic_type: 'internal' })`. 제외는 GA4 콘솔 데이터 필터가 수행 |
+| 2 | 관리자 판별은 **서버에서** — allowlist를 클라이언트 번들에 노출 금지 | `app/api/analytics/internal/route.ts` — 세션 이메일 vs `ADMIN_EMAILS` env(기본값 `caselab.kr@gmail.com`, admin repo middleware와 동일 패턴). boolean만 응답 |
+| 3 | `events` 테이블은 관리자 세션이면 **적재 스킵** | `track.ts`가 단일 깔때기(모든 클라이언트 계측이 경유) — insert 전 `isInternalTraffic()` 체크. userId 단위 메모이즈로 이벤트당 fetch 1회 아님 |
+| 4 | 서버측 적재 경로 `app/api/ebook/download/route.ts`는 제외 안 함 | 이메일 링크 클릭(비세션·service role)이라 관리자 여부 판별 불가. 관리자가 자기 이메일로 테스트 주문하는 경우만 해당 — 무시 가능한 엣지 |
+| 5 | DB 스키마 변경 없음 | RLS 차단 방식 기각 — 클라이언트 스킵으로 충분, 마이그레이션 드리프트 리스크 회피 |
+
+> ⚠️ **배포 후 수동 작업 (GA4 콘솔)**: 관리 → 데이터 설정 → **데이터 필터** → 기본 제공 "Internal Traffic" 필터(`traffic_type=internal`)를 **테스트 → 활성(Active)** 으로 전환해야 보고서에서 실제 제외됨. 필터는 활성화 시점 이후 데이터만 제외(소급 없음).
+
+**영향받는 파일**: `lib/analytics/internal-traffic.ts`(신설), `app/api/analytics/internal/route.ts`(신설), `lib/analytics/track.ts`. 브랜치 `feat/ga4-internal-traffic`.
+
 ---
 
 ## 19. Admin 풀스택 결정 매트릭스 (정합본)

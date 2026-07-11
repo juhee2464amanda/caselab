@@ -456,6 +456,10 @@ where email = 'caselab.kr@gmail.com';
 4. **로컬 검증**: `npm run dev` → 페이지 2~3개 이동 → GA4 **실시간(Realtime)**에서 활성 사용자 1명 + `page_view`가 **라우트당 1회씩만**(이중 아님) 뜨는지 확인 (§18.20 — 동의 클릭 없이 바로 수집돼야 정상)
 5. **Vercel 등록 + 배포** (Day 10에서 처리 — 아래 참조): 유저앱 프로젝트 Environment Variables에 `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-...` 등록(Production+Preview). `NEXT_PUBLIC_` 접두사라 빌드타임 주입 → **재배포 필수**
 6. **prod 실시간 확인**: 배포된 URL에서 라우트 이동 + 프롬프트 복사 → 실시간 이벤트에 `page_view` / `prompt_copy`(`source=library_pick|list|step_inline`) / `deep_read` / `save` / `search`가 뜨는지 확인. 이벤트 이름 규약은 §18.9 D21 매핑 그대로라 admin 해석과 정합.
+7. **내부 트래픽 필터 활성화 (§18.21, `feat/ga4-internal-traffic` 배포 후)**: 관리자 세션은 코드가 `traffic_type=internal`을 태깅하지만, GA4 콘솔에서 필터를 켜야 보고서에서 실제 제외됨.
+   - GA4 관리(Admin) → 데이터 설정 → **데이터 필터(Data Filters)** → 기본 제공 "Internal Traffic" 필터(조건 `traffic_type=internal`)를 **테스트 → 활성(Active)** 전환
+   - ⚠️ 활성화 시점 이후 데이터만 제외(소급 없음). 테스트 상태에선 보고서 "Test data filter name" 차원으로 확인만 가능
+   - 검증: 관리자 로그인 상태로 페이지 방문 → DebugView 이벤트에 `traffic_type=internal` 붙는지 + `events` 테이블에 해당 방문 행이 **안** 생기는지. 비로그인 상태에선 기존과 동일해야 함
 
 ### 📋 약관 검수
 - `app/(public)/legal/privacy/page.tsx` — “운영자: 개인 운영자” 부분 본인 이름 또는 운영명으로 변경
@@ -682,6 +686,7 @@ https://<your>.vercel.app/sitemap.xml  # 200
 | `NEXT_PUBLIC_SITE_URL` | Vercel 서브도메인 | Day 10 | 필수 |
 | `DRAFT_PREVIEW_SECRET` | `openssl rand -hex 32` | Day 10 | 필수 |
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | GA4 | Day 8 | 선택 |
+| `ADMIN_EMAILS` | 관리자 이메일 쉼표구분 (§18.21 내부 트래픽 판별) | — | 선택 (미설정 시 기본값 `caselab.kr@gmail.com`) |
 | `KAKAO_REST_API_KEY` (Edge Function secret) | Kakao 디벨로퍼스 | Day 2 (선택) | Kakao 도입 시 |
 | `KAKAO_CLIENT_SECRET` (Edge Function secret) | Kakao 디벨로퍼스 | Day 2 (선택) | 동일 |
 | `GMAIL_USER` (Edge Function secret) | `caselab.kr@gmail.com` (발신 Gmail 계정) | Day 9 | 필수 (전자책 발송) |

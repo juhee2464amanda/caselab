@@ -4,6 +4,7 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { GA_ID } from './ga4';
 import { attachUtmToMetadata } from './utm';
 import { attachIdentity } from './anon';
+import { isInternalTraffic } from './internal-traffic';
 
 /**
  * events 테이블 + GA4 통합 적재 wrapper.
@@ -113,31 +114,48 @@ export async function track(
 ): Promise<void> {
   const merged = attachIdentity(attachUtmToMetadata(metadata));
 
-  // 1) events 테이블 적재 (anon RLS 허용, 익명 사용자도 적재 가능)
+  // 관리자 세션 판별 (§18.21) — GA fire 전에 await해야
+  // gtag('set', { traffic_type }) → gtag('event') 순서가 보장됨.
+  let internal = false;
+  let userId: string | null = null;
   try {
     const supabase = createSupabaseBrowserClient();
-    const { content_id, product_id, ...rest } = merged as {
-      content_id?: string;
-      product_id?: string;
-    } & Record<string, unknown>;
     // user_id 채움 — UV distinct 집계 원천 (getSession은 로컬, 네트워크 없음)
     const {
       data: { session },
     } = await supabase.auth.getSession();
-    const row: Record<string, unknown> = {
-      event_type: DB_EVENT_NAME[eventType],
-      content_id: content_id ?? null,
-      user_id: session?.user?.id ?? null,
-      metadata: rest,
-    };
-    // product_id는 값이 있을 때만 포함 (0011 미적용 환경에서 일반 이벤트 insert 실패 방지)
-    if (product_id) row.product_id = product_id;
-    await supabase.from('events').insert(row);
+    userId = session?.user?.id ?? null;
+    internal = await isInternalTraffic(userId);
   } catch {
-    // silent
+    // silent — 판별 실패 시 기존과 동일하게 외부 트래픽으로 취급
+  }
+
+  // 1) events 테이블 적재 (anon RLS 허용, 익명 사용자도 적재 가능)
+  //    관리자 세션은 스킵 — admin 확인 작업이 KPI를 오염시키지 않도록 (§18.21)
+  if (!internal) {
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { content_id, product_id, ...rest } = merged as {
+        content_id?: string;
+        product_id?: string;
+      } & Record<string, unknown>;
+      const row: Record<string, unknown> = {
+        event_type: DB_EVENT_NAME[eventType],
+        content_id: content_id ?? null,
+        user_id: userId,
+        metadata: rest,
+      };
+      // product_id는 값이 있을 때만 포함 (0011 미적용 환경에서 일반 이벤트 insert 실패 방지)
+      if (product_id) row.product_id = product_id;
+      await supabase.from('events').insert(row);
+    } catch {
+      // silent
+    }
   }
 
   // 2) GA4 fire (Consent granted 시만 — Consent Mode v2가 자동 처리)
+  //    관리자 세션도 발화 — traffic_type=internal이 세팅된 상태라 GA4 데이터
+  //    필터가 보고서에서 제외하고, DebugView 테스트는 그대로 가능 (§18.21)
   if (
     typeof window !== 'undefined' &&
     GA_ID &&
