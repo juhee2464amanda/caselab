@@ -54,3 +54,23 @@ export async function listPrompts(): Promise<PromptItem[]> {
   const rows = ((data ?? []) as unknown as ToolPromptRow[]).map(mapPromptRow);
   return rows.length ? rows : IS_DEV ? promptSeed : [];
 }
+
+export async function getPromptBySlug(slug: string): Promise<PromptItem | null> {
+  const devHit = () =>
+    IS_DEV ? promptSeed.find((p) => p.slug === slug) ?? null : null;
+  if (!isSupabaseConfigured()) return devHit();
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from('tools')
+    .select('id, slug, name, description, pick_order, body')
+    .eq('category', 'prompt')
+    .eq('slug', slug)
+    .eq('status', 'published')
+    .maybeSingle();
+  if (error) {
+    console.warn('[getPromptBySlug]', error.message);
+    return devHit();
+  }
+  const row = data as unknown as ToolPromptRow | null;
+  return row ? mapPromptRow(row) : devHit();
+}

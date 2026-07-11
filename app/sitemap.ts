@@ -44,6 +44,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.8,
       });
     }
+
+    const { data: promptRows } = await supabase
+      .from('tools')
+      .select('slug, updated_at')
+      .eq('category', 'prompt')
+      .eq('status', 'published')
+      .limit(1000);
+
+    for (const p of promptRows ?? []) {
+      entries.push({
+        url: `${SITE}/prompts/${p.slug}`,
+        lastModified: p.updated_at ? new Date(p.updated_at as string) : new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.6,
+      });
+    }
   } catch {
     /* DB 미연결이면 정적 entries만 반환 */
   }

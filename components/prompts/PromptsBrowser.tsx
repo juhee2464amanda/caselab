@@ -1,16 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Check,
-  Copy,
-  ArrowUpRight,
-  Sparkles,
-  ChevronDown,
-  ChevronUp,
-} from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Check, Sparkles, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { track } from '@/lib/analytics/track';
+import { TrackedCtaLink } from '@/components/analytics/TrackedCtaLink';
 import {
   PROMPT_CATEGORIES,
   PROMPT_CATEGORY_LABELS,
@@ -141,87 +134,18 @@ export function PromptsBrowser({ prompts }: { prompts: PromptItem[] }) {
   );
 }
 
-function useCopy(prompt: PromptItem, band: 'pick' | 'list') {
-  const [copied, setCopied] = useState(false);
-  function copy() {
-    navigator.clipboard?.writeText(prompt.prompt).then(
-      () => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1200);
-        // 북극성(prompt_copy) 원천 — /prompts 라이브러리 복사 계측.
-        // tools(category='prompt') 항목이라 content_id 없음 → 식별자는 metadata로.
-        void track('prompt_copy', {
-          prompt_id: prompt.id,
-          label: prompt.title,
-          category: prompt.category,
-          source: `library_${band}`,
-        });
-      },
-      () => {},
-    );
-  }
-  return { copied, copy };
-}
-
 /**
- * 프롬프트 본문 — 접힘 시 3줄로 고정(길이와 무관하게 균일한 카드 리듬).
- * 3줄을 넘칠 때만 더보기/접기 토글 노출. 짧은 프롬프트엔 버튼 없음.
+ * 카드에는 제목 + 압축 설명만. 본문·복사는 상세(/prompts/[slug])로 —
+ * 프롬프트별 URL이 있어야 DM으로 개별 안내·유입이 가능하다.
  */
-function PromptBody({ text }: { text: string }) {
-  const [expanded, setExpanded] = useState(false);
-  const [overflowing, setOverflowing] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const measure = () => {
-      if (expanded) return; // 펼친 상태에선 측정값이 무의미 → 이전 overflowing 유지
-      setOverflowing(el.scrollHeight > el.clientHeight + 1);
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [text, expanded]);
-
-  return (
-    <div className="mb-2">
-      <div
-        ref={ref}
-        className={cn(
-          'text-[13px] text-ink/50 leading-relaxed font-mono bg-muted px-3.5 py-2.5 rounded-lg border border-border whitespace-pre-wrap break-keep',
-          expanded ? '' : 'line-clamp-2',
-        )}
-      >
-        {text}
-      </div>
-      {(overflowing || expanded) && (
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          className="mt-1.5 inline-flex items-center gap-0.5 text-[12px] font-semibold text-ink/45 hover:text-ink/70 transition-colors"
-        >
-          {expanded ? (
-            <>
-              접기 <ChevronUp className="h-3 w-3" />
-            </>
-          ) : (
-            <>
-              더보기 <ChevronDown className="h-3 w-3" />
-            </>
-          )}
-        </button>
-      )}
-    </div>
-  );
-}
-
 function PickCard({ prompt }: { prompt: PromptItem }) {
-  const { copied, copy } = useCopy(prompt, 'pick');
-
   return (
-    <article className="flex flex-col rounded-xl border border-accent-100 bg-white p-4 transition-shadow hover:shadow-[0_2px_12px_rgba(49,130,246,0.08)]">
+    <TrackedCtaLink
+      href={`/prompts/${prompt.slug}`}
+      label="prompt_card"
+      meta={{ prompt_id: prompt.id, slug: prompt.slug, category: prompt.category, band: 'pick' }}
+      className="flex flex-col rounded-xl border border-accent-100 bg-white p-4 transition-shadow hover:shadow-[0_2px_12px_rgba(49,130,246,0.08)]"
+    >
       <div className="flex gap-1.5 flex-wrap mb-1.5">
         <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-accent bg-accent-50 px-2 py-0.5 rounded">
           추천
@@ -235,86 +159,52 @@ function PickCard({ prompt }: { prompt: PromptItem }) {
           </span>
         )}
       </div>
-      <h3 className="text-[15px] font-bold tracking-[-0.02em] leading-snug mb-2 break-keep">
+      <h3 className="text-[15px] font-bold tracking-[-0.02em] leading-snug mb-1.5 break-keep">
         {prompt.title}
       </h3>
-      <div className="text-[12px] text-ink/50 leading-relaxed font-mono bg-muted px-3 py-2 rounded-lg border border-border mb-3 line-clamp-2 whitespace-pre-wrap break-keep">
-        {prompt.prompt}
-      </div>
-      <button
-        type="button"
-        onClick={copy}
-        className="mt-auto self-end inline-flex items-center gap-1 text-xs font-semibold text-accent bg-accent-50 px-2.5 py-1 rounded-md hover:bg-accent-100 transition-colors"
-      >
-        {copied ? (
-          <>
-            <Check className="h-3 w-3" /> 복사됨
-          </>
-        ) : (
-          <>
-            <Copy className="h-3 w-3" /> 복사
-          </>
-        )}
-      </button>
-    </article>
+      {prompt.description && (
+        <p className="text-[13px] text-ink/50 leading-relaxed line-clamp-2 break-keep whitespace-pre-line mb-2">
+          {prompt.description}
+        </p>
+      )}
+      <span className="mt-auto self-end inline-flex items-center gap-0.5 text-xs font-semibold text-accent">
+        자세히 보기 <ChevronRight className="h-3 w-3" />
+      </span>
+    </TrackedCtaLink>
   );
 }
 
 function PromptCard({ prompt }: { prompt: PromptItem }) {
-  const { copied, copy } = useCopy(prompt, 'list');
-
   return (
-    <article className="flex gap-5 py-6 border-b border-border first:pt-0">
+    <TrackedCtaLink
+      href={`/prompts/${prompt.slug}`}
+      label="prompt_card"
+      meta={{ prompt_id: prompt.id, slug: prompt.slug, category: prompt.category, band: 'list' }}
+      className="group flex gap-5 py-6 border-b border-border first:pt-0"
+    >
       <div className="flex-1 min-w-0">
         <div className="flex gap-1.5 flex-wrap mb-2">
           <span className="text-[11px] font-bold text-accent bg-accent-50 px-2 py-0.5 rounded">
             {PROMPT_CATEGORY_LABELS[prompt.category]}
           </span>
-          {prompt.source &&
-            (prompt.sourceUrl ? (
-              <a
-                href={prompt.sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-ink/50 bg-muted px-2 py-0.5 rounded hover:bg-border hover:text-ink transition-colors"
-              >
-                {prompt.source}
-                <ArrowUpRight className="h-3 w-3" />
-              </a>
-            ) : (
-              <span className="text-[11px] font-semibold text-ink/50 bg-muted px-2 py-0.5 rounded">
-                {prompt.source}
-              </span>
-            ))}
+          {prompt.source && (
+            <span className="text-[11px] font-semibold text-ink/50 bg-muted px-2 py-0.5 rounded">
+              {prompt.source}
+            </span>
+          )}
         </div>
-        <h2 className="text-[18px] md:text-xl font-bold tracking-[-0.02em] leading-snug mb-1.5 truncate">
+        <h2 className="text-[18px] md:text-xl font-bold tracking-[-0.02em] leading-snug mb-1.5 truncate group-hover:text-accent transition-colors">
           {prompt.title}
         </h2>
         {prompt.description && (
-          <p className="text-[14px] text-ink/60 leading-relaxed mb-2.5 break-keep whitespace-pre-line">
+          <p className="text-[14px] text-ink/60 leading-relaxed line-clamp-2 break-keep whitespace-pre-line mb-2.5">
             {prompt.description}
           </p>
         )}
-        <PromptBody text={prompt.prompt} />
-        <div className="flex items-center justify-between">
-          <span className="text-[13px] text-ink/40">바로 복사 가능</span>
-          <button
-            type="button"
-            onClick={copy}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-accent bg-accent-50 px-2.5 py-1 rounded-md hover:bg-accent-100 transition-colors"
-          >
-            {copied ? (
-              <>
-                <Check className="h-3 w-3" /> 복사됨
-              </>
-            ) : (
-              <>
-                <Copy className="h-3 w-3" /> 복사
-              </>
-            )}
-          </button>
-        </div>
+        <span className="inline-flex items-center gap-0.5 text-[13px] font-semibold text-accent">
+          프롬프트 보기 <ChevronRight className="h-3.5 w-3.5" />
+        </span>
       </div>
-    </article>
+    </TrackedCtaLink>
   );
 }
