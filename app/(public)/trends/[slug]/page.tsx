@@ -1,3 +1,4 @@
+import { renderInline } from '@/lib/inline-md';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
@@ -111,7 +112,7 @@ export default async function TrendDetailPage({
                   {body.forWho.map((w, i) => (
                     <div key={i} className="rounded-xl border border-border bg-white p-4">
                       <div className="text-sm font-bold text-accent mb-1">{w.role}</div>
-                      <div className="text-[13.5px] text-ink/70 leading-relaxed break-keep">{w.why}</div>
+                      <div className="text-[13.5px] text-ink/70 leading-relaxed break-keep">{renderInline(w.why)}</div>
                     </div>
                   ))}
                 </div>
@@ -128,7 +129,7 @@ export default async function TrendDetailPage({
                       <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-50 text-[11px] font-bold text-accent">
                         {i + 1}
                       </span>
-                      <span className="text-[15px] text-ink/80 leading-relaxed break-keep">{k}</span>
+                      <span className="text-[15px] text-ink/80 leading-relaxed break-keep">{renderInline(k)}</span>
                     </li>
                   ))}
                 </ul>

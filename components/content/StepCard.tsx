@@ -1,3 +1,4 @@
+import { renderInline } from '@/lib/inline-md';
 import type { StepCard as StepCardType } from '@/types/content';
 import { PromptInline } from './PromptInline';
 
@@ -24,19 +25,13 @@ export function StepCard({
           <div className="text-[11px] font-bold text-ink/50 uppercase tracking-[0.06em] mb-1.5">
             사람이 할 일
           </div>
-          <p
-            className="text-sm text-ink/80 leading-[1.6]"
-            dangerouslySetInnerHTML={{ __html: step.human }}
-          />
+          <p className="text-sm text-ink/80 leading-[1.6]">{renderInline(step.human)}</p>
         </div>
         <div className="bg-muted rounded-xl p-4">
           <div className="text-[11px] font-bold text-ink/50 uppercase tracking-[0.06em] mb-1.5">
             AI에게 시킬 것
           </div>
-          <p
-            className="text-sm text-ink/80 leading-[1.6]"
-            dangerouslySetInnerHTML={{ __html: step.ai }}
-          />
+          <p className="text-sm text-ink/80 leading-[1.6]">{renderInline(step.ai)}</p>
         </div>
       </div>
 
@@ -47,10 +42,7 @@ export function StepCard({
           {step.goodResult && (
             <div className="bg-muted rounded-xl p-4 text-sm leading-[1.6]">
               <div className="text-xs font-bold text-ink/50 mb-2">✓ 잘된 것</div>
-              <div
-                className="text-ink/80 break-keep"
-                dangerouslySetInnerHTML={{ __html: step.goodResult }}
-              />
+              <div className="text-ink/80 break-keep">{renderInline(step.goodResult)}</div>
             </div>
           )}
           {step.badResult && (
@@ -58,10 +50,7 @@ export function StepCard({
               <div className="text-xs font-bold text-ink/40 mb-2">
                 ✗ 별로인 것
               </div>
-              <div
-                className="text-ink/80 break-keep"
-                dangerouslySetInnerHTML={{ __html: step.badResult }}
-              />
+              <div className="text-ink/80 break-keep">{renderInline(step.badResult)}</div>
             </div>
           )}
         </div>

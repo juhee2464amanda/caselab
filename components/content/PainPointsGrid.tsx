@@ -1,3 +1,4 @@
+import { renderInline } from '@/lib/inline-md';
 import type { PainPoint } from '@/types/content';
 
 export function PainPointsGrid({ items }: { items: PainPoint[] }) {
@@ -12,8 +13,8 @@ export function PainPointsGrid({ items }: { items: PainPoint[] }) {
             {p.title}
           </div>
           <div className="text-[13.5px] text-ink/60 leading-[1.65] break-keep">
-            {p.symptom} <strong className="text-ink font-semibold">원인</strong>:{' '}
-            {p.rootCause}
+            {renderInline(p.symptom)} <strong className="text-ink font-semibold">원인</strong>:{' '}
+            {renderInline(p.rootCause)}
           </div>
         </div>
       ))}
