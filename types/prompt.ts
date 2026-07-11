@@ -18,6 +18,8 @@ export interface PromptItem {
   slug: string;
   /** 카드 제목 (tools.name) */
   title: string;
+  /** 복사 박스 밖에 노출되는 설명 (tools.description) — 복사 대상이 아님 */
+  description?: string;
   /** 복사 대상 프롬프트 본문 (body.prompt) */
   prompt: string;
   /** 사고하기/만들기/검증하기/다듬기 (body.promptCategory) */

@@ -290,6 +290,11 @@ function PromptCard({ prompt }: { prompt: PromptItem }) {
         <h2 className="text-[18px] md:text-xl font-bold tracking-[-0.02em] leading-snug mb-1.5 break-keep">
           {prompt.title}
         </h2>
+        {prompt.description && (
+          <p className="text-[14px] text-ink/60 leading-relaxed mb-2.5 break-keep whitespace-pre-line">
+            {prompt.description}
+          </p>
+        )}
         <PromptBody text={prompt.prompt} />
         <div className="flex items-center justify-between">
           <span className="text-[13px] text-ink/40">바로 복사 가능</span>
