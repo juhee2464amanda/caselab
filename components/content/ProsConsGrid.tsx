@@ -1,3 +1,5 @@
+import { renderInline } from '@/lib/inline-md';
+
 export function ProsConsGrid({
   pros,
   cons,
@@ -18,7 +20,7 @@ export function ProsConsGrid({
               className="text-[14.5px] leading-[1.65] text-ink/80 flex gap-2.5 items-start break-keep"
             >
               <span className="w-1 h-1 rounded-full bg-ink/40 flex-shrink-0 mt-2.5" />
-              <span>{p}</span>
+              <span>{renderInline(p)}</span>
             </li>
           ))}
         </ul>
@@ -34,7 +36,7 @@ export function ProsConsGrid({
               className="text-[14.5px] leading-[1.65] text-ink/80 flex gap-2.5 items-start break-keep"
             >
               <span className="w-1 h-1 rounded-full bg-ink/40 flex-shrink-0 mt-2.5" />
-              <span>{c}</span>
+              <span>{renderInline(c)}</span>
             </li>
           ))}
         </ul>

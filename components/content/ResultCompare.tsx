@@ -1,3 +1,5 @@
+import { renderInline } from '@/lib/inline-md';
+
 interface Props {
   good: string;
   bad: string;
@@ -10,13 +12,13 @@ export function ResultCompare({ good, bad }: Props) {
         <div className="text-[11px] font-semibold uppercase text-green-700 tracking-wider mb-2">
           잘된 결과
         </div>
-        <p className="text-sm text-ink/85 leading-relaxed whitespace-pre-wrap">{good}</p>
+        <p className="text-sm text-ink/85 leading-relaxed whitespace-pre-wrap">{renderInline(good)}</p>
       </article>
       <article className="rounded-md border-2 border-red-200 bg-white p-4">
         <div className="text-[11px] font-semibold uppercase text-red-700 tracking-wider mb-2">
           별로인 결과
         </div>
-        <p className="text-sm text-ink/85 leading-relaxed whitespace-pre-wrap">{bad}</p>
+        <p className="text-sm text-ink/85 leading-relaxed whitespace-pre-wrap">{renderInline(bad)}</p>
       </article>
     </div>
   );

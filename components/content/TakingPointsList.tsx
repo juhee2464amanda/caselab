@@ -1,3 +1,4 @@
+import { renderInline } from '@/lib/inline-md';
 import type { TakingPoint } from '@/types/content';
 
 export function TakingPointsList({ items }: { items: TakingPoint[] }) {
@@ -16,7 +17,7 @@ export function TakingPointsList({ items }: { items: TakingPoint[] }) {
               {tp.title}
             </div>
             <div className="text-sm text-ink/60 leading-[1.65] mb-2.5 break-keep">
-              {tp.description}
+              {renderInline(tp.description)}
             </div>
             {tp.action && (
               <div className="inline-block text-[12.5px] font-semibold text-ink/60 bg-muted px-2.5 py-1 rounded-md">

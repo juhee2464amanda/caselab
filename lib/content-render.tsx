@@ -1,3 +1,4 @@
+import { renderInline } from '@/lib/inline-md';
 import type * as React from 'react';
 import type { Block } from '@/types/content';
 import { IntentBox } from '@/components/content/IntentBox';
@@ -19,7 +20,7 @@ export function renderBlock(
     case 'text':
       return (
         <p key={key} className="text-[16px] leading-[1.75] text-ink/85 my-4 whitespace-pre-wrap">
-          {block.markdown}
+          {renderInline(block.markdown)}
         </p>
       );
     case 'heading':
@@ -56,7 +57,7 @@ export function renderBlock(
             {block.items.map((it, i) => (
               <li key={i} className="flex gap-2 text-sm text-ink/85">
                 <span className="text-accent">✓</span>
-                {it}
+                <span>{renderInline(it)}</span>
               </li>
             ))}
           </ul>

@@ -1,3 +1,4 @@
+import { renderInline } from '@/lib/inline-md';
 import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
 import { ActionsBar } from '@/components/content/ActionsBar';
@@ -98,7 +99,7 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
           <div className="space-y-3.5">
             {body.about.paragraphs.map((p, i) => (
               <p key={i} className="text-[15.5px] leading-[1.75] text-ink/80 max-w-[680px] break-keep">
-                {p}
+                {renderInline(p)}
               </p>
             ))}
           </div>
@@ -113,7 +114,7 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
               <div key={i} className="p-4 border border-border rounded-[10px] bg-white">
                 {w.icon && <span className="text-lg block mb-1.5">{w.icon}</span>}
                 <div className="text-sm font-bold tracking-[-0.02em] mb-1 break-keep">{w.title}</div>
-                <div className="text-[13px] text-ink/60 leading-relaxed break-keep">{w.desc}</div>
+                <div className="text-[13px] text-ink/60 leading-relaxed break-keep">{renderInline(w.desc)}</div>
               </div>
             ))}
           </div>
@@ -131,7 +132,7 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-[15px] font-bold tracking-[-0.02em] mb-1 break-keep">{f.title}</div>
-                  <div className="text-[13.5px] text-ink/60 leading-relaxed break-keep">{f.desc}</div>
+                  <div className="text-[13.5px] text-ink/60 leading-relaxed break-keep">{renderInline(f.desc)}</div>
                   {f.image && (
                     <figure className="mt-3 rounded-xl border border-border overflow-hidden bg-muted">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -165,7 +166,7 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
                   {p.name}
                 </div>
                 <div className="text-lg font-extrabold tracking-[-0.02em] mb-2 break-keep">{p.amount}</div>
-                <div className="text-[13px] text-ink/60 leading-relaxed break-keep">{p.includes}</div>
+                <div className="text-[13px] text-ink/60 leading-relaxed break-keep">{renderInline(p.includes)}</div>
               </div>
             ))}
           </div>

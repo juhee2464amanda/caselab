@@ -1,3 +1,4 @@
+import { renderInline } from '@/lib/inline-md';
 import type { FrameworkReference, StepCard } from '@/types/content';
 
 export function FrameworkRefSection({
@@ -17,7 +18,7 @@ export function FrameworkRefSection({
           {reference.name}
         </div>
         <p className="text-sm text-ink/60 leading-[1.65] mb-4 break-keep">
-          {reference.description}
+          {renderInline(reference.description)}
         </p>
         {reference.sourceUrl && (
           <div className="border-t border-border pt-3.5">
