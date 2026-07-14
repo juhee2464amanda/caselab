@@ -87,11 +87,31 @@ export const ChecklistBlockSchema = z.object({
 });
 
 // 이미지 블록 — 운영자가 본문에 직접 삽입(업로드/URL). url은 공개 이미지 주소.
+// size: 렌더 폭(small≈320·medium≈480·full=본문폭). 기본 full. admin과 동일.
 export const ImageBlockSchema = z.object({
   type: z.literal('image'),
   url: z.string().min(1),
   alt: z.string().optional(),
   caption: z.string().optional(),
+  size: z.enum(['small', 'medium', 'full']).optional(),
+  align: z.enum(['left', 'center', 'right']).optional(), // small·medium일 때만 의미(full은 무시)
+});
+
+// 갤러리(카드뉴스) — 여러 이미지를 좌우로 넘겨 본다. admin types/content.ts와 동일.
+export const GalleryBlockSchema = z.object({
+  type: z.literal('gallery'),
+  images: z.array(z.object({ url: z.string().min(1), caption: z.string().optional() })).min(1),
+});
+
+// 북마크 — 링크 카드. title/description/image는 OG 메타 자동. admin과 동일.
+export const BookmarkBlockSchema = z.object({
+  type: z.literal('bookmark'),
+  url: z.string().min(1),
+  title: z.string().optional(),
+  description: z.string().optional(),
+  image: z.string().optional(),
+  favicon: z.string().optional(),
+  siteName: z.string().optional(),
 });
 
 // FailureSection는 내부에 BlockSchema를 가짐 → lazy 사용
@@ -108,6 +128,8 @@ export type Block =
   | z.infer<typeof ContextCardBlockSchema>
   | z.infer<typeof ChecklistBlockSchema>
   | z.infer<typeof ImageBlockSchema>
+  | z.infer<typeof GalleryBlockSchema>
+  | z.infer<typeof BookmarkBlockSchema>
   | { type: 'failure'; title: string; blocks: Block[] };
 
 export const BlockSchema: z.ZodType<Block> = z.lazy(() =>
@@ -124,6 +146,8 @@ export const BlockSchema: z.ZodType<Block> = z.lazy(() =>
     ContextCardBlockSchema,
     ChecklistBlockSchema,
     ImageBlockSchema,
+    GalleryBlockSchema,
+    BookmarkBlockSchema,
     z.object({
       type: z.literal('failure'),
       title: z.string().min(1),
