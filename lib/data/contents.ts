@@ -69,8 +69,17 @@ function heroFromContent(c: {
  * - active=true + 예약 노출 창(featured_from<=now<=featured_until, null=상시) 필터.
  * - 슬롯 순서대로 정렬. content_id는 contents(케이스/트렌드), tool_id는 tools(도구/프롬프트/가이드)를 가리킴.
  *   둘 다 published인 것만 노출. HeroItem으로 정규화해 캐러셀에 넘긴다.
- * - 비어있거나(미배정/전부 미발행) Supabase 미구성이면 contents.curated 폴백.
+ * - 비어있으면(미배정/전부 미발행) contents.curated → 그래도 비면 최신 발행 콘텐츠 순으로 폴백.
+ *   → 발행 콘텐츠가 하나라도 있으면 히어로는 절대 비지 않는다. (admin 큐레이션은 항상 우선)
+ * - Supabase 미구성이면 dev seed 폴백.
  */
+async function heroCuratedFallback(limit: number): Promise<HeroItem[]> {
+  const curated = await listPublishedContents({ curated: true, limit });
+  if (curated.length) return curated.map(heroFromContent);
+  // 큐레이션 미지정이어도 발행 콘텐츠가 있으면 최신순으로 노출 (빈 히어로 방지)
+  return (await listPublishedContents({ limit })).map(heroFromContent);
+}
+
 export async function listFeaturedContents(limit = 5): Promise<HeroItem[]> {
   if (!isSupabaseConfigured()) return devFallback({ curated: true, limit }).map(heroFromContent);
   const supabase = await createSupabaseServerClient();
@@ -90,7 +99,7 @@ export async function listFeaturedContents(limit = 5): Promise<HeroItem[]> {
     .limit(limit);
   if (error) {
     console.warn('[listFeaturedContents]', error.message);
-    return (await listPublishedContents({ curated: true, limit })).map(heroFromContent);
+    return heroCuratedFallback(limit);
   }
   const items: HeroItem[] = ((data ?? []) as unknown as FeaturedJoinRow[])
     .map((r): HeroItem | null => {
@@ -102,7 +111,7 @@ export async function listFeaturedContents(limit = 5): Promise<HeroItem[]> {
       return null;
     })
     .filter((x): x is HeroItem => x !== null);
-  return items.length ? items : (await listPublishedContents({ curated: true, limit })).map(heroFromContent);
+  return items.length ? items : heroCuratedFallback(limit);
 }
 
 export async function getContentBySlug(slug: string): Promise<ContentRow | null> {
