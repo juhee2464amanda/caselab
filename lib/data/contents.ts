@@ -1,5 +1,5 @@
 import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
-import type { ContentRow } from '@/types/content';
+import type { ContentRow, HeroItem, JobTag } from '@/types/content';
 import { caseSeed, applyCaseFilters } from './dev-seed';
 
 const PUBLIC_FIELDS = 'id, slug, track, title, summary, body, job_tags, persona_coverage, read_min, apply_min, status, curated, thumbnail_url, author_quote, view_count, published_at, created_at, updated_at';
@@ -41,34 +41,77 @@ export async function listPublishedContents(opts: ListOpts = {}): Promise<Conten
   return rows.length ? rows : devFallback(opts);
 }
 
+// featured_contents 조인 행 — content_id(→contents) 또는 tool_id(→tools) 중 하나가 채워짐.
+type FeaturedContentJoin = {
+  slug: string; track: 'case' | 'trend'; title: string; summary: string | null;
+  thumbnail_url: string | null; read_min: number; job_tags: JobTag[] | null; status: string;
+};
+type FeaturedToolJoin = {
+  slug: string; category: string; name: string; description: string | null;
+  thumbnail_url: string | null; status: string;
+};
+type FeaturedJoinRow = {
+  slot: number; content_id: string | null; tool_id: string | null;
+  contents: FeaturedContentJoin | null; tools: FeaturedToolJoin | null;
+};
+
+const TOOL_TRACK: Record<string, HeroItem['track']> = { tool: 'tool', prompt: 'prompt', guide: 'guide' };
+
+function heroFromContent(c: {
+  slug: string; track: 'case' | 'trend'; title: string; summary: string | null;
+  thumbnail_url: string | null; read_min: number; job_tags: JobTag[] | null;
+}): HeroItem {
+  return { slug: c.slug, title: c.title, summary: c.summary, track: c.track, thumbnail_url: c.thumbnail_url, read_min: c.read_min, job_tags: c.job_tags ?? [] };
+}
+
 /**
  * Hero 큐레이션 — admin이 featured_contents(slot_type='hero')에 배정한 슬롯을 읽는다.
  * - active=true + 예약 노출 창(featured_from<=now<=featured_until, null=상시) 필터.
- * - slot 순서대로 정렬, contents는 published만(!inner).
- * - 비어있거나(예약 만료/미배정) Supabase 미구성이면 contents.curated 폴백.
- *   → admin 큐레이션이 비로소 공개 Hero에 반영됨 (이전엔 curated 플래그만 봤음).
+ * - 슬롯 순서대로 정렬. content_id는 contents(케이스/트렌드), tool_id는 tools(도구/프롬프트/가이드)를 가리킴.
+ *   둘 다 published인 것만 노출. HeroItem으로 정규화해 캐러셀에 넘긴다.
+ * - 비어있으면(미배정/전부 미발행) contents.curated → 그래도 비면 최신 발행 콘텐츠 순으로 폴백.
+ *   → 발행 콘텐츠가 하나라도 있으면 히어로는 절대 비지 않는다. (admin 큐레이션은 항상 우선)
+ * - Supabase 미구성이면 dev seed 폴백.
  */
-export async function listFeaturedContents(limit = 5): Promise<ContentRow[]> {
-  if (!isSupabaseConfigured()) return devFallback({ curated: true, limit });
+async function heroCuratedFallback(limit: number): Promise<HeroItem[]> {
+  const curated = await listPublishedContents({ curated: true, limit });
+  if (curated.length) return curated.map(heroFromContent);
+  // 큐레이션 미지정이어도 발행 콘텐츠가 있으면 최신순으로 노출 (빈 히어로 방지)
+  return (await listPublishedContents({ limit })).map(heroFromContent);
+}
+
+export async function listFeaturedContents(limit = 5): Promise<HeroItem[]> {
+  if (!isSupabaseConfigured()) return devFallback({ curated: true, limit }).map(heroFromContent);
   const supabase = await createSupabaseServerClient();
   const nowIso = new Date().toISOString();
   const { data, error } = await supabase
     .from('featured_contents')
-    .select(`slot, contents:content_id!inner(${PUBLIC_FIELDS})`)
+    .select(
+      `slot, content_id, tool_id,
+       contents:content_id(slug, track, title, summary, thumbnail_url, read_min, job_tags, status),
+       tools:tool_id(slug, category, name, description, thumbnail_url, status)`,
+    )
     .eq('slot_type', 'hero')
     .eq('active', true)
-    .eq('contents.status', 'published')
     .or(`featured_from.is.null,featured_from.lte.${nowIso}`)
     .or(`featured_until.is.null,featured_until.gte.${nowIso}`)
     .order('slot', { ascending: true })
     .limit(limit);
   if (error) {
     console.warn('[listFeaturedContents]', error.message);
-    return listPublishedContents({ curated: true, limit });
+    return heroCuratedFallback(limit);
   }
-  const rows = (data ?? []) as unknown as Array<{ contents: ContentRow }>;
-  const contents = rows.map((r) => r.contents).filter(Boolean);
-  return contents.length ? contents : listPublishedContents({ curated: true, limit });
+  const items: HeroItem[] = ((data ?? []) as unknown as FeaturedJoinRow[])
+    .map((r): HeroItem | null => {
+      if (r.contents && r.contents.status === 'published') return heroFromContent(r.contents);
+      if (r.tools && r.tools.status === 'published') {
+        const t = r.tools;
+        return { slug: t.slug, title: t.name, summary: t.description, track: TOOL_TRACK[t.category] ?? 'tool', thumbnail_url: t.thumbnail_url, read_min: null, job_tags: [] };
+      }
+      return null;
+    })
+    .filter((x): x is HeroItem => x !== null);
+  return items.length ? items : heroCuratedFallback(limit);
 }
 
 export async function getContentBySlug(slug: string): Promise<ContentRow | null> {

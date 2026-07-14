@@ -289,6 +289,18 @@ export interface ContentRow {
   updated_at: string;
 }
 
+// 홈 히어로 캐러셀 아이템 — 콘텐츠(케이스/트렌드) + 도구/프롬프트/가이드 공통 표현.
+// admin 큐레이션이 featured_contents에 contents 또는 tools를 배치하면 여기로 정규화된다.
+export interface HeroItem {
+  slug: string;
+  title: string;
+  summary: string | null;
+  track: 'case' | 'trend' | 'tool' | 'prompt' | 'guide';
+  thumbnail_url: string | null;
+  read_min: number | null;
+  job_tags: JobTag[];
+}
+
 // ───────────────────────────────────────────────────────────
 // 직무 한글 라벨
 // ───────────────────────────────────────────────────────────

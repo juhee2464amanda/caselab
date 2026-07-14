@@ -61,6 +61,12 @@
   }
 }
 
+/* 한글 줄바꿈 — 단어(어절) 단위로 끊고, 긴 영문/URL은 강제 줄바꿈 */
+.keepall {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
 /* Hero carousel */
 .hero-slide {
   scroll-snap-align: start;

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import type { ContentRow } from '@/types/content';
+import type { HeroItem } from '@/types/content';
 import { track } from '@/lib/analytics/track';
 
 /**
@@ -14,10 +14,7 @@ import { track } from '@/lib/analytics/track';
  */
 
 interface Props {
-  items: Pick<
-    ContentRow,
-    'slug' | 'title' | 'summary' | 'track' | 'thumbnail_url' | 'read_min' | 'job_tags'
-  >[];
+  items: HeroItem[];
 }
 
 const JOB_LABEL: Record<string, string> = {
@@ -28,6 +25,39 @@ const JOB_LABEL: Record<string, string> = {
   strategy: '전략',
   analysis: '데이터/분석',
 };
+
+// 트랙별 라벨/경로 — 케이스·트렌드 + 도구·프롬프트·가이드 (큐레이션 폴리모픽 대응)
+const TRACK_LABEL: Record<HeroItem['track'], string> = {
+  case: '실전 케이스',
+  trend: 'AI 트렌드',
+  tool: 'AI 도구',
+  prompt: '바로 쓰는 프롬프트',
+  guide: '공식 가이드',
+};
+const TRACK_PATH: Record<HeroItem['track'], string> = {
+  case: 'cases',
+  trend: 'trends',
+  tool: 'tools',
+  prompt: 'prompts',
+  guide: 'guides',
+};
+
+// 썸네일 — 없거나 깨진 URL이면 브랜드 플레이스홀더로 폴백 (broken "?" 방지)
+function HeroThumb({ src }: { src: string | null }) {
+  const [broken, setBroken] = useState(false);
+  return (
+    <div className="w-full md:w-[500px] aspect-[16/9] md:aspect-[5/3] rounded-2xl overflow-hidden bg-muted shrink-0">
+      {src && !broken ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt="" onError={() => setBroken(true)} className="w-full h-full object-cover" />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent/10 to-muted">
+          <span className="font-serif text-2xl font-bold text-ink/25 tracking-tight">Caselab</span>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function HeroCarousel({ items }: Props) {
   const [idx, setIdx] = useState(0);
@@ -75,10 +105,10 @@ export function HeroCarousel({ items }: Props) {
             style={{ transform: `translateX(-${idx * 100}%)` }}
           >
             {items.map((it, i) => {
-              const trackLabel = it.track === 'case' ? '실전 케이스' : 'AI 트렌드';
+              const trackLabel = TRACK_LABEL[it.track] ?? 'AI 트렌드';
               const job = it.job_tags?.[0] ? JOB_LABEL[it.job_tags[0]] : '';
               const eye = job ? `${trackLabel} · ${job}` : trackLabel;
-              const href = `/${it.track === 'case' ? 'cases' : 'trends'}/${it.slug}`;
+              const href = `/${TRACK_PATH[it.track] ?? 'trends'}/${it.slug}`;
 
               return (
                 <div key={it.slug} className="min-w-full">
@@ -98,7 +128,7 @@ export function HeroCarousel({ items }: Props) {
                       <span className="inline-block text-[11px] font-bold text-accent bg-accent/10 px-2.5 py-[3px] rounded mb-3.5 tracking-tight">
                         {eye}
                       </span>
-                      <h2 className="text-2xl md:text-[32px] font-extrabold leading-[1.3] tracking-tight mb-2.5 line-clamp-1 keepall">
+                      <h2 className="text-2xl md:text-[32px] font-extrabold leading-[1.3] tracking-tight mb-2.5 line-clamp-2 keepall">
                         {it.title}
                       </h2>
                       {it.summary && (
@@ -106,9 +136,11 @@ export function HeroCarousel({ items }: Props) {
                           {it.summary}
                         </p>
                       )}
-                      <div className="text-[13px] text-ink/50 flex items-center gap-1">
-                        <span>읽는데 {it.read_min}분</span>
-                      </div>
+                      {typeof it.read_min === 'number' && (
+                        <div className="text-[13px] text-ink/50 flex items-center gap-1">
+                          <span>읽는데 {it.read_min}분</span>
+                        </div>
+                      )}
                       {/* arrows */}
                       {total > 1 && (
                         <div className="flex gap-2 mt-4">
@@ -137,15 +169,7 @@ export function HeroCarousel({ items }: Props) {
                         </div>
                       )}
                     </div>
-                    <div className="w-full md:w-[500px] aspect-[16/9] md:aspect-[5/3] rounded-2xl overflow-hidden bg-muted shrink-0">
-                      {it.thumbnail_url && (
-                        <img
-                          src={it.thumbnail_url}
-                          alt=""
-                          className="w-full h-full object-cover"
-                        />
-                      )}
-                    </div>
+                    <HeroThumb src={it.thumbnail_url} />
                   </Link>
                 </div>
               );
