@@ -44,7 +44,6 @@ export function FreeBookBanner({
             as="p"
             k="home.banner.desc"
             value={desc}
-            multiline
             className="text-sm text-white/70 keepall"
           />
         </div>

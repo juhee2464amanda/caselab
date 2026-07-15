@@ -37,7 +37,8 @@
       Object.keys(edits[contentId]).forEach(function(field) {
         var value = edits[contentId][field];
         document.querySelectorAll('[data-content-id="' + contentId + '"][data-field="' + field + '"]').forEach(function(el) {
-          if (el.textContent !== value) el.textContent = value;
+          // innerText로 반영해야 줄바꿈(\n)이 <br>로 렌더링됨
+          if (el.innerText !== value) el.innerText = value;
         });
       });
     });
@@ -58,10 +59,13 @@
       el.setAttribute('contenteditable', 'true');
       el.setAttribute('spellcheck', 'false');
       el.addEventListener('blur', function() {
-        saveEdit(this.dataset.contentId, this.dataset.field, this.textContent.trim());
+        // innerText로 저장해야 줄바꿈(\n)이 보존됨
+        saveEdit(this.dataset.contentId, this.dataset.field, this.innerText.trim());
       });
       el.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); this.blur(); }
+        // Enter → 줄바꿈 삽입 (기존엔 편집 종료됐음). Esc → 편집 종료
+        if (e.key === 'Enter') { e.preventDefault(); document.execCommand('insertLineBreak'); }
+        else if (e.key === 'Escape') { e.preventDefault(); this.blur(); }
       });
     });
 
