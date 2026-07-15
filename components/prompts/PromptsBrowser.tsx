@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { Check, Sparkles, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { stripInlineMd } from '@/lib/inline-md';
 import { TrackedCtaLink } from '@/components/analytics/TrackedCtaLink';
 import {
   PROMPT_CATEGORIES,
@@ -181,7 +182,7 @@ function PickCard({ prompt }: { prompt: PromptItem }) {
       </h3>
       {prompt.description && (
         <p className="text-[13px] text-ink/50 leading-relaxed line-clamp-2 break-keep whitespace-pre-line mb-2">
-          {prompt.description}
+          {stripInlineMd(prompt.description)}
         </p>
       )}
       <span className="mt-auto self-end inline-flex items-center gap-0.5 text-xs font-semibold text-accent">
@@ -215,7 +216,7 @@ function PromptCard({ prompt }: { prompt: PromptItem }) {
         </h2>
         {prompt.description && (
           <p className="text-[14px] text-ink/60 leading-relaxed line-clamp-2 break-keep whitespace-pre-line mb-2.5">
-            {prompt.description}
+            {stripInlineMd(prompt.description)}
           </p>
         )}
         <span className="inline-flex items-center gap-0.5 text-[13px] font-semibold text-accent">

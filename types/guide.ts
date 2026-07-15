@@ -70,4 +70,13 @@ export interface GuideItem {
   thumbColor?: string;
   /** 링크 라벨 (예: "docs.anthropic.com") */
   linkLabel?: string;
+  /** 상세 본문 (body.bodyRich) — 마커 리치 텍스트. 있으면 카드가 내부 상세로 링크 */
+  bodyRich?: string;
+  /** 상세 참고 이미지 (body.images) */
+  images?: { url: string; caption?: string }[];
+}
+
+/** 내부 상세페이지로 열 만한 본문(리치 텍스트/이미지)이 있는가 */
+export function guideHasDetail(g: Pick<GuideItem, 'bodyRich' | 'images'>): boolean {
+  return !!(g.bodyRich?.trim() || (g.images && g.images.length > 0));
 }

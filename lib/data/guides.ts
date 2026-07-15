@@ -19,6 +19,8 @@ type ToolGuideRow = {
     thumbBg?: string;
     thumbColor?: string;
     linkLabel?: string;
+    bodyRich?: string;
+    images?: { url: string; caption?: string }[];
   } | null;
 };
 
@@ -47,6 +49,8 @@ function mapGuideRow(r: ToolGuideRow): GuideItem {
     thumbBg: b.thumbBg,
     thumbColor: b.thumbColor,
     linkLabel: b.linkLabel,
+    bodyRich: b.bodyRich,
+    images: Array.isArray(b.images) ? b.images.filter((im) => im && typeof im.url === 'string' && im.url) : undefined,
   };
 }
 
@@ -65,4 +69,23 @@ export async function listGuides(): Promise<GuideItem[]> {
   }
   const rows = ((data ?? []) as unknown as ToolGuideRow[]).map(mapGuideRow);
   return rows.length ? rows : IS_DEV ? guideSeed : [];
+}
+
+export async function getGuideBySlug(slug: string): Promise<GuideItem | null> {
+  const devHit = () => (IS_DEV ? guideSeed.find((g) => g.slug === slug) ?? null : null);
+  if (!isSupabaseConfigured()) return devHit();
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from('tools')
+    .select('id, slug, name, description, url, body')
+    .in('category', ['guide', 'context-card'])
+    .eq('slug', slug)
+    .eq('status', 'published')
+    .maybeSingle();
+  if (error) {
+    console.warn('[getGuideBySlug]', error.message);
+    return devHit();
+  }
+  const row = data as unknown as ToolGuideRow | null;
+  return row ? mapGuideRow(row) : devHit();
 }

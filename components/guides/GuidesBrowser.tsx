@@ -1,12 +1,14 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   GUIDE_CATEGORIES,
   GUIDE_TAB_LABELS,
   GUIDE_SECTIONS,
+  guideHasDetail,
   type GuideCategory,
   type GuideItem,
   type GuideSourceType,
@@ -110,13 +112,12 @@ function TabButton({
 }
 
 function GuideCard({ guide }: { guide: GuideItem }) {
-  return (
-    <a
-      href={guide.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group block w-[240px] sm:w-[264px] shrink-0 snap-start border border-border rounded-[10px] overflow-hidden bg-white transition-all hover:border-accent hover:shadow-[0_4px_14px_rgba(49,130,246,0.06)] hover:-translate-y-px"
-    >
+  // 리치 본문/이미지가 있으면 내부 상세로, 없으면 기존처럼 외부 원문으로 바로 연결.
+  const detail = guideHasDetail(guide);
+  const cardClass =
+    'group block w-[240px] sm:w-[264px] shrink-0 snap-start border border-border rounded-[10px] overflow-hidden bg-white transition-all hover:border-accent hover:shadow-[0_4px_14px_rgba(49,130,246,0.06)] hover:-translate-y-px';
+  const inner = (
+    <>
       <div
         className="h-20 flex items-center justify-center px-3.5 overflow-hidden"
         style={{ background: guide.thumbBg ?? '#f2f4f6' }}
@@ -150,6 +151,16 @@ function GuideCard({ guide }: { guide: GuideItem }) {
           </span>
         )}
       </div>
+    </>
+  );
+
+  return detail ? (
+    <Link href={`/guides/${guide.slug}`} className={cardClass}>
+      {inner}
+    </Link>
+  ) : (
+    <a href={guide.url} target="_blank" rel="noopener noreferrer" className={cardClass}>
+      {inner}
     </a>
   );
 }
