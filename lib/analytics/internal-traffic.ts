@@ -11,6 +11,12 @@
  *
  * 판별은 /api/analytics/internal(서버)에서 수행 — allowlist를 번들에 노출하지 않음.
  * 결과는 userId 단위 메모이즈(로그인/로그아웃으로 사용자가 바뀌면 재판별).
+ *
+ * 레이스 주의: 로그인 직후 첫 pageview에서는 클라이언트에 세션이 있어도(getSession)
+ * 서버 쿠키가 아직 전파되지 않아 /api/analytics/internal이 false를 줄 수 있다.
+ * 이 false를 영구 캐시하면 운영자 세션 전체가 새므로(§18.21 버그), 긍정(true)만
+ * 캐시하고 부정(false)은 캐시를 비워 다음 이벤트에서 재판별한다. in-flight 프라미스는
+ * 그대로 공유되어 동시 다발 pageview가 요청을 중복 발사하지는 않는다.
  */
 
 let cached: { userId: string; promise: Promise<boolean> } | null = null;
@@ -27,13 +33,53 @@ export function isInternalTraffic(
     .then((res) => (res.ok ? res.json() : { internal: false }))
     .then((data: { internal?: boolean }) => {
       const internal = Boolean(data?.internal);
-      if (internal && typeof window.gtag === 'function') {
-        window.gtag('set', { traffic_type: 'internal' });
+      if (internal) {
+        if (typeof window.gtag === 'function') {
+          window.gtag('set', { traffic_type: 'internal' });
+        }
+      } else if (cached?.userId === userId) {
+        // 세션 전파 전 false일 수 있음 — 캐시 비워 다음 이벤트에서 재판별
+        cached = null;
       }
       return internal;
     })
-    .catch(() => false);
+    .catch(() => {
+      if (cached?.userId === userId) cached = null;
+      return false;
+    });
 
   cached = { userId, promise };
   return promise;
+}
+
+/**
+ * 로그인 없이도 판정하는 내부(운영자) 컨텍스트 제외 — §18.21.
+ *
+ * 로그인 기반 제외(isInternalTraffic)는 "caselab.kr에 로그인된 세션"에서만 작동해,
+ * 프리뷰(*.vercel.app)·로그아웃·시크릿·localhost 등 세션 없는 맥락의 운영자
+ * 트래픽을 못 거른다. 이를 origin/플래그로 보강한다.
+ *
+ *  - Layer 1: 실서비스 도메인(PROD_HOSTS)이 아니면 제외. 진짜 방문자는 caselab.kr로만
+ *    들어오므로, 프리뷰·localhost·vercel.app 발화는 정의상 운영자/개발이다.
+ *  - Layer 2: opt-out 플래그. `?cl_optout=1` 방문 시 localStorage에 저장(로그아웃해도
+ *    유지)되어 이후 해당 브라우저의 실도메인 로그아웃 방문도 제외. `?cl_optout=0`로 해제.
+ */
+const PROD_HOSTS = new Set(['caselab.kr', 'www.caselab.kr']);
+const OPTOUT_KEY = 'cl_optout';
+
+export function isExcludedContext(): boolean {
+  if (typeof window === 'undefined') return false;
+
+  // Layer 2 — opt-out 플래그 (URL 파라미터로 토글, localStorage에 영속)
+  try {
+    const flag = new URL(window.location.href).searchParams.get('cl_optout');
+    if (flag === '1') localStorage.setItem(OPTOUT_KEY, '1');
+    else if (flag === '0') localStorage.removeItem(OPTOUT_KEY);
+    if (localStorage.getItem(OPTOUT_KEY) === '1') return true;
+  } catch {
+    // localStorage 접근 불가(사생활 모드 등) — 무시하고 Layer 1로 진행
+  }
+
+  // Layer 1 — 실서비스 도메인이 아니면 제외 (프리뷰·localhost·vercel.app 등)
+  return !PROD_HOSTS.has(window.location.hostname);
 }
