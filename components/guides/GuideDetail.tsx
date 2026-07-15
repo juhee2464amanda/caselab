@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { renderInline } from '@/lib/inline-md';
+import { RichSections } from '@/components/content/RichSections';
 import { GUIDE_TAB_LABELS, type GuideItem, type GuideSourceType } from '@/types/guide';
 
 function sourceBadgeClass(type: GuideSourceType): string {
@@ -60,6 +61,9 @@ export function GuideDetail({ guide }: { guide: GuideItem }) {
           ))}
         </section>
       )}
+
+      {/* 추가 리치 섹션 — 운영자가 넣은 이미지·링크·갤러리 등 */}
+      <RichSections sections={guide.sections} keyPrefix="guide-section" contentId={guide.id} />
 
       {/* 원문 보기 */}
       {hasExternal && (

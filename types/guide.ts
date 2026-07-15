@@ -3,6 +3,8 @@
  * 데이터는 tools(category in ['guide','context-card'])의 body jsonb + url 컬럼.
  */
 
+import type { RichSection } from '@/types/content';
+
 export const GUIDE_CATEGORIES = [
   'prompt',
   'cases',
@@ -74,9 +76,15 @@ export interface GuideItem {
   bodyRich?: string;
   /** 상세 참고 이미지 (body.images) */
   images?: { url: string; caption?: string }[];
+  /** 자유 리치 섹션 (body.sections) — 상세 하단에 이미지·링크·갤러리 등 자유 배치 */
+  sections?: RichSection[];
 }
 
-/** 내부 상세페이지로 열 만한 본문(리치 텍스트/이미지)이 있는가 */
-export function guideHasDetail(g: Pick<GuideItem, 'bodyRich' | 'images'>): boolean {
-  return !!(g.bodyRich?.trim() || (g.images && g.images.length > 0));
+/** 내부 상세페이지로 열 만한 본문(리치 텍스트/이미지/추가 섹션)이 있는가 */
+export function guideHasDetail(g: Pick<GuideItem, 'bodyRich' | 'images' | 'sections'>): boolean {
+  return !!(
+    g.bodyRich?.trim() ||
+    (g.images && g.images.length > 0) ||
+    (g.sections && g.sections.some((s) => s.blocks?.length))
+  );
 }

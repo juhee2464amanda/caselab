@@ -6,6 +6,7 @@ import { Check, Copy, ArrowUpRight } from 'lucide-react';
 import { track } from '@/lib/analytics/track';
 import { TrackedCtaLink } from '@/components/analytics/TrackedCtaLink';
 import { renderInline, stripInlineMd } from '@/lib/inline-md';
+import { RichSections } from '@/components/content/RichSections';
 import { PROMPT_CATEGORY_LABELS, type PromptItem } from '@/types/prompt';
 
 export function PromptDetail({
@@ -121,6 +122,9 @@ export function PromptDetail({
           ))}
         </section>
       )}
+
+      {/* 추가 리치 섹션 — 운영자가 넣은 이미지·링크·갤러리 등 */}
+      <RichSections sections={prompt.sections} keyPrefix="prompt-section" contentId={prompt.id} />
 
       {/* Related */}
       {related.length > 0 && (

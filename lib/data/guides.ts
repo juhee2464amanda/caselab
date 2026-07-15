@@ -1,5 +1,6 @@
 import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
 import type { GuideItem, GuideCategory, GuideSourceType } from '@/types/guide';
+import type { RichSection } from '@/types/content';
 import { GUIDE_CATEGORIES } from '@/types/guide';
 import { guideSeed } from './dev-seed';
 
@@ -21,6 +22,7 @@ type ToolGuideRow = {
     linkLabel?: string;
     bodyRich?: string;
     images?: { url: string; caption?: string }[];
+    sections?: RichSection[];
   } | null;
 };
 
@@ -51,6 +53,7 @@ function mapGuideRow(r: ToolGuideRow): GuideItem {
     linkLabel: b.linkLabel,
     bodyRich: b.bodyRich,
     images: Array.isArray(b.images) ? b.images.filter((im) => im && typeof im.url === 'string' && im.url) : undefined,
+    sections: Array.isArray(b.sections) ? b.sections.filter((s) => s && Array.isArray(s.blocks) && s.blocks.length) : undefined,
   };
 }
 

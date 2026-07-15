@@ -3,6 +3,8 @@
  * 데이터는 tools(category='prompt')의 body jsonb에 저장.
  */
 
+import type { RichSection } from '@/types/content';
+
 export const PROMPT_CATEGORIES = ['think', 'make', 'verify', 'refine'] as const;
 export type PromptCategory = (typeof PROMPT_CATEGORIES)[number];
 
@@ -32,6 +34,8 @@ export interface PromptItem {
   sourceUrl?: string;
   /** 참고 이미지 (body.images) — 상세에서 프롬프트 본문 아래 노출. 2장 이상이면 갤러리 */
   images?: { url: string; caption?: string }[];
+  /** 자유 리치 섹션 (body.sections) — 상세 하단에 이미지·링크·갤러리 등 자유 배치 */
+  sections?: RichSection[];
   /**
    * 에디터 PICK 상단노출 순서 (tools.pick_order).
    * null = 일반(최신순 누적), 숫자 = PICK 밴드에 노출되며 작을수록 앞.
