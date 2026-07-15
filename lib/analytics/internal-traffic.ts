@@ -51,3 +51,35 @@ export function isInternalTraffic(
   cached = { userId, promise };
   return promise;
 }
+
+/**
+ * 로그인 없이도 판정하는 내부(운영자) 컨텍스트 제외 — §18.21.
+ *
+ * 로그인 기반 제외(isInternalTraffic)는 "caselab.kr에 로그인된 세션"에서만 작동해,
+ * 프리뷰(*.vercel.app)·로그아웃·시크릿·localhost 등 세션 없는 맥락의 운영자
+ * 트래픽을 못 거른다. 이를 origin/플래그로 보강한다.
+ *
+ *  - Layer 1: 실서비스 도메인(PROD_HOSTS)이 아니면 제외. 진짜 방문자는 caselab.kr로만
+ *    들어오므로, 프리뷰·localhost·vercel.app 발화는 정의상 운영자/개발이다.
+ *  - Layer 2: opt-out 플래그. `?cl_optout=1` 방문 시 localStorage에 저장(로그아웃해도
+ *    유지)되어 이후 해당 브라우저의 실도메인 로그아웃 방문도 제외. `?cl_optout=0`로 해제.
+ */
+const PROD_HOSTS = new Set(['caselab.kr', 'www.caselab.kr']);
+const OPTOUT_KEY = 'cl_optout';
+
+export function isExcludedContext(): boolean {
+  if (typeof window === 'undefined') return false;
+
+  // Layer 2 — opt-out 플래그 (URL 파라미터로 토글, localStorage에 영속)
+  try {
+    const flag = new URL(window.location.href).searchParams.get('cl_optout');
+    if (flag === '1') localStorage.setItem(OPTOUT_KEY, '1');
+    else if (flag === '0') localStorage.removeItem(OPTOUT_KEY);
+    if (localStorage.getItem(OPTOUT_KEY) === '1') return true;
+  } catch {
+    // localStorage 접근 불가(사생활 모드 등) — 무시하고 Layer 1로 진행
+  }
+
+  // Layer 1 — 실서비스 도메인이 아니면 제외 (프리뷰·localhost·vercel.app 등)
+  return !PROD_HOSTS.has(window.location.hostname);
+}

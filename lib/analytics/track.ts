@@ -4,7 +4,7 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { GA_ID } from './ga4';
 import { attachUtmToMetadata } from './utm';
 import { attachIdentity } from './anon';
-import { isInternalTraffic } from './internal-traffic';
+import { isInternalTraffic, isExcludedContext } from './internal-traffic';
 
 /**
  * events 테이블 + GA4 통합 적재 wrapper.
@@ -130,9 +130,13 @@ export async function track(
     // silent — 판별 실패 시 기존과 동일하게 외부 트래픽으로 취급
   }
 
+  // 로그인 없이도 판정하는 내부 컨텍스트(프리뷰·localhost·opt-out) 제외 (§18.21)
+  // — 로그인 기반 판별이 못 보는 세션 없는 운영자 트래픽을 origin/플래그로 보강.
+  const excludedContext = isExcludedContext();
+
   // 1) events 테이블 적재 (anon RLS 허용, 익명 사용자도 적재 가능)
-  //    관리자 세션은 스킵 — admin 확인 작업이 KPI를 오염시키지 않도록 (§18.21)
-  if (!internal) {
+  //    관리자 세션·내부 컨텍스트는 스킵 — 운영자 확인 작업이 KPI를 오염시키지 않도록 (§18.21)
+  if (!internal && !excludedContext) {
     try {
       const supabase = createSupabaseBrowserClient();
       const { content_id, product_id, ...rest } = merged as {
@@ -161,6 +165,8 @@ export async function track(
     GA_ID &&
     typeof window.gtag === 'function'
   ) {
+    // 내부 컨텍스트는 GA4에도 traffic_type=internal 태깅 — GA 보고서 필터가 제외 (admin과 동일)
+    if (excludedContext) window.gtag('set', { traffic_type: 'internal' });
     const ga4Name = GA4_EVENT_NAME[eventType];
     window.gtag('event', ga4Name, merged);
   }
