@@ -140,11 +140,12 @@ export function HeroCarousel({ items }: Props) {
                         {eye}
                       </span>
                       {/* 2줄 고정 높이 — 제목이 1줄이어도 아래 요소(요약·메타·화살표) 위치가 슬라이드마다 흔들리지 않도록 */}
+                      {/* NOTE: `block` 금지 — line-clamp-2 의 display:-webkit-box 를 덮어써 줄자르기가 무효화됨(h2/p 는 기본 block) */}
                       <Editable
                         as="h2"
                         k={`home.hero.${it.slug}.title`}
                         value={it.title}
-                        className="block text-2xl md:text-[32px] font-extrabold leading-[1.3] tracking-tight mb-2.5 line-clamp-2 keepall min-h-[62px] md:min-h-[84px]"
+                        className="text-2xl md:text-[32px] font-extrabold leading-[1.3] tracking-tight mb-2.5 line-clamp-2 keepall min-h-[62px] md:min-h-[84px]"
                       />
                       {/* 요약 — 빈 값이어도 컨테이너를 항상 렌더해 2줄 높이를 예약 (시작 위치 정렬 유지) */}
                       <Editable
@@ -152,7 +153,7 @@ export function HeroCarousel({ items }: Props) {
                         k={`home.hero.${it.slug}.summary`}
                         value={it.summary ?? ''}
                         multiline
-                        className="block text-[15px] md:text-base text-ink/60 leading-[1.6] mb-3 max-w-md keepall line-clamp-2 whitespace-pre-line min-h-[48px] md:min-h-[51px]"
+                        className="text-[15px] md:text-base text-ink/60 leading-[1.6] mb-3 max-w-md keepall line-clamp-2 whitespace-pre-line min-h-[48px] md:min-h-[51px]"
                       />
                       {/* 메타 — 값 유무와 무관하게 고정 높이 확보 */}
                       <div className="text-[13px] text-ink/50 flex items-center gap-1 h-5">
