@@ -20,6 +20,8 @@ export interface PromptItem {
   title: string;
   /** 복사 박스 밖에 노출되는 설명 (tools.description) — 복사 대상이 아님 */
   description?: string;
+  /** 리스트 카드·히어로 썸네일 (tools.thumbnail_url). 없으면 브랜드 플레이스홀더 폴백 */
+  thumbnailUrl?: string | null;
   /** 복사 대상 프롬프트 본문 (body.prompt) */
   prompt: string;
   /** 사고하기/만들기/검증하기/다듬기 (body.promptCategory) */
