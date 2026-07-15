@@ -11,6 +11,12 @@
  *
  * 판별은 /api/analytics/internal(서버)에서 수행 — allowlist를 번들에 노출하지 않음.
  * 결과는 userId 단위 메모이즈(로그인/로그아웃으로 사용자가 바뀌면 재판별).
+ *
+ * 레이스 주의: 로그인 직후 첫 pageview에서는 클라이언트에 세션이 있어도(getSession)
+ * 서버 쿠키가 아직 전파되지 않아 /api/analytics/internal이 false를 줄 수 있다.
+ * 이 false를 영구 캐시하면 운영자 세션 전체가 새므로(§18.21 버그), 긍정(true)만
+ * 캐시하고 부정(false)은 캐시를 비워 다음 이벤트에서 재판별한다. in-flight 프라미스는
+ * 그대로 공유되어 동시 다발 pageview가 요청을 중복 발사하지는 않는다.
  */
 
 let cached: { userId: string; promise: Promise<boolean> } | null = null;
@@ -27,12 +33,20 @@ export function isInternalTraffic(
     .then((res) => (res.ok ? res.json() : { internal: false }))
     .then((data: { internal?: boolean }) => {
       const internal = Boolean(data?.internal);
-      if (internal && typeof window.gtag === 'function') {
-        window.gtag('set', { traffic_type: 'internal' });
+      if (internal) {
+        if (typeof window.gtag === 'function') {
+          window.gtag('set', { traffic_type: 'internal' });
+        }
+      } else if (cached?.userId === userId) {
+        // 세션 전파 전 false일 수 있음 — 캐시 비워 다음 이벤트에서 재판별
+        cached = null;
       }
       return internal;
     })
-    .catch(() => false);
+    .catch(() => {
+      if (cached?.userId === userId) cached = null;
+      return false;
+    });
 
   cached = { userId, promise };
   return promise;
