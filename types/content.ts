@@ -157,6 +157,17 @@ export const BlockSchema: z.ZodType<Block> = z.lazy(() =>
 );
 
 // ───────────────────────────────────────────────────────────
+// 자유 리치 섹션 — 트렌드처럼 이미지·갤러리·북마크·문단 등 블록을
+// 각 섹션에 자유 배치. 도구·케이스·프롬프트·가이드 상세 공통.
+// ───────────────────────────────────────────────────────────
+export const RichSectionSchema = z.object({
+  label: z.string().optional(),
+  heading: z.string().optional(),
+  blocks: z.array(BlockSchema),
+});
+export type RichSection = z.infer<typeof RichSectionSchema>;
+
+// ───────────────────────────────────────────────────────────
 // 트랙별 본문 스키마
 // ───────────────────────────────────────────────────────────
 export const FrameworkStepSchema = z.object({
@@ -213,6 +224,12 @@ export const CaseBodySchema = z.object({
   cons: z.array(z.string()).optional(),
   takingPoints: z.array(TakingPointSchema).optional(),
 
+  // 자유 리치 섹션 — 고정 7섹션 뒤에 순서대로 렌더 (이미지·링크·갤러리 등)
+  sections: z.array(RichSectionSchema).optional(),
+
+  // 고정 섹션 소제목·리드 오버라이드 (키=섹션키, 예: forWho·painPoints.lead). 비면 기본 문구.
+  headings: z.record(z.string(), z.string()).optional(),
+
   // 기존 (legacy 호환 — 4섹션 본문)
   essence: z.array(BlockSchema).min(1),
   framework: z.array(FrameworkStepSchema).min(1),
@@ -250,6 +267,8 @@ export const TrendBodySchema = z.object({
   soWhat: z.array(BlockSchema).optional(),
   /** 출처·더 보기 */
   sources: z.array(z.object({ label: z.string(), url: z.string() })).optional(),
+  /** 고정 섹션 소제목 오버라이드 (키=섹션키, 예: what·why). 비면 기본 문구. */
+  headings: z.record(z.string(), z.string()).optional(),
 });
 
 export const ContentBodySchema = z.discriminatedUnion('kind', [

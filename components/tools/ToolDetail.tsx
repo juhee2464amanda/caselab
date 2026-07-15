@@ -4,11 +4,14 @@ import { ExternalLink } from 'lucide-react';
 import { ActionsBar } from '@/components/content/ActionsBar';
 import { CommentThread } from '@/components/content/CommentThread';
 import { ToolToc } from '@/components/tools/ToolToc';
+import { renderBlocks } from '@/lib/content-render';
 import { TOOL_CATEGORY_LABELS, type Tool } from '@/types/tool';
 
 export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
   const body = tool.body ?? {};
   const catLabel = TOOL_CATEGORY_LABELS[tool.category];
+  // 운영자가 관리자에서 덮어쓴 섹션 소제목·라벨이 있으면 그것을, 없으면 기본 문구.
+  const h = (key: string, def: string) => body.headings?.[key]?.trim() || def;
 
   const tocItems = [
     { id: 'hero', label: '개요' },
@@ -17,6 +20,10 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
     ...(body.features?.length ? [{ id: 'features', label: '주요 기능' }] : []),
     ...(body.pricing?.length ? [{ id: 'pricing', label: '가격' }] : []),
     ...(body.useCases?.length ? [{ id: 'use-cases', label: '실전 사용기' }] : []),
+    ...(body.sections ?? [])
+      .map((s, i) => ({ s, i }))
+      .filter(({ s }) => s.blocks?.length && (s.label || s.heading))
+      .map(({ s, i }) => ({ id: `section-${i}`, label: (s.heading || s.label)! })),
   ];
 
   return (
@@ -95,7 +102,7 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
 
       {/* About */}
       {body.about && (
-        <Section id="about" label="어떤 서비스인가요" title={body.about.heading}>
+        <Section id="about" label={h('about.label', '어떤 서비스인가요')} title={body.about.heading}>
           <div className="space-y-3.5">
             {body.about.paragraphs.map((p, i) => (
               <p key={i} className="text-[15.5px] leading-[1.75] text-ink/80 max-w-[680px] break-keep">
@@ -108,7 +115,7 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
 
       {/* When to use */}
       {body.whenToUse && body.whenToUse.length > 0 && (
-        <Section id="when" label="언제 쓰면 좋은가요" title="이런 일을 할 때 가장 빛납니다">
+        <Section id="when" label={h('when.label', '언제 쓰면 좋은가요')} title={h('when', '이런 일을 할 때 가장 빛납니다')}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {body.whenToUse.map((w, i) => (
               <div key={i} className="p-4 border border-border rounded-[10px] bg-white">
@@ -123,7 +130,7 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
 
       {/* Features */}
       {body.features && body.features.length > 0 && (
-        <Section id="features" label="주요 기능" title="이 도구가 잘하는 것">
+        <Section id="features" label={h('features.label', '주요 기능')} title={h('features', '이 도구가 잘하는 것')}>
           <div className="border-t border-border">
             {body.features.map((f, i) => (
               <div key={i} className="flex gap-4 py-4 border-b border-border items-start">
@@ -158,7 +165,7 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
 
       {/* Pricing */}
       {body.pricing && body.pricing.length > 0 && (
-        <Section id="pricing" label="가격" title="요금 정보">
+        <Section id="pricing" label={h('pricing.label', '가격')} title={h('pricing', '요금 정보')}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {body.pricing.map((p, i) => (
               <div key={i} className="p-5 border border-border rounded-xl bg-white">
@@ -178,7 +185,7 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
 
       {/* Use cases */}
       {body.useCases && body.useCases.length > 0 && (
-        <Section id="use-cases" label="실전 사용기 · 옵션" title="이 도구를 직접 써본 케이스">
+        <Section id="use-cases" label={h('useCases.label', '실전 사용기 · 옵션')} title={h('useCases', '이 도구를 직접 써본 케이스')}>
           <div className="grid gap-3.5">
             {body.useCases.map((u, i) => (
               <Link
@@ -197,6 +204,15 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
             ))}
           </div>
         </Section>
+      )}
+
+      {/* 자유 리치 섹션 — 이미지·갤러리·북마크 등 블록 자유 배치 */}
+      {body.sections?.map((s, i) =>
+        s.blocks?.length ? (
+          <Section key={i} id={`section-${i}`} label={s.label ?? ''} title={s.heading}>
+            {renderBlocks(s.blocks, `tool-section-${i}`)}
+          </Section>
+        ) : null,
       )}
 
       <ActionsBar toolId={tool.id} />
@@ -280,9 +296,11 @@ function Section({
 }) {
   return (
     <section id={id} className="mb-12 scroll-mt-20">
-      <div className="text-[11px] font-bold text-ink/30 uppercase tracking-[0.08em] mb-2.5">
-        {label}
-      </div>
+      {label && (
+        <div className="text-[11px] font-bold text-ink/30 uppercase tracking-[0.08em] mb-2.5">
+          {label}
+        </div>
+      )}
       {title && (
         <h2 className="text-[22px] font-extrabold tracking-[-0.025em] mb-4 break-keep">{title}</h2>
       )}

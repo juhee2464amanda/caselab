@@ -1,5 +1,6 @@
 import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
 import type { PromptItem, PromptCategory } from '@/types/prompt';
+import type { RichSection } from '@/types/content';
 import { PROMPT_CATEGORIES } from '@/types/prompt';
 import { promptSeed } from './dev-seed';
 
@@ -18,6 +19,7 @@ type ToolPromptRow = {
     source?: string;
     sourceUrl?: string;
     images?: { url: string; caption?: string }[];
+    sections?: RichSection[];
   } | null;
 };
 
@@ -38,6 +40,7 @@ function mapPromptRow(r: ToolPromptRow): PromptItem {
     source: b.source,
     sourceUrl: b.sourceUrl,
     images: Array.isArray(b.images) ? b.images.filter((im) => im && typeof im.url === 'string' && im.url) : undefined,
+    sections: Array.isArray(b.sections) ? b.sections.filter((s) => s && Array.isArray(s.blocks) && s.blocks.length) : undefined,
     pickOrder: r.pick_order ?? null,
   };
 }

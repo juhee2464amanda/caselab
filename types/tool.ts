@@ -2,6 +2,8 @@
  * Tool types — mockup tools.html 정합 (2026-06-06)
  */
 
+import type { Block } from '@/types/content';
+
 export const TOOL_CATEGORIES = [
   'design',
   'automation',
@@ -39,6 +41,18 @@ export interface ToolPricingPlan {
   amount: string;
   includes: string;
 }
+/**
+ * 자유 리치 섹션 — AI 트렌드처럼 각 섹션에 이미지·갤러리·북마크·문단 등
+ * 블록을 자유롭게 배치. 고정 섹션(about/features/pricing…) 뒤에 순서대로 렌더.
+ */
+export interface ToolSection {
+  /** 작은 라벨(eyebrow, 예: "더 알아보기"). 없으면 미표시 */
+  label?: string;
+  /** 섹션 제목(h2). 없으면 미표시 */
+  heading?: string;
+  /** 리치 블록 — 트렌드 본문과 동일(text·heading·prompt·checklist·image·gallery·bookmark 등) */
+  blocks: Block[];
+}
 export interface ToolBody {
   /** 히어로 카테고리 옆 대상 (예: "마케터·기획자") */
   audience?: string;
@@ -56,6 +70,10 @@ export interface ToolBody {
   pricingNote?: string;
   /** 실전 사용기 — 연결 케이스 카드 */
   useCases?: ToolUseCase[];
+  /** 자유 리치 섹션 — 고정 섹션 뒤에 순서대로 렌더 (이미지·링크·갤러리 등) */
+  sections?: ToolSection[];
+  /** 고정 섹션 소제목·라벨 오버라이드 (키=섹션id, 예: when·when.label). 비면 기본 문구. */
+  headings?: Record<string, string>;
 }
 export interface ToolUseCase {
   /** 케이스 링크 (예: /cases/competitor-analysis) */

@@ -16,6 +16,7 @@ import { FrameworkRefSection } from '@/components/content/FrameworkRefSection';
 import { StepCard } from '@/components/content/StepCard';
 import { ProsConsGrid } from '@/components/content/ProsConsGrid';
 import { TakingPointsList } from '@/components/content/TakingPointsList';
+import { RichSections } from '@/components/content/RichSections';
 import { DeepReadTracker } from '@/components/analytics/DeepReadTracker';
 import { DwellTracker } from '@/components/analytics/DwellTracker';
 import { ScrollTracker } from '@/components/analytics/ScrollTracker';
@@ -56,6 +57,8 @@ export default async function CaseDetailPage({
   const body = content.body;
   const related = await listRelated(content);
   const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/cases/${slug}`;
+  // 운영자가 관리자에서 덮어쓴 소제목·리드가 있으면 그것을, 없으면 기본 문구.
+  const h = (key: string, def: string) => body.headings?.[key]?.trim() || def;
 
   return (
     <article>
@@ -90,7 +93,7 @@ export default async function CaseDetailPage({
             {/* 01. 이런 분들을 위한 글 */}
             {body.forWho && body.forWho.length > 0 && (
               <section id="s1" className="pt-2">
-                <SectionHeader num="01" title="이런 분들을 위한 글이에요" />
+                <SectionHeader num="01" title={h('forWho', '이런 분들을 위한 글이에요')} />
                 <ForWhoBox items={body.forWho} />
               </section>
             )}
@@ -98,7 +101,7 @@ export default async function CaseDetailPage({
             {/* 02. 어떤 케이스를 다루나요 */}
             {body.caseIntro && body.caseIntro.length > 0 && (
               <section id="s2" className="pt-11 mt-11 border-t border-border">
-                <SectionHeader num="02" title="어떤 케이스를 다루나요" />
+                <SectionHeader num="02" title={h('caseIntro', '어떤 케이스를 다루나요')} />
                 {renderBlocks(body.caseIntro, 'intro', content.id)}
               </section>
             )}
@@ -106,8 +109,8 @@ export default async function CaseDetailPage({
             {/* 03. 막히는 이유 */}
             {body.painPoints && body.painPoints.length > 0 && (
               <section id="s3" className="pt-11 mt-11 border-t border-border">
-                <SectionHeader num="03" title="보통 이런 일에서 막히는 이유" />
-                <SectionLead text="실무에서 반복적으로 나오는 3가지 문제와, 그 근본 원인을 정리했습니다." />
+                <SectionHeader num="03" title={h('painPoints', '보통 이런 일에서 막히는 이유')} />
+                <SectionLead text={h('painPoints.lead', '실무에서 반복적으로 나오는 3가지 문제와, 그 근본 원인을 정리했습니다.')} />
                 <PainPointsGrid items={body.painPoints} />
               </section>
             )}
@@ -115,7 +118,7 @@ export default async function CaseDetailPage({
             {/* 04. 적용한 Framework */}
             {body.frameworkReference && (
               <section id="s4" className="pt-11 mt-11 border-t border-border">
-                <SectionHeader num="04" title="적용한 Framework" />
+                <SectionHeader num="04" title={h('frameworkReference', '적용한 Framework')} />
                 <SectionLead text="공통 원인을 푸는 사고법으로, 가설 중심 구조를 차용했습니다." />
                 <FrameworkRefSection
                   reference={body.frameworkReference}
@@ -127,8 +130,8 @@ export default async function CaseDetailPage({
             {/* 05. 단계별 AI 활용 */}
             {body.stepCards && body.stepCards.length > 0 && (
               <section id="s5" className="pt-11 mt-11 border-t border-border">
-                <SectionHeader num="05" title="단계별 AI 활용" />
-                <SectionLead text='단계마다 사람이 먼저 손으로 만든 입력이 있어야 AI 출력이 쓸 만합니다. 각 단계는 "사람이 할 일 / AI에 시킬 일 / 프롬프트 / 결과 비교" 4개로 구성됩니다.' />
+                <SectionHeader num="05" title={h('stepCards', '단계별 AI 활용')} />
+                <SectionLead text={h('stepCards.lead', '단계마다 사람이 먼저 손으로 만든 입력이 있어야 AI 출력이 쓸 만합니다. 각 단계는 "사람이 할 일 / AI에 시킬 일 / 프롬프트 / 결과 비교" 4개로 구성됩니다.')} />
                 <div className="flex flex-col gap-3.5 mt-3.5">
                   {body.stepCards.map((step) => (
                     <StepCard key={step.num} step={step} contentId={content.id} />
@@ -140,7 +143,7 @@ export default async function CaseDetailPage({
             {/* 06. 좋았던 점 · 아쉬웠던 점 */}
             {body.pros && body.cons && (
               <section id="s6" className="pt-11 mt-11 border-t border-border">
-                <SectionHeader num="06" title="좋았던 점 · 아쉬웠던 점" />
+                <SectionHeader num="06" title={h('prosCons', '좋았던 점 · 아쉬웠던 점')} />
                 <ProsConsGrid pros={body.pros} cons={body.cons} />
               </section>
             )}
@@ -148,8 +151,8 @@ export default async function CaseDetailPage({
             {/* 07. 핵심 Taking point */}
             {body.takingPoints && body.takingPoints.length > 0 && (
               <section id="s7" className="pt-11 mt-11 border-t border-border">
-                <SectionHeader num="07" title="핵심 Taking point" />
-                <SectionLead text="이 글에서 가져갈 3가지. 본인 일에 바로 옮길 수 있는 액션도 함께." />
+                <SectionHeader num="07" title={h('takingPoints', '핵심 Taking point')} />
+                <SectionLead text={h('takingPoints.lead', '이 글에서 가져갈 3가지. 본인 일에 바로 옮길 수 있는 액션도 함께.')} />
                 <TakingPointsList items={body.takingPoints} />
               </section>
             )}
@@ -179,6 +182,9 @@ export default async function CaseDetailPage({
                 </div>
               </section>
             )}
+
+            {/* 추가 리치 섹션 — 운영자가 넣은 이미지·링크·갤러리 등 */}
+            <RichSections sections={body.sections} keyPrefix="case-section" contentId={content.id} />
           </div>
 
           <ActionsBar contentId={content.id} />

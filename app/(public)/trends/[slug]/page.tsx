@@ -42,6 +42,8 @@ export default async function TrendDetailPage({
   const body = content.body;
   const related = await listRelated(content);
   const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/trends/${slug}`;
+  // 운영자가 관리자에서 덮어쓴 소제목이 있으면 그것을, 없으면 기본 문구.
+  const h = (key: string, def: string) => body.headings?.[key]?.trim() || def;
 
   // 있는 섹션만 목차에 (모든 섹션 optional)
   const toc = (
@@ -91,7 +93,7 @@ export default async function TrendDetailPage({
             {/* 무슨 소식이에요 */}
             {body.what && body.what.length > 0 && (
               <section id="s1" className="pt-2">
-                <SectionHeader num={num()} title="무슨 소식이에요" />
+                <SectionHeader num={num()} title={h('what', '무슨 소식이에요')} />
                 {renderBlocks(body.what, 'what', content.id)}
               </section>
             )}
@@ -99,7 +101,7 @@ export default async function TrendDetailPage({
             {/* 왜 지금 화두예요 */}
             {body.why && body.why.length > 0 && (
               <section id="s2" className="pt-11 mt-11 border-t border-border">
-                <SectionHeader num={num()} title="왜 지금 화두예요" />
+                <SectionHeader num={num()} title={h('why', '왜 지금 화두예요')} />
                 {renderBlocks(body.why, 'why', content.id)}
               </section>
             )}
@@ -107,7 +109,7 @@ export default async function TrendDetailPage({
             {/* 누구한테 중요해요 */}
             {body.forWho && body.forWho.length > 0 && (
               <section id="s3" className="pt-11 mt-11 border-t border-border">
-                <SectionHeader num={num()} title="누구한테 중요해요" />
+                <SectionHeader num={num()} title={h('forWho', '누구한테 중요해요')} />
                 <div className="grid gap-3 sm:grid-cols-2 mt-1">
                   {body.forWho.map((w, i) => (
                     <div key={i} className="rounded-xl border border-border bg-white p-4">
@@ -122,7 +124,7 @@ export default async function TrendDetailPage({
             {/* 핵심 3가지 */}
             {body.keyPoints && body.keyPoints.length > 0 && (
               <section id="s4" className="pt-11 mt-11 border-t border-border">
-                <SectionHeader num={num()} title="핵심만 빠르게" />
+                <SectionHeader num={num()} title={h('keyPoints', '핵심만 빠르게')} />
                 <ul className="flex flex-col gap-2.5 mt-1">
                   {body.keyPoints.map((k, i) => (
                     <li key={i} className="flex gap-3 items-start">
@@ -139,7 +141,7 @@ export default async function TrendDetailPage({
             {/* 좀 더 들어가면 (선택) */}
             {body.deepDive && body.deepDive.length > 0 && (
               <section id="s5" className="pt-11 mt-11 border-t border-border">
-                <SectionHeader num={num()} title="좀 더 들어가면" />
+                <SectionHeader num={num()} title={h('deepDive', '좀 더 들어가면')} />
                 {renderBlocks(body.deepDive, 'deep', content.id)}
               </section>
             )}
@@ -147,7 +149,7 @@ export default async function TrendDetailPage({
             {/* 그래서, 내 일엔? */}
             {body.soWhat && body.soWhat.length > 0 && (
               <section id="s6" className="pt-11 mt-11 border-t border-border">
-                <SectionHeader num={num()} title="그래서, 내 일엔?" />
+                <SectionHeader num={num()} title={h('soWhat', '그래서, 내 일엔?')} />
                 <div className="rounded-xl border border-accent/20 bg-accent-50/40 p-5">
                   {renderBlocks(body.soWhat, 'so', content.id)}
                 </div>
@@ -157,7 +159,7 @@ export default async function TrendDetailPage({
             {/* 출처·더 보기 */}
             {body.sources && body.sources.length > 0 && (
               <section className="pt-11 mt-11 border-t border-border">
-                <div className="text-xs font-bold text-ink/40 tracking-[0.08em] mb-3">출처·더 보기</div>
+                <div className="text-xs font-bold text-ink/40 tracking-[0.08em] mb-3">{h('sources', '출처·더 보기')}</div>
                 <ul className="flex flex-col gap-1.5">
                   {body.sources.map((s, i) => (
                     <li key={i}>
