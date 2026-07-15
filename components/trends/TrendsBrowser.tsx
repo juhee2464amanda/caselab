@@ -87,14 +87,16 @@ export function TrendsBrowser({ items }: { items: ContentRow[] }) {
                   <TimeBadge readMin={it.read_min} applyMin={it.apply_min} />
                 </div>
                 {it.thumbnail_url ? (
-                  <img
-                    src={it.thumbnail_url}
-                    alt=""
-                    loading="lazy"
-                    className="h-24 w-24 rounded-md object-cover shrink-0"
-                  />
+                  <div className="w-32 sm:w-40 rounded-lg overflow-hidden shrink-0">
+                    <img
+                      src={it.thumbnail_url}
+                      alt=""
+                      loading="lazy"
+                      className="h-auto w-full transition-transform group-hover:scale-[1.04]"
+                    />
+                  </div>
                 ) : (
-                  <div className="h-24 w-24 rounded-md bg-muted shrink-0" />
+                  <div className="aspect-[4/3] w-32 sm:w-40 rounded-lg bg-muted shrink-0" />
                 )}
               </Link>
             </li>
