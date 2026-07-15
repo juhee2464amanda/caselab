@@ -134,6 +134,22 @@ export function PromptsBrowser({ prompts }: { prompts: PromptItem[] }) {
   );
 }
 
+// 리스트 썸네일 — 없으면 브랜드 플레이스홀더로 폴백 (히어로 HeroThumb와 동일 감각).
+function PromptThumb({ src, className }: { src?: string | null; className?: string }) {
+  return (
+    <div className={cn('rounded-md overflow-hidden bg-muted shrink-0', className)}>
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt="" loading="lazy" className="w-full h-full object-cover" />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent/10 to-muted">
+          <span className="font-serif text-xs font-bold text-ink/25 tracking-tight">Caselab</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /**
  * 카드에는 제목 + 압축 설명만. 본문·복사는 상세(/prompts/[slug])로 —
  * 프롬프트별 URL이 있어야 DM으로 개별 안내·유입이 가능하다.
@@ -146,6 +162,7 @@ function PickCard({ prompt }: { prompt: PromptItem }) {
       meta={{ prompt_id: prompt.id, slug: prompt.slug, category: prompt.category, band: 'pick' }}
       className="flex flex-col rounded-xl border border-accent-100 bg-white p-4 transition-shadow hover:shadow-[0_2px_12px_rgba(49,130,246,0.08)]"
     >
+      <PromptThumb src={prompt.thumbnailUrl} className="-mx-4 -mt-4 mb-3 aspect-[16/9] rounded-t-xl rounded-b-none" />
       <div className="flex gap-1.5 flex-wrap mb-1.5">
         <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-accent bg-accent-50 px-2 py-0.5 rounded">
           추천
@@ -180,7 +197,7 @@ function PromptCard({ prompt }: { prompt: PromptItem }) {
       href={`/prompts/${prompt.slug}`}
       label="prompt_card"
       meta={{ prompt_id: prompt.id, slug: prompt.slug, category: prompt.category, band: 'list' }}
-      className="group flex gap-5 py-6 border-b border-border first:pt-0"
+      className="group flex gap-5 py-6 border-b border-border first:pt-0 items-start"
     >
       <div className="flex-1 min-w-0">
         <div className="flex gap-1.5 flex-wrap mb-2">
@@ -205,6 +222,7 @@ function PromptCard({ prompt }: { prompt: PromptItem }) {
           프롬프트 보기 <ChevronRight className="h-3.5 w-3.5" />
         </span>
       </div>
+      <PromptThumb src={prompt.thumbnailUrl} className="h-24 w-24" />
     </TrackedCtaLink>
   );
 }

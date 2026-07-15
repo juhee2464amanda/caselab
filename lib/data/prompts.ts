@@ -10,6 +10,7 @@ type ToolPromptRow = {
   slug: string;
   name: string;
   description: string | null;
+  thumbnail_url: string | null;
   pick_order: number | null;
   body: {
     prompt?: string;
@@ -30,6 +31,7 @@ function mapPromptRow(r: ToolPromptRow): PromptItem {
     slug: r.slug,
     title: r.name,
     description: r.description ?? undefined,
+    thumbnailUrl: r.thumbnail_url ?? null,
     prompt: b.prompt ?? '',
     category: isPromptCategory(b.promptCategory) ? b.promptCategory : 'think',
     source: b.source,
@@ -43,7 +45,7 @@ export async function listPrompts(): Promise<PromptItem[]> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from('tools')
-    .select('id, slug, name, description, pick_order, body')
+    .select('id, slug, name, description, thumbnail_url, pick_order, body')
     .eq('category', 'prompt')
     .eq('status', 'published')
     .order('created_at', { ascending: false });
@@ -62,7 +64,7 @@ export async function getPromptBySlug(slug: string): Promise<PromptItem | null> 
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from('tools')
-    .select('id, slug, name, description, pick_order, body')
+    .select('id, slug, name, description, thumbnail_url, pick_order, body')
     .eq('category', 'prompt')
     .eq('slug', slug)
     .eq('status', 'published')
