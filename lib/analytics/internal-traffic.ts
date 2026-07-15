@@ -55,17 +55,26 @@ export function isInternalTraffic(
 /**
  * 로그인 없이도 판정하는 내부(운영자) 컨텍스트 제외 — §18.21.
  *
- * 로그인 기반 제외(isInternalTraffic)는 "caselab.kr에 로그인된 세션"에서만 작동해,
- * 프리뷰(*.vercel.app)·로그아웃·시크릿·localhost 등 세션 없는 맥락의 운영자
- * 트래픽을 못 거른다. 이를 origin/플래그로 보강한다.
+ * 로그인 기반 제외(isInternalTraffic)는 로그인된 세션에서만 작동해, 프리뷰
+ * 배포·로그아웃·시크릿·localhost 등 세션 없는 맥락의 운영자 트래픽을 못 거른다.
+ * 이를 origin/플래그로 보강한다.
  *
- *  - Layer 1: 실서비스 도메인(PROD_HOSTS)이 아니면 제외. 진짜 방문자는 caselab.kr로만
- *    들어오므로, 프리뷰·localhost·vercel.app 발화는 정의상 운영자/개발이다.
+ *  - Layer 1: 개발 빌드(localhost)거나, 실서비스 canonical 도메인이 아닌 호스트
+ *    (프리뷰 배포 등)면 제외. canonical 도메인의 유일한 출처는 NEXT_PUBLIC_SITE_URL
+ *    (metadataBase·robots·sitemap과 동일) — 도메인을 하드코딩하지 않는다.
+ *    env 미설정 등으로 canonical을 알 수 없으면 실트래픽을 막지 않도록 fail-open(로그 유지).
  *  - Layer 2: opt-out 플래그. `?cl_optout=1` 방문 시 localStorage에 저장(로그아웃해도
  *    유지)되어 이후 해당 브라우저의 실도메인 로그아웃 방문도 제외. `?cl_optout=0`로 해제.
  */
-const PROD_HOSTS = new Set(['caselab.kr', 'www.caselab.kr']);
 const OPTOUT_KEY = 'cl_optout';
+
+function canonicalHost(): string {
+  try {
+    return new URL(process.env.NEXT_PUBLIC_SITE_URL ?? '').hostname;
+  } catch {
+    return '';
+  }
+}
 
 export function isExcludedContext(): boolean {
   if (typeof window === 'undefined') return false;
@@ -80,6 +89,10 @@ export function isExcludedContext(): boolean {
     // localStorage 접근 불가(사생활 모드 등) — 무시하고 Layer 1로 진행
   }
 
-  // Layer 1 — 실서비스 도메인이 아니면 제외 (프리뷰·localhost·vercel.app 등)
-  return !PROD_HOSTS.has(window.location.hostname);
+  // Layer 1 — 개발 빌드 제외 (localhost 등). 프리뷰/프로덕션 빌드는 NODE_ENV='production'.
+  if (process.env.NODE_ENV !== 'production') return true;
+  // canonical(실서비스) 도메인이 아닌 호스트(프리뷰 배포 등)는 제외. 모르면 fail-open.
+  const canonical = canonicalHost();
+  if (canonical && window.location.hostname !== canonical) return true;
+  return false;
 }
