@@ -153,7 +153,6 @@ export function HeroCarousel({ items }: Props) {
                         as="p"
                         k={`home.hero.${it.slug}.summary`}
                         value={it.summary ?? ''}
-                        multiline
                         maxLines={2}
                         maxLength={90}
                         className="text-[15px] md:text-base text-ink/60 leading-[1.6] mb-3 max-w-md keepall line-clamp-2 whitespace-pre-line min-h-[48px] md:min-h-[51px]"

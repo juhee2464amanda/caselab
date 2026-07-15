@@ -51,7 +51,6 @@ export function SeriesGrid({ series }: { series: SeriesCard[] }) {
               as="p"
               k={`${s.k}.desc`}
               value={s.desc}
-              multiline
               className="text-[13px] text-ink/60 leading-snug keepall"
             />
             {s.recentTitle && (

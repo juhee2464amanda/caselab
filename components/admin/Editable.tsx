@@ -12,8 +12,6 @@ interface Props {
   /** 렌더 태그 — 원본과 동일한 태그를 넘겨 레이아웃 유지 (기본 span) */
   as?: ElementType;
   className?: string;
-  /** Enter 로 저장하지 않고 줄바꿈 허용 */
-  multiline?: boolean;
   /** 허용 최대 줄 수 (예: 배너 서브텍스트 2줄). 초과 줄바꿈/붙여넣기 차단. */
   maxLines?: number;
   /** 허용 최대 글자 수 (예: 배너 헤드라인). 초과해 '늘리는' 입력만 차단. */
@@ -35,14 +33,17 @@ function caretToEnd(el: HTMLElement) {
 /**
  * 인라인 편집 가능한 텍스트.
  * 비관리자/편집모드 OFF 이면 순수 텍스트와 동일하게 렌더(오버헤드 0).
- * 편집모드에서는 점선 아웃라인 + contentEditable, 포커스 아웃/Enter 시 저장.
+ * 편집모드에서는 점선 아웃라인 + contentEditable.
+ * Enter 는 줄바꿈, ⌘/Ctrl+Enter 또는 포커스 아웃 시 저장.
+ * 저장된 줄바꿈(\n)은 whitespace-pre-line 으로 보존·렌더된다.
  *
  * maxLines/maxLength 제약(예: 메인배너 2줄):
  *   - 한도를 '초과하면서 더 늘리는' 입력만 되돌린다. 줄이는 편집은 항상 허용하고
  *     이미 한도를 넘긴 기존 값(원본 콘텐츠 제목 등)도 임의로 잘라내지 않는다.
+ *   - maxLines 지정 시 그 줄 수에 도달하면 추가 Enter 줄바꿈만 막는다.
  *   - 한글 IME 조합 중에는 검사하지 않고 compositionend 에서만 확정 검사(조합 깨짐 방지).
  */
-export function Editable({ k, value, as, className, multiline, maxLines, maxLength }: Props) {
+export function Editable({ k, value, as, className, maxLines, maxLength }: Props) {
   const { isAdmin, editMode } = useAdminEdit();
   const router = useRouter();
   const ref = useRef<HTMLElement>(null);
@@ -53,7 +54,8 @@ export function Editable({ k, value, as, className, multiline, maxLines, maxLeng
   const Tag = (as ?? 'span') as ElementType;
 
   if (!isAdmin || !editMode) {
-    return <Tag className={className}>{value}</Tag>;
+    // whitespace-pre-line: 저장된 줄바꿈(\n)을 그대로 렌더
+    return <Tag className={`${className ?? ''} whitespace-pre-line`}>{value}</Tag>;
   }
 
   // 현재 DOM 텍스트가 한도를 넘겼는지
@@ -106,13 +108,13 @@ export function Editable({ k, value, as, className, multiline, maxLines, maxLeng
   return (
     <Tag
       ref={ref}
-      className={`${className ?? ''} rounded-sm outline-dashed outline-1 outline-accent/70 outline-offset-2 cursor-text ${
+      className={`${className ?? ''} whitespace-pre-line rounded-sm outline-dashed outline-1 outline-accent/70 outline-offset-2 cursor-text ${
         saving ? 'opacity-50' : ''
       }`}
       contentEditable={!saving}
       suppressContentEditableWarning
       spellCheck={false}
-      title="클릭해 편집 · 벗어나면 저장"
+      title="클릭해 편집 · Enter 줄바꿈 · 벗어나면 저장"
       onClick={(e: React.MouseEvent) => {
         // 부모가 <Link> 인 경우 편집 클릭이 페이지 이동으로 이어지지 않도록 차단
         e.preventDefault();
@@ -142,19 +144,18 @@ export function Editable({ k, value, as, className, multiline, maxLines, maxLeng
         enforce();
       }}
       onKeyDown={(e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-          if (!multiline) {
-            // 단일 줄: Enter = 저장 후 blur
-            e.preventDefault();
-            (e.target as HTMLElement).blur();
-            return;
-          }
-          // 멀티라인: 최대 줄 수 도달 시 추가 줄바꿈 차단
-          const lines = (ref.current?.innerText ?? '').split('\n').length;
-          if (maxLines && lines >= maxLines) {
-            e.preventDefault();
-          }
+        if (e.key !== 'Enter') return;
+        // ⌘/Ctrl+Enter → 저장(포커스 아웃)
+        if (e.metaKey || e.ctrlKey) {
+          e.preventDefault();
+          (e.target as HTMLElement).blur();
+          return;
         }
+        // Enter → 줄바꿈 삽입. maxLines 도달 시 추가 줄바꿈만 차단.
+        e.preventDefault();
+        const lines = (ref.current?.innerText ?? '').split('\n').length;
+        if (maxLines && lines >= maxLines) return;
+        document.execCommand('insertLineBreak');
       }}
     >
       {value}
