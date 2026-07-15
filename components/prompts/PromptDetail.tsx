@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Check, Copy, ArrowUpRight } from 'lucide-react';
 import { track } from '@/lib/analytics/track';
 import { TrackedCtaLink } from '@/components/analytics/TrackedCtaLink';
+import { renderInline, stripInlineMd } from '@/lib/inline-md';
 import { PROMPT_CATEGORY_LABELS, type PromptItem } from '@/types/prompt';
 
 export function PromptDetail({
@@ -73,7 +74,7 @@ export function PromptDetail({
       </h1>
       {prompt.description && (
         <p className="text-[15px] text-ink/60 leading-relaxed break-keep whitespace-pre-line mb-7">
-          {prompt.description}
+          {renderInline(prompt.description)}
         </p>
       )}
 
@@ -104,6 +105,23 @@ export function PromptDetail({
         </div>
       </section>
 
+      {/* 참고 이미지 — 2장 이상이면 세로로 쌓아 보여준다 */}
+      {prompt.images && prompt.images.length > 0 && (
+        <section className="mb-8 space-y-3">
+          {prompt.images.map((im, i) => (
+            <figure key={i} className="overflow-hidden rounded-xl border border-border bg-muted">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={im.url} alt={im.caption ?? ''} loading="lazy" className="block w-full" />
+              {im.caption && (
+                <figcaption className="border-t border-border bg-white px-3.5 py-2 text-[12px] text-ink/50 break-keep">
+                  {im.caption}
+                </figcaption>
+              )}
+            </figure>
+          ))}
+        </section>
+      )}
+
       {/* Related */}
       {related.length > 0 && (
         <section className="pt-8 border-t border-border">
@@ -127,7 +145,7 @@ export function PromptDetail({
                 </h3>
                 {r.description && (
                   <p className="text-[13px] text-ink/50 leading-relaxed mt-1 line-clamp-2 break-keep">
-                    {r.description}
+                    {stripInlineMd(r.description)}
                   </p>
                 )}
               </TrackedCtaLink>

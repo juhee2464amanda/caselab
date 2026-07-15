@@ -30,6 +30,8 @@ export interface PromptItem {
   source?: string;
   /** 출처 외부 링크 (있으면 칩 클릭 시 새 탭) */
   sourceUrl?: string;
+  /** 참고 이미지 (body.images) — 상세에서 프롬프트 본문 아래 노출. 2장 이상이면 갤러리 */
+  images?: { url: string; caption?: string }[];
   /**
    * 에디터 PICK 상단노출 순서 (tools.pick_order).
    * null = 일반(최신순 누적), 숫자 = PICK 밴드에 노출되며 작을수록 앞.

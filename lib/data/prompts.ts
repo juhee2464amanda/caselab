@@ -17,6 +17,7 @@ type ToolPromptRow = {
     promptCategory?: string;
     source?: string;
     sourceUrl?: string;
+    images?: { url: string; caption?: string }[];
   } | null;
 };
 
@@ -36,6 +37,7 @@ function mapPromptRow(r: ToolPromptRow): PromptItem {
     category: isPromptCategory(b.promptCategory) ? b.promptCategory : 'think',
     source: b.source,
     sourceUrl: b.sourceUrl,
+    images: Array.isArray(b.images) ? b.images.filter((im) => im && typeof im.url === 'string' && im.url) : undefined,
     pickOrder: r.pick_order ?? null,
   };
 }
