@@ -1,4 +1,6 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { BookOpen } from 'lucide-react';
 import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/utils';
 
@@ -33,9 +35,19 @@ export default async function MypageEbooks() {
                 <h3 className="font-medium">{p.products.title}</h3>
                 <p className="text-xs text-ink/50 mt-0.5">신청일 {formatDate(p.created_at)}</p>
               </div>
-              <span className="badge">
-                {p.status === 'sent' ? '발송완료' : p.status === 'pending' ? '발송대기' : p.status}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="badge">
+                  {p.status === 'sent' ? '발송완료' : p.status === 'pending' ? '발송대기' : p.status}
+                </span>
+                {p.status !== 'refunded' && (
+                  <Link
+                    href={`/read/${p.id}`}
+                    className="inline-flex items-center gap-1.5 rounded-md bg-ink px-3 py-1.5 text-sm font-medium text-white transition hover:bg-ink/85"
+                  >
+                    <BookOpen className="h-3.5 w-3.5" /> 읽기
+                  </Link>
+                )}
+              </div>
             </li>
           ))}
         </ul>

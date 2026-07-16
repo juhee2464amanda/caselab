@@ -18,3 +18,6 @@ tsconfig.tsbuildinfo
 
 # Supabase CLI local link artifacts (project-ref, pooler-url 등) — 커밋 금지
 supabase/.temp/
+
+# pdfjs worker (postinstall이 pdfjs-dist에서 복사)
+/public/pdf.worker.min.mjs
