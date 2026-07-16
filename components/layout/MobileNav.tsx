@@ -27,7 +27,7 @@ export function MobileNav({ open, onClose, nav, onSubscribe, isLoggedIn, onLogou
         aria-hidden
       />
       <aside className={cn(
-        'absolute right-0 top-0 h-full w-72 bg-white shadow-elevated transition-transform',
+        'absolute right-0 top-0 h-full w-[80vw] max-w-xs bg-white shadow-elevated transition-transform',
         open ? 'translate-x-0' : 'translate-x-full'
       )}>
         <header className="flex items-center justify-between p-4 border-b border-border">

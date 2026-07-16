@@ -23,24 +23,25 @@ export interface SeriesCard {
 
 export function SeriesGrid({ series }: { series: SeriesCard[] }) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4 mt-4">
       {series.map((s) => (
         <Link
           key={s.href}
           href={s.href}
-          className="group block border border-border rounded-[14px] overflow-hidden bg-white hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] hover:border-ink/20 transition-all"
+          className="group flex flex-row md:flex-col border border-border rounded-[14px] overflow-hidden bg-white hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] hover:border-ink/20 transition-all"
         >
-          <div className="aspect-[4/3] overflow-hidden relative bg-muted">
+          {/* 썸네일 — 모바일: 좌측 고정 정사각, 데스크톱: 상단 4:3 */}
+          <div className="relative shrink-0 w-32 h-32 md:w-full md:h-auto md:aspect-[4/3] overflow-hidden bg-muted">
             <EditableImage
               k={`${s.k}.thumb`}
               src={s.thumb || null}
               imgClassName="w-full h-full object-cover transition-transform group-hover:scale-[1.03]"
             />
-            <span className="absolute top-2.5 left-2.5 text-[11px] font-bold text-white bg-black/55 backdrop-blur px-2 py-0.5 rounded">
+            <span className="absolute top-2 left-2 md:top-2.5 md:left-2.5 text-[11px] font-bold text-white bg-black/55 backdrop-blur px-2 py-0.5 rounded">
               {s.count}개
             </span>
           </div>
-          <div className="p-4 pb-4.5">
+          <div className="flex-1 min-w-0 p-3.5 md:p-4 md:pb-4.5">
             <Editable
               as="h3"
               k={`${s.k}.name`}
@@ -51,7 +52,7 @@ export function SeriesGrid({ series }: { series: SeriesCard[] }) {
               as="p"
               k={`${s.k}.desc`}
               value={s.desc}
-              className="text-[13px] text-ink/60 leading-snug keepall"
+              className="text-[13px] text-ink/60 leading-snug keepall line-clamp-2 min-h-[36px] md:min-h-0"
             />
             {s.recentTitle && (
               <div className="mt-3 pt-2.5 border-t border-muted flex items-center gap-1.5 min-w-0">

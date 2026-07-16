@@ -1,6 +1,6 @@
 import { HeroCarousel } from '@/components/layout/HeroCarousel';
 import { FreeBookBanner } from '@/components/home/FreeBookBanner';
-import { CategoryTabsList } from '@/components/home/CategoryTabsList';
+import { CasesSwipe } from '@/components/home/CasesSwipe';
 import { PopularSidebar } from '@/components/home/PopularSidebar';
 import { SeriesGrid } from '@/components/home/SeriesGrid';
 import { VoteCompact } from '@/components/home/VoteCompact';
@@ -190,25 +190,36 @@ export default async function HomePage() {
   }));
 
   return (
-    <>
+    // flex-col + order — 모바일에선 무료 ebook 배너를 맨 아래로 내린다(데스크톱은 원래 2번째 유지).
+    <div className="flex flex-col">
+      {/* ⓪ 브랜드 띠배너 — 검은 얇은 띠 */}
+      <Editable
+        as="div"
+        k="home.strip.text"
+        value={pick(overrides, 'home.strip.text', '일잘러의 검증된 AI 큐레이션')}
+        className="bg-ink text-center text-[12px] md:text-[13px] font-medium tracking-tight text-white/90 py-2 px-4"
+      />
+
       {/* ① Hero Carousel */}
       <HeroCarousel items={curated} />
 
-      {/* ② 무료 전자책 배너 (준비중이면 '준비 중' 배너로 대체) */}
-      <FreeBookBanner
-        comingSoon={bannerComingSoon}
-        tag={pick(overrides, 'home.banner.tag', '무료 배포 중')}
-        title={pick(overrides, 'home.banner.title', 'AI, 누구나 쉽게 시작할 수 있도록')}
-        desc={pick(
-          overrides,
-          'home.banner.desc',
-          '첫 번째 ebook을 무료로 드립니다. 다운로드 후 바로 읽어보세요.',
-        )}
-        cta={pick(overrides, 'home.banner.cta', '무료로 받기 →')}
-      />
+      {/* ② 무료 전자책 배너 (준비중이면 '준비 중' 배너로 대체) — 모바일에선 하단(이런 거 다뤄주세요 바로 위), 데스크톱 원위치 */}
+      <div className="order-4 md:order-none">
+        <FreeBookBanner
+          comingSoon={bannerComingSoon}
+          tag={pick(overrides, 'home.banner.tag', '무료 배포 중')}
+          title={pick(overrides, 'home.banner.title', 'AI, 누구나 쉽게 시작할 수 있도록')}
+          desc={pick(
+            overrides,
+            'home.banner.desc',
+            '첫 번째 ebook을 무료로 드립니다. 다운로드 후 바로 읽어보세요.',
+          )}
+          cta={pick(overrides, 'home.banner.cta', '무료로 받기 →')}
+        />
+      </div>
 
-      {/* ③ 실전케이스 + Popular 사이드바 (연회색) */}
-      <section className="py-10 md:py-14 bg-user-subtle">
+      {/* ③ 실전케이스 + Popular 사이드바 (연회색) — 모바일에선 메인배너 바로 아래 */}
+      <section className="py-10 md:py-14 bg-user-subtle order-1 md:order-none">
         <div className="mx-auto max-w-[1100px] px-6">
           <div className="flex flex-col lg:flex-row gap-0 lg:gap-12">
             <div className="flex-1 min-w-0">
@@ -226,7 +237,7 @@ export default async function HomePage() {
                   전체 보기
                 </a>
               </div>
-              <CategoryTabsList items={articleItems} />
+              <CasesSwipe items={articleItems} />
             </div>
 
             <aside className="w-full lg:w-[280px] lg:pt-12 shrink-0">
@@ -236,8 +247,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ④ 일잘러의 AI 자료실 (4 series) */}
-      <section className="py-10 md:py-14">
+      {/* ④ 일잘러의 AI 자료실 (4 series) — 모바일에선 실전케이스 아래 */}
+      <section className="py-10 md:py-14 order-2 md:order-none">
         <div className="mx-auto max-w-[1100px] px-6">
           <div className="flex items-center justify-between">
             <h2 className="text-[22px] md:text-[26px] font-extrabold tracking-tight">
@@ -257,8 +268,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ⑤ 이런 거 다뤄주세요 (연회색) */}
-      <section className="py-10 md:py-14 bg-user-subtle">
+      {/* ⑤ 이런 거 다뤄주세요 (연회색) — 모바일에선 맨 아래 */}
+      <section className="py-10 md:py-14 bg-user-subtle order-5 md:order-none">
         <div className="mx-auto max-w-[1100px] px-6">
           <Editable
             as="h2"
@@ -270,6 +281,6 @@ export default async function HomePage() {
           <SuggestInline />
         </div>
       </section>
-    </>
+    </div>
   );
 }

@@ -86,7 +86,7 @@ export function GNB() {
           'sticky top-0 z-40 w-full bg-white border-b border-border'
         )}
       >
-        <div className="mx-auto max-w-[1100px] px-6 flex h-14 items-center justify-between gap-4">
+        <div className="mx-auto max-w-[1100px] px-4 sm:px-6 flex h-14 items-center justify-between gap-2.5 sm:gap-4">
           {/* 로고 + sub message */}
           <div className="flex items-center gap-3">
             <Link
@@ -153,7 +153,7 @@ export function GNB() {
                 <button
                   type="button"
                   onClick={() => setUserMenuOpen((v) => !v)}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-md text-ink/60 hover:bg-muted transition-colors overflow-hidden"
+                  className="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-md text-ink/60 hover:bg-muted transition-colors overflow-hidden"
                   aria-label="내 메뉴"
                   aria-haspopup="menu"
                   aria-expanded={userMenuOpen}
@@ -205,7 +205,7 @@ export function GNB() {
             ) : (
               <Link
                 href="/login"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-md text-ink/60 hover:bg-muted transition-colors"
+                className="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-md text-ink/60 hover:bg-muted transition-colors"
                 aria-label="로그인"
               >
                 <User className="h-5 w-5" strokeWidth={1.8} />
@@ -213,7 +213,7 @@ export function GNB() {
             )}
             <Link
               href="/search"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md text-ink/60 hover:bg-muted transition-colors"
+              className="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-md text-ink/60 hover:bg-muted transition-colors"
               aria-label="검색"
             >
               <Search className="h-5 w-5" strokeWidth={1.8} />
@@ -222,7 +222,7 @@ export function GNB() {
             {/* 모바일 햄버거 */}
             <button
               type="button"
-              className="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted"
+              className="md:hidden inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-md hover:bg-muted"
               onClick={() => setMobileOpen(true)}
               aria-label="메뉴 열기"
             >
