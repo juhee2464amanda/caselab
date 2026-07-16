@@ -29,6 +29,7 @@ export interface PageAnnotation {
   id: string;
   color: string;
   rects: NormRect[];
+  note: string | null;
 }
 
 /** 드래그 선택 결과 — 플로팅 메뉴 표시용 */
@@ -40,11 +41,34 @@ export interface TextSelection {
   anchor: { x: number; y: number };
 }
 
+// 단색 + 그룹 opacity로 칠한다 — rect가 겹쳐도 진해지지 않게(얼룩 방지)
 export const HIGHLIGHT_COLORS: Record<string, string> = {
-  yellow: 'rgba(250, 204, 21, 0.42)',
-  green: 'rgba(74, 222, 128, 0.38)',
-  pink: 'rgba(244, 114, 182, 0.36)',
+  yellow: '#FACC15',
+  green: '#4ADE80',
+  pink: '#F472B6',
 };
+
+/** 같은 줄의 rect들을 하나로 병합 — 겹침/틈으로 인한 얼룩덜룩한 형광펜 방지 */
+export function mergeLineRects(rects: NormRect[]): NormRect[] {
+  const lines: NormRect[] = [];
+  const sorted = [...rects].sort((a, b) => a.y - b.y || a.x - b.x);
+  for (const r of sorted) {
+    const line = lines.find(
+      (l) => Math.abs(l.y + l.h / 2 - (r.y + r.h / 2)) < Math.max(l.h, r.h) * 0.6
+    );
+    if (line) {
+      const right = Math.max(line.x + line.w, r.x + r.w);
+      const bottom = Math.max(line.y + line.h, r.y + r.h);
+      line.x = Math.min(line.x, r.x);
+      line.y = Math.min(line.y, r.y);
+      line.w = right - line.x;
+      line.h = bottom - line.y;
+    } else {
+      lines.push({ ...r });
+    }
+  }
+  return lines;
+}
 
 interface PdfReaderProps {
   fileUrl: string;
@@ -59,6 +83,8 @@ interface PdfReaderProps {
   onPageChange: (page: number) => void;
   /** 텍스트 드래그 선택/해제 — null이면 선택 해제(메뉴 닫기) */
   onTextSelected: (sel: TextSelection | null) => void;
+  /** 메모 있는 하이라이트 클릭 → 메모 팝오버 */
+  onAnnotationClick: (id: string, anchor: { x: number; y: number }) => void;
 }
 
 /** PDF 내장 outline → {제목, 페이지} 평탄화 (2단계까지) */
@@ -84,26 +110,58 @@ async function flattenOutline(
   }
 }
 
-/** 하이라이트 오버레이 — 텍스트 레이어 아래(z-index)라 선택을 방해하지 않고,
- *  다크모드 invert 필터 밖에 있어 색이 유지된다. 관리는 노트 패널에서. */
-function HighlightOverlay({ items }: { items: PageAnnotation[] }) {
+/** 하이라이트 오버레이 — 다크모드 invert 필터 밖에 있어 색이 유지된다.
+ *  주석 단위 그룹 opacity라 rect가 겹쳐도 균일한 색. 메모가 있으면 📝 배지 + 클릭으로 열람. */
+function HighlightOverlay({
+  items,
+  onNoteClick,
+}: {
+  items: PageAnnotation[];
+  onNoteClick: (id: string, anchor: { x: number; y: number }) => void;
+}) {
   return (
     <div className="pointer-events-none absolute inset-0">
-      {items.map((a) =>
-        a.rects.map((r, i) => (
-          <div
-            key={`${a.id}-${i}`}
-            className="absolute rounded-[2px]"
-            style={{
-              left: `${r.x * 100}%`,
-              top: `${r.y * 100}%`,
-              width: `${r.w * 100}%`,
-              height: `${r.h * 100}%`,
-              background: HIGHLIGHT_COLORS[a.color] ?? HIGHLIGHT_COLORS.yellow,
-            }}
-          />
-        ))
-      )}
+      {items.map((a) => {
+        const color = HIGHLIGHT_COLORS[a.color] ?? HIGHLIGHT_COLORS.yellow;
+        const rects = mergeLineRects(a.rects); // 병합 전 저장분도 렌더 시 정리
+        const first = rects[0];
+        return (
+          <div key={a.id}>
+            <div className="absolute inset-0" style={{ opacity: 0.45 }}>
+              {rects.map((r, i) => (
+                <div
+                  key={i}
+                  className={`absolute rounded-[2px] ${a.note ? 'pointer-events-auto cursor-pointer' : ''}`}
+                  style={{
+                    left: `${r.x * 100}%`,
+                    top: `${r.y * 100}%`,
+                    width: `${r.w * 100}%`,
+                    height: `${r.h * 100}%`,
+                    background: color,
+                  }}
+                  onClick={
+                    a.note
+                      ? (e) => onNoteClick(a.id, { x: e.clientX, y: e.clientY })
+                      : undefined
+                  }
+                />
+              ))}
+            </div>
+            {a.note && first && (
+              <button
+                type="button"
+                aria-label="메모 보기"
+                title="메모 보기"
+                className="pointer-events-auto absolute z-10 -translate-y-1/2 translate-x-[-2px] cursor-pointer text-[13px] leading-none drop-shadow-sm transition hover:scale-125"
+                style={{ left: `${(first.x + first.w) * 100}%`, top: `${first.y * 100}%` }}
+                onClick={(e) => onNoteClick(a.id, { x: e.clientX, y: e.clientY })}
+              >
+                📝
+              </button>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -124,6 +182,7 @@ export default function PdfReader({
   onDocLoad,
   onPageChange,
   onTextSelected,
+  onAnnotationClick,
 }: PdfReaderProps) {
   const [numPages, setNumPages] = useState(0);
   const [aspectRatio, setAspectRatio] = useState(1.414); // A4 기본값, 1페이지 로드 후 실측
@@ -220,7 +279,7 @@ export default function PdfReader({
     onTextSelected({
       page: pageNum,
       text: text.slice(0, 1000),
-      rects,
+      rects: mergeLineRects(rects), // 줄 단위 병합 — 겹침 얼룩 방지
       anchor: { x: last.right, y: last.top },
     });
   }, [onTextSelected]);
@@ -313,7 +372,7 @@ export default function PdfReader({
             loading={<div style={{ width: pageWidth, height: pageHeight }} />}
           />
         </div>
-        <HighlightOverlay items={annotations.get(p) ?? []} />
+        <HighlightOverlay items={annotations.get(p) ?? []} onNoteClick={onAnnotationClick} />
       </>
     );
   }

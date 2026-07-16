@@ -94,6 +94,8 @@ export function EbookViewer({
   /** 메모 입력 팝오버 대상 (선택 캡처본) */
   const [memoTarget, setMemoTarget] = useState<TextSelection | null>(null);
   const [memoText, setMemoText] = useState('');
+  /** 하이라이트 📝 클릭 시 메모 열람 팝오버 */
+  const [viewNote, setViewNote] = useState<{ id: string; anchor: { x: number; y: number } } | null>(null);
 
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const pageRef = useRef(page);
@@ -153,10 +155,13 @@ export function EbookViewer({
   }, [supabase, productId]);
 
   const annotationsByPage = useMemo(() => {
-    const map = new Map<number, Array<{ id: string; color: string; rects: AnnotationRow['rects'] }>>();
+    const map = new Map<
+      number,
+      Array<{ id: string; color: string; rects: AnnotationRow['rects']; note: string | null }>
+    >();
     for (const a of annotations) {
       const list = map.get(a.page) ?? [];
-      list.push({ id: a.id, color: a.color, rects: a.rects });
+      list.push({ id: a.id, color: a.color, rects: a.rects, note: a.note });
       map.set(a.page, list);
     }
     return map;
@@ -219,14 +224,15 @@ export function EbookViewer({
 
   // 내부 스크롤 시 플로팅 메뉴 위치가 어긋나므로 닫기 (capture로 내부 컨테이너 스크롤 감지)
   useEffect(() => {
-    if (!selection && !memoTarget) return;
+    if (!selection && !memoTarget && !viewNote) return;
     const close = () => {
       setSelection(null);
       setMemoTarget(null);
+      setViewNote(null);
     };
     window.addEventListener('scroll', close, true);
     return () => window.removeEventListener('scroll', close, true);
-  }, [selection, memoTarget]);
+  }, [selection, memoTarget, viewNote]);
 
   const handleDocLoad = useCallback(
     ({ numPages: n, outline: o }: { numPages: number; outline: OutlineItem[] }) => {
@@ -431,6 +437,7 @@ export function EbookViewer({
             onDocLoad={handleDocLoad}
             onPageChange={setPage}
             onTextSelected={setSelection}
+            onAnnotationClick={(id, anchor) => setViewNote({ id, anchor })}
           />
         ) : (
           <div className="flex h-full items-center justify-center gap-2 text-sm opacity-60">
@@ -526,6 +533,45 @@ export function EbookViewer({
           </div>
         </div>
       )}
+
+      {/* 메모 열람 팝오버 — 하이라이트의 📝 클릭 시 */}
+      {viewNote &&
+        (() => {
+          const a = annotations.find((x) => x.id === viewNote.id);
+          if (!a) return null;
+          return (
+            <div
+              className="fixed z-50 w-72 rounded-lg border border-black/10 bg-white p-3 shadow-xl"
+              style={menuPos(viewNote.anchor)}
+            >
+              {a.selected_text && (
+                <p className="mb-2 line-clamp-2 rounded bg-amber-50 px-2 py-1 text-xs text-ink/60">
+                  “{a.selected_text.slice(0, 80)}”
+                </p>
+              )}
+              <p className="whitespace-pre-wrap text-sm text-ink">{a.note}</p>
+              <div className="mt-2 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    void removeAnnotation(a.id);
+                    setViewNote(null);
+                  }}
+                  className="rounded-md px-2.5 py-1 text-xs text-red-600 hover:bg-red-50"
+                >
+                  삭제
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewNote(null)}
+                  className="rounded-md bg-muted px-2.5 py-1 text-xs text-ink hover:bg-muted/70"
+                >
+                  닫기
+                </button>
+              </div>
+            </div>
+          );
+        })()}
 
       {/* 하단 진행바 */}
       <footer className={`z-30 flex items-center gap-3 border-t px-3 py-2 sm:px-4 select-none ${chrome}`}>
