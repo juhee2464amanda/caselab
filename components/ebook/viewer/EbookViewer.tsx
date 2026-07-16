@@ -236,7 +236,15 @@ export function EbookViewer({
   const hoverBg = dark ? 'hover:bg-neutral-700' : 'hover:bg-muted';
   const progress = numPages > 0 ? Math.round((page / numPages) * 100) : 0;
 
-  const iconBtn = `rounded-md p-2 transition ${hoverBg} disabled:opacity-30`;
+  // 툴바 버튼 — 틴트 배경·테두리로 기능이 한눈에 보이게 (2026-07-16 피드백)
+  // 기본: accent 틴트 / 활성(북마크): amber 채움 / 활성(패널·다크): accent 채움
+  const iconBtn = dark
+    ? 'rounded-full border border-neutral-600 bg-neutral-700/70 p-2 text-neutral-100 transition hover:bg-neutral-600 disabled:opacity-30'
+    : 'rounded-full border border-accent-100 bg-accent-50 p-2 text-accent-600 transition hover:bg-accent-100 hover:text-accent-700 disabled:opacity-30';
+  const iconBtnAmber = dark
+    ? 'rounded-full border border-amber-400/60 bg-amber-400/20 p-2 text-amber-300 transition hover:bg-amber-400/30'
+    : 'rounded-full border border-amber-300 bg-amber-100 p-2 text-amber-600 transition hover:bg-amber-200';
+  const iconBtnOn = 'rounded-full border border-accent-500 bg-accent-500 p-2 text-white transition hover:bg-accent-600';
 
   return (
     <div
@@ -244,20 +252,26 @@ export function EbookViewer({
       onContextMenu={(e) => e.preventDefault()}
     >
       {/* 상단 툴바 */}
-      <header className={`z-30 flex items-center gap-1 border-b px-2 py-1.5 sm:px-3 ${chrome}`}>
-        <Link href="/mypage/ebooks" aria-label="내 전자책으로 돌아가기" className={iconBtn}>
+      <header className={`z-30 flex items-center gap-1.5 border-b px-2 py-2 sm:px-3 ${chrome}`}>
+        <Link
+          href="/mypage/ebooks"
+          aria-label="내 전자책으로 돌아가기"
+          title="내 전자책으로"
+          className={`rounded-full p-2 transition ${hoverBg}`}
+        >
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <h1 className="min-w-0 flex-1 truncate text-sm font-medium">{title}</h1>
         <button
           type="button"
           aria-label={currentBookmark ? '북마크 해제' : '이 페이지 북마크'}
+          title={currentBookmark ? '북마크 해제' : '이 페이지 북마크'}
           onClick={toggleBookmark}
-          className={iconBtn}
+          className={currentBookmark ? iconBtnAmber : iconBtn}
           disabled={numPages === 0}
         >
           {currentBookmark ? (
-            <BookmarkCheck className="h-4 w-4 text-amber-500" />
+            <BookmarkCheck className="h-4 w-4" />
           ) : (
             <Bookmark className="h-4 w-4" />
           )}
@@ -265,14 +279,16 @@ export function EbookViewer({
         <button
           type="button"
           aria-label="목차·북마크 열기"
+          title="목차 · 북마크"
           onClick={() => setPanel((p) => (p ? null : 'toc'))}
-          className={iconBtn}
+          className={panel ? iconBtnOn : iconBtn}
         >
           <ListTree className="h-4 w-4" />
         </button>
         <button
           type="button"
           aria-label={mode === 'scroll' ? '페이지 넘김 모드로' : '스크롤 모드로'}
+          title={mode === 'scroll' ? '페이지 넘김 모드로' : '스크롤 모드로'}
           onClick={() => updatePrefs({ mode: mode === 'scroll' ? 'page' : 'scroll' })}
           className={iconBtn}
         >
@@ -285,6 +301,7 @@ export function EbookViewer({
         <button
           type="button"
           aria-label="축소"
+          title="축소"
           onClick={() => updatePrefs({ zoom: Math.max(ZOOM_MIN, +(zoom - 0.2).toFixed(1)) })}
           className={`${iconBtn} hidden sm:block`}
           disabled={zoom <= ZOOM_MIN}
@@ -294,6 +311,7 @@ export function EbookViewer({
         <button
           type="button"
           aria-label="확대"
+          title="확대"
           onClick={() => updatePrefs({ zoom: Math.min(ZOOM_MAX, +(zoom + 0.2).toFixed(1)) })}
           className={`${iconBtn} hidden sm:block`}
           disabled={zoom >= ZOOM_MAX}
@@ -303,8 +321,9 @@ export function EbookViewer({
         <button
           type="button"
           aria-label={dark ? '라이트 모드' : '다크 모드'}
+          title={dark ? '라이트 모드' : '다크 모드'}
           onClick={() => updatePrefs({ dark: !dark })}
-          className={iconBtn}
+          className={dark ? iconBtnOn : iconBtn}
         >
           {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
