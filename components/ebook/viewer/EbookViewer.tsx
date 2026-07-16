@@ -12,14 +12,15 @@ import {
   ListTree,
   Loader2,
   Moon,
+  StickyNote,
   Sun,
   ZoomIn,
   ZoomOut,
 } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { track } from '@/lib/analytics/track';
-import type { OutlineItem } from './PdfReader';
-import { ViewerPanel, type BookmarkRow } from './ViewerPanel';
+import type { OutlineItem, TextSelection } from './PdfReader';
+import { ViewerPanel, type AnnotationRow, type BookmarkRow, type PanelTab } from './ViewerPanel';
 
 const PdfReader = dynamic(() => import('./PdfReader'), {
   ssr: false,
@@ -49,6 +50,13 @@ const PREFS_KEY = 'ebook-viewer-prefs';
 const ZOOM_MIN = 0.6;
 const ZOOM_MAX = 2;
 
+/** 플로팅 메뉴 색상 스와치 (실제 하이라이트 색은 PdfReader.HIGHLIGHT_COLORS) */
+const SWATCHES: Array<{ key: string; bg: string; label: string }> = [
+  { key: 'yellow', bg: '#FACC15', label: '노랑 형광펜' },
+  { key: 'green', bg: '#4ADE80', label: '초록 형광펜' },
+  { key: 'pink', bg: '#F472B6', label: '분홍 형광펜' },
+];
+
 function loadPrefs(): ViewerPrefs {
   try {
     const raw = localStorage.getItem(PREFS_KEY);
@@ -60,7 +68,7 @@ function loadPrefs(): ViewerPrefs {
 }
 
 /**
- * 웹뷰어 셸 — 툴바/진행바/패널/상태 관리.
+ * 웹뷰어 셸 — 툴바/진행바/패널/하이라이트·메모/상태 관리.
  * 렌더링은 PdfReader(클라이언트 전용, dynamic import)에 위임.
  * 기획: docs/08_ebook_viewer_plan.md
  */
@@ -78,8 +86,14 @@ export function EbookViewer({
   const [numPages, setNumPages] = useState(0);
   const [outline, setOutline] = useState<OutlineItem[]>([]);
   const [bookmarks, setBookmarks] = useState<BookmarkRow[]>([]);
-  const [panel, setPanel] = useState<'toc' | 'bookmarks' | null>(null);
+  const [annotations, setAnnotations] = useState<AnnotationRow[]>([]);
+  const [panel, setPanel] = useState<PanelTab | null>(null);
   const [prefs, setPrefs] = useState<ViewerPrefs>({ mode: 'scroll', zoom: 1, dark: false });
+  /** 드래그 선택 중 (플로팅 색상 메뉴 표시) */
+  const [selection, setSelection] = useState<TextSelection | null>(null);
+  /** 메모 입력 팝오버 대상 (선택 캡처본) */
+  const [memoTarget, setMemoTarget] = useState<TextSelection | null>(null);
+  const [memoText, setMemoText] = useState('');
 
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const pageRef = useRef(page);
@@ -122,7 +136,7 @@ export function EbookViewer({
     };
   }, [purchaseId]);
 
-  // 북마크 로드 (RLS로 본인 것만)
+  // 북마크·하이라이트 로드 (RLS로 본인 것만)
   useEffect(() => {
     supabase
       .from('ebook_bookmarks')
@@ -130,7 +144,23 @@ export function EbookViewer({
       .eq('product_id', productId)
       .order('page')
       .then(({ data }) => setBookmarks((data as BookmarkRow[]) ?? []));
+    supabase
+      .from('ebook_annotations')
+      .select('id, page, color, selected_text, rects, note')
+      .eq('product_id', productId)
+      .order('page')
+      .then(({ data }) => setAnnotations((data as AnnotationRow[]) ?? []));
   }, [supabase, productId]);
+
+  const annotationsByPage = useMemo(() => {
+    const map = new Map<number, Array<{ id: string; color: string; rects: AnnotationRow['rects'] }>>();
+    for (const a of annotations) {
+      const list = map.get(a.page) ?? [];
+      list.push({ id: a.id, color: a.color, rects: a.rects });
+      map.set(a.page, list);
+    }
+    return map;
+  }, [annotations]);
 
   const saveReadingState = useCallback(
     (p: number) => {
@@ -187,6 +217,17 @@ export function EbookViewer({
     return () => window.removeEventListener('keydown', onKey);
   }, [prefs.mode]);
 
+  // 내부 스크롤 시 플로팅 메뉴 위치가 어긋나므로 닫기 (capture로 내부 컨테이너 스크롤 감지)
+  useEffect(() => {
+    if (!selection && !memoTarget) return;
+    const close = () => {
+      setSelection(null);
+      setMemoTarget(null);
+    };
+    window.addEventListener('scroll', close, true);
+    return () => window.removeEventListener('scroll', close, true);
+  }, [selection, memoTarget]);
+
   const handleDocLoad = useCallback(
     ({ numPages: n, outline: o }: { numPages: number; outline: OutlineItem[] }) => {
       setNumPages(n);
@@ -229,6 +270,43 @@ export function EbookViewer({
     [supabase]
   );
 
+  /** 하이라이트/메모 저장 (target = 캡처된 선택) */
+  const saveAnnotation = useCallback(
+    async (target: TextSelection, color: string, note: string | null) => {
+      setSelection(null);
+      setMemoTarget(null);
+      setMemoText('');
+      window.getSelection()?.removeAllRanges();
+      const { data } = await supabase
+        .from('ebook_annotations')
+        .insert({
+          user_id: userId,
+          product_id: productId,
+          page: target.page,
+          color,
+          selected_text: target.text,
+          rects: target.rects,
+          note,
+        })
+        .select('id, page, color, selected_text, rects, note')
+        .single();
+      if (data) {
+        setAnnotations((prev) =>
+          [...prev, data as AnnotationRow].sort((a, b) => a.page - b.page)
+        );
+      }
+    },
+    [supabase, userId, productId]
+  );
+
+  const removeAnnotation = useCallback(
+    async (id: string) => {
+      setAnnotations((prev) => prev.filter((a) => a.id !== id));
+      await supabase.from('ebook_annotations').delete().eq('id', id);
+    },
+    [supabase]
+  );
+
   const { mode, zoom, dark } = prefs;
   const chrome = dark
     ? 'bg-neutral-800 text-neutral-100 border-neutral-700'
@@ -246,10 +324,17 @@ export function EbookViewer({
     : 'rounded-full border border-amber-300 bg-amber-100 p-2 text-amber-600 transition hover:bg-amber-200';
   const iconBtnOn = 'rounded-full border border-accent-500 bg-accent-500 p-2 text-white transition hover:bg-accent-600';
 
+  // 플로팅 메뉴 위치 (뷰포트 클램프)
+  const menuPos = (anchor: { x: number; y: number }) => ({
+    left: Math.min(Math.max(8, anchor.x - 80), (typeof window !== 'undefined' ? window.innerWidth : 800) - 190),
+    top: Math.max(8, anchor.y - 52),
+  });
+
   return (
     <div
-      className={`flex h-dvh flex-col select-none ${dark ? 'bg-neutral-900' : 'bg-neutral-200'}`}
+      className={`flex h-dvh flex-col ${dark ? 'bg-neutral-900' : 'bg-neutral-200'}`}
       onContextMenu={(e) => e.preventDefault()}
+      onCopy={(e) => e.preventDefault()} // 선택은 허용(하이라이트용), 복사만 차단
     >
       {/* 상단 툴바 */}
       <header className={`z-30 flex items-center gap-1.5 border-b px-2 py-2 sm:px-3 ${chrome}`}>
@@ -261,7 +346,7 @@ export function EbookViewer({
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
-        <h1 className="min-w-0 flex-1 truncate text-sm font-medium">{title}</h1>
+        <h1 className="min-w-0 flex-1 truncate text-sm font-medium select-none">{title}</h1>
         <button
           type="button"
           aria-label={currentBookmark ? '북마크 해제' : '이 페이지 북마크'}
@@ -278,8 +363,8 @@ export function EbookViewer({
         </button>
         <button
           type="button"
-          aria-label="목차·북마크 열기"
-          title="목차 · 북마크"
+          aria-label="목차·북마크·노트 열기"
+          title="목차 · 북마크 · 노트"
           onClick={() => setPanel((p) => (p ? null : 'toc'))}
           className={panel ? iconBtnOn : iconBtn}
         >
@@ -342,8 +427,10 @@ export function EbookViewer({
             page={page}
             zoom={zoom}
             dark={dark}
+            annotations={annotationsByPage}
             onDocLoad={handleDocLoad}
             onPageChange={setPage}
+            onTextSelected={setSelection}
           />
         ) : (
           <div className="flex h-full items-center justify-center gap-2 text-sm opacity-60">
@@ -357,18 +444,91 @@ export function EbookViewer({
             outline={outline}
             fallbackToc={fallbackToc}
             bookmarks={bookmarks}
+            annotations={annotations}
             currentPage={page}
             dark={dark}
             onTabChange={setPanel}
             onJump={jumpTo}
             onRemoveBookmark={removeBookmark}
+            onRemoveAnnotation={removeAnnotation}
             onClose={() => setPanel(null)}
           />
         )}
       </main>
 
+      {/* 드래그 선택 플로팅 메뉴 — 형광펜 3색 + 메모 */}
+      {selection && !memoTarget && (
+        <div
+          className="fixed z-50 flex items-center gap-1.5 rounded-full border border-black/10 bg-white px-2.5 py-1.5 shadow-lg"
+          style={menuPos(selection.anchor)}
+          onMouseDown={(e) => e.preventDefault()} // 클릭 시 브라우저 선택 해제 방지
+        >
+          {SWATCHES.map((s) => (
+            <button
+              key={s.key}
+              type="button"
+              aria-label={s.label}
+              title={s.label}
+              onClick={() => void saveAnnotation(selection, s.key, null)}
+              className="h-6 w-6 rounded-full border border-black/10 transition hover:scale-110"
+              style={{ background: s.bg }}
+            />
+          ))}
+          <span className="mx-0.5 h-4 w-px bg-black/10" />
+          <button
+            type="button"
+            onClick={() => {
+              setMemoTarget(selection);
+              setSelection(null);
+            }}
+            className="flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium text-ink hover:bg-muted"
+          >
+            <StickyNote className="h-3.5 w-3.5 text-accent-600" /> 메모
+          </button>
+        </div>
+      )}
+
+      {/* 메모 입력 팝오버 */}
+      {memoTarget && (
+        <div
+          className="fixed z-50 w-72 rounded-lg border border-black/10 bg-white p-3 shadow-xl"
+          style={menuPos(memoTarget.anchor)}
+        >
+          <p className="mb-2 line-clamp-2 rounded bg-amber-50 px-2 py-1 text-xs text-ink/60">
+            “{memoTarget.text.slice(0, 80)}”
+          </p>
+          <textarea
+            autoFocus
+            rows={3}
+            value={memoText}
+            onChange={(e) => setMemoText(e.target.value)}
+            placeholder="메모를 입력하세요"
+            className="w-full resize-none rounded-md border border-black/10 px-2 py-1.5 text-sm text-ink outline-none focus:border-accent-500"
+          />
+          <div className="mt-2 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setMemoTarget(null);
+                setMemoText('');
+              }}
+              className="rounded-md px-2.5 py-1 text-xs text-ink/60 hover:bg-muted"
+            >
+              취소
+            </button>
+            <button
+              type="button"
+              onClick={() => void saveAnnotation(memoTarget, 'yellow', memoText.trim() || null)}
+              className="rounded-md bg-accent-500 px-3 py-1 text-xs font-medium text-white hover:bg-accent-600"
+            >
+              저장
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 하단 진행바 */}
-      <footer className={`z-30 flex items-center gap-3 border-t px-3 py-2 sm:px-4 ${chrome}`}>
+      <footer className={`z-30 flex items-center gap-3 border-t px-3 py-2 sm:px-4 select-none ${chrome}`}>
         <input
           type="range"
           min={1}

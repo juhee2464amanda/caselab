@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
+import 'react-pdf/dist/Page/TextLayer.css';
 
 // 워커는 public/ 정적 파일로 서빙 (postinstall이 pdfjs-dist 버전과 동기화).
 // new URL('pdfjs-dist/...', import.meta.url) 패턴은 Next webpack에서 pdfjs 모듈을
@@ -16,6 +17,35 @@ export interface OutlineItem {
   depth: number;
 }
 
+/** 페이지 기준 정규화 좌표 (0..1) */
+export interface NormRect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+export interface PageAnnotation {
+  id: string;
+  color: string;
+  rects: NormRect[];
+}
+
+/** 드래그 선택 결과 — 플로팅 메뉴 표시용 */
+export interface TextSelection {
+  page: number;
+  text: string;
+  rects: NormRect[];
+  /** 메뉴 앵커 (뷰포트 좌표) */
+  anchor: { x: number; y: number };
+}
+
+export const HIGHLIGHT_COLORS: Record<string, string> = {
+  yellow: 'rgba(250, 204, 21, 0.42)',
+  green: 'rgba(74, 222, 128, 0.38)',
+  pink: 'rgba(244, 114, 182, 0.36)',
+};
+
 interface PdfReaderProps {
   fileUrl: string;
   mode: 'scroll' | 'page';
@@ -23,8 +53,12 @@ interface PdfReaderProps {
   page: number;
   zoom: number;
   dark: boolean;
+  /** 페이지별 하이라이트 (page → annotations) */
+  annotations: Map<number, PageAnnotation[]>;
   onDocLoad: (info: { numPages: number; outline: OutlineItem[] }) => void;
   onPageChange: (page: number) => void;
+  /** 텍스트 드래그 선택/해제 — null이면 선택 해제(메뉴 닫기) */
+  onTextSelected: (sel: TextSelection | null) => void;
 }
 
 /** PDF 내장 outline → {제목, 페이지} 평탄화 (2단계까지) */
@@ -50,11 +84,35 @@ async function flattenOutline(
   }
 }
 
+/** 하이라이트 오버레이 — 텍스트 레이어 아래(z-index)라 선택을 방해하지 않고,
+ *  다크모드 invert 필터 밖에 있어 색이 유지된다. 관리는 노트 패널에서. */
+function HighlightOverlay({ items }: { items: PageAnnotation[] }) {
+  return (
+    <div className="pointer-events-none absolute inset-0">
+      {items.map((a) =>
+        a.rects.map((r, i) => (
+          <div
+            key={`${a.id}-${i}`}
+            className="absolute rounded-[2px]"
+            style={{
+              left: `${r.x * 100}%`,
+              top: `${r.y * 100}%`,
+              width: `${r.w * 100}%`,
+              height: `${r.h * 100}%`,
+              background: HIGHLIGHT_COLORS[a.color] ?? HIGHLIGHT_COLORS.yellow,
+            }}
+          />
+        ))
+      )}
+    </div>
+  );
+}
+
 /**
  * react-pdf(PDF.js) 렌더러.
  * - 스크롤 모드: 전 페이지 래퍼 + 현재 페이지 ±2만 실제 렌더(윈도잉), IntersectionObserver로 현재 페이지 보고
  * - 페이지 모드: 단일 페이지 + 좌우 이동
- * - 텍스트/주석 레이어 비활성 — 복사 방지 겸 렌더 비용 절감 (검색·하이라이트는 v2에서 재검토)
+ * - 텍스트 레이어 활성 — 드래그 선택 → 하이라이트/메모. 복사는 상위(EbookViewer)에서 차단
  */
 export default function PdfReader({
   fileUrl,
@@ -62,8 +120,10 @@ export default function PdfReader({
   page,
   zoom,
   dark,
+  annotations,
   onDocLoad,
   onPageChange,
+  onTextSelected,
 }: PdfReaderProps) {
   const [numPages, setNumPages] = useState(0);
   const [aspectRatio, setAspectRatio] = useState(1.414); // A4 기본값, 1페이지 로드 후 실측
@@ -117,6 +177,63 @@ export default function PdfReader({
     },
     [onDocLoad]
   );
+
+  // 드래그 선택 감지 → 정규화 rect 계산 후 부모에 보고
+  const reportSelection = useCallback(() => {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || sel.rangeCount === 0) {
+      onTextSelected(null);
+      return;
+    }
+    const range = sel.getRangeAt(0);
+    const startEl =
+      range.startContainer instanceof Element
+        ? range.startContainer
+        : range.startContainer.parentElement;
+    const pageEl = startEl?.closest('[data-page]') as HTMLElement | null;
+    if (!pageEl) {
+      onTextSelected(null);
+      return;
+    }
+    const pageNum = Number(pageEl.getAttribute('data-page'));
+    const pr = pageEl.getBoundingClientRect();
+    const rects: NormRect[] = [];
+    let last: DOMRect | null = null;
+    for (const r of Array.from(range.getClientRects())) {
+      if (r.width < 2 || r.height < 2) continue;
+      // 페이지 경계 밖(다른 페이지에 걸친) 조각은 제외 — 단일 페이지로 제한
+      if (r.top < pr.top - 2 || r.bottom > pr.bottom + 2) continue;
+      rects.push({
+        x: (r.left - pr.left) / pr.width,
+        y: (r.top - pr.top) / pr.height,
+        w: r.width / pr.width,
+        h: r.height / pr.height,
+      });
+      last = r;
+      if (rects.length >= 60) break; // 과도한 선택 방어
+    }
+    const text = sel.toString().trim();
+    if (!rects.length || !text || !last) {
+      onTextSelected(null);
+      return;
+    }
+    onTextSelected({
+      page: pageNum,
+      text: text.slice(0, 1000),
+      rects,
+      anchor: { x: last.right, y: last.top },
+    });
+  }, [onTextSelected]);
+
+  useEffect(() => {
+    const handler = () => setTimeout(reportSelection, 10); // 선택 확정 후 계산
+    document.addEventListener('mouseup', handler);
+    document.addEventListener('touchend', handler);
+    return () => {
+      document.removeEventListener('mouseup', handler);
+      document.removeEventListener('touchend', handler);
+    };
+  }, [reportSelection]);
 
   // 스크롤 모드: 화면에 가장 크게 보이는 페이지를 현재 페이지로 보고
   useEffect(() => {
@@ -183,6 +300,24 @@ export default function PdfReader({
     </div>
   );
 
+  function renderPage(p: number) {
+    return (
+      <>
+        {/* invert 필터는 캔버스/텍스트레이어에만 — 하이라이트는 필터 밖이라 색 유지 */}
+        <div style={{ filter: darkFilter }}>
+          <Page
+            pageNumber={p}
+            width={pageWidth}
+            renderTextLayer
+            renderAnnotationLayer={false}
+            loading={<div style={{ width: pageWidth, height: pageHeight }} />}
+          />
+        </div>
+        <HighlightOverlay items={annotations.get(p) ?? []} />
+      </>
+    );
+  }
+
   return (
     <div
       ref={scrollRef}
@@ -206,31 +341,20 @@ export default function PdfReader({
                 key={p}
                 data-page={p}
                 ref={(el) => registerPageRef(p, el)}
-                className="shadow-card"
-                style={{ width: pageWidth, minHeight: pageHeight, filter: darkFilter }}
+                className="relative shadow-card"
+                style={{ width: pageWidth, minHeight: pageHeight }}
               >
-                {Math.abs(p - page) <= 2 ? (
-                  <Page
-                    pageNumber={p}
-                    width={pageWidth}
-                    renderTextLayer={false}
-                    renderAnnotationLayer={false}
-                    loading={<div style={{ width: pageWidth, height: pageHeight }} />}
-                  />
-                ) : null}
+                {Math.abs(p - page) <= 2 ? renderPage(p) : null}
               </div>
             ))}
           </div>
         ) : (
           <div className="relative flex min-h-full items-center justify-center py-4">
-            <div className="shadow-card" style={{ filter: darkFilter }}>
-              <Page
-                pageNumber={Math.min(Math.max(page, 1), Math.max(numPages, 1))}
-                width={pageWidth}
-                renderTextLayer={false}
-                renderAnnotationLayer={false}
-                loading={<div style={{ width: pageWidth, height: pageHeight }} />}
-              />
+            <div
+              data-page={Math.min(Math.max(page, 1), Math.max(numPages, 1))}
+              className="relative shadow-card"
+            >
+              {renderPage(Math.min(Math.max(page, 1), Math.max(numPages, 1)))}
             </div>
             <button
               type="button"
