@@ -64,8 +64,10 @@ export interface GuideItem {
   source: string;
   /** 배지 색: default(파랑) | github(검정) | course(초록) */
   sourceType: GuideSourceType;
-  /** 썸네일 영역에 표시할 브랜드명 (로고 대체 텍스트) */
+  /** 썸네일 영역에 표시할 브랜드명 (로고 대체 텍스트 · thumbImage 없을 때 폴백) */
   thumbLabel: string;
+  /** 썸네일 이미지 URL (있으면 이미지로, 없으면 thumbLabel 텍스트로 렌더) */
+  thumbImage?: string;
   /** 썸네일 배경색 (없으면 muted) */
   thumbBg?: string;
   /** 썸네일 글자색 (없으면 ink) */

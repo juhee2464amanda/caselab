@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   GUIDE_CATEGORIES,
@@ -11,15 +11,18 @@ import {
   guideHasDetail,
   type GuideCategory,
   type GuideItem,
-  type GuideSourceType,
 } from '@/types/guide';
 
 type Tab = 'all' | GuideCategory;
 
-function sourceBadgeClass(type: GuideSourceType): string {
-  if (type === 'github') return 'text-white bg-[#24292e]';
-  if (type === 'course') return 'text-[#047857] bg-[#d1fae5]';
-  return 'text-accent bg-accent-50';
+function hostLabel(guide: GuideItem): string | null {
+  if (guide.linkLabel) return guide.linkLabel;
+  if (!guide.url) return null;
+  try {
+    return new URL(guide.url).hostname.replace(/^www\./, '');
+  } catch {
+    return null;
+  }
 }
 
 export function GuidesBrowser({ guides }: { guides: GuideItem[] }) {
@@ -37,9 +40,9 @@ export function GuidesBrowser({ guides }: { guides: GuideItem[] }) {
   const presentCats = GUIDE_CATEGORIES.filter((c) => grouped.has(c));
 
   return (
-    <div className="mx-auto max-w-[1100px] px-6 pb-20">
+    <div className="mx-auto max-w-[860px] px-6 pb-20">
       {/* 필터 탭 */}
-      <div className="sticky top-14 z-40 -mx-6 px-6 bg-bg border-b border-border mb-8 flex gap-1.5 overflow-x-auto py-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="sticky top-14 z-40 -mx-6 px-6 bg-bg border-b border-border mb-5 flex gap-1.5 overflow-x-auto py-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <TabButton active={tab === 'all'} onClick={() => setTab('all')} label="전체" count={guides.length} />
         {presentCats.map((c) => (
           <TabButton
@@ -52,24 +55,42 @@ export function GuidesBrowser({ guides }: { guides: GuideItem[] }) {
         ))}
       </div>
 
+      {/* 범례 — 내부 상세 vs 외부 이동 구분 */}
+      {guides.length > 0 && (
+        <div className="mb-6 flex items-center gap-4 px-1 text-[11.5px] text-ink/45">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="inline-flex h-4 w-4 items-center justify-center rounded-[4px] bg-accent-50 text-accent">
+              <ArrowRight className="h-2.5 w-2.5" />
+            </span>
+            케이스랩 상세 가이드
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="inline-flex h-4 w-4 items-center justify-center rounded-[4px] bg-ink/[0.05] text-ink/40">
+              <ExternalLink className="h-2.5 w-2.5" />
+            </span>
+            외부 사이트로 이동
+          </span>
+        </div>
+      )}
+
       {presentCats
         .filter((c) => tab === 'all' || tab === c)
         .map((c) => {
           const items = grouped.get(c)!;
           return (
-            <section key={c} className="mb-12 scroll-mt-32">
-              <div className="flex items-baseline gap-2.5 mb-2">
-                <h2 className="text-xl font-extrabold tracking-[-0.025em]">
+            <section key={c} className="mb-9 scroll-mt-32">
+              <div className="flex items-baseline gap-2 mb-1">
+                <h2 className="text-[16px] font-extrabold tracking-[-0.02em]">
                   {GUIDE_SECTIONS[c].title}
                 </h2>
-                <span className="text-[13px] font-medium text-ink/30">{items.length}</span>
+                <span className="text-[12px] font-medium text-ink/30">{items.length}</span>
               </div>
-              <p className="text-sm text-ink/60 mb-4 max-w-[600px] leading-relaxed break-keep">
+              <p className="text-[13px] text-ink/55 mb-3 max-w-[600px] leading-relaxed break-keep">
                 {GUIDE_SECTIONS[c].desc}
               </p>
-              <div className="-mx-6 flex gap-4 overflow-x-auto px-6 pb-1 snap-x [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {items.map((g) => (
-                  <GuideCard key={g.id} guide={g} />
+              <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-[0_1px_3px_rgba(25,31,40,0.03)]">
+                {items.map((g, i) => (
+                  <GuideRow key={g.id} guide={g} last={i === items.length - 1} />
                 ))}
               </div>
             </section>
@@ -111,55 +132,78 @@ function TabButton({
   );
 }
 
-function GuideCard({ guide }: { guide: GuideItem }) {
-  // 리치 본문/이미지가 있으면 내부 상세로, 없으면 기존처럼 외부 원문으로 바로 연결.
+function GuideThumb({ guide }: { guide: GuideItem }) {
+  if (guide.thumbImage) {
+    return (
+      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-border bg-[#f2f4f6]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={guide.thumbImage} alt="" loading="lazy" className="h-full w-full object-cover" />
+      </div>
+    );
+  }
   const detail = guideHasDetail(guide);
-  const cardClass =
-    'group block w-[240px] sm:w-[264px] shrink-0 snap-start border border-border rounded-[10px] overflow-hidden bg-white transition-all hover:border-accent hover:shadow-[0_4px_14px_rgba(49,130,246,0.06)] hover:-translate-y-px';
+  return (
+    <div
+      className={cn(
+        'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl px-1 text-center text-[11px] font-bold leading-tight',
+        detail ? 'bg-accent-50 text-accent' : 'bg-[#f2f4f6] text-ink/70',
+      )}
+    >
+      <span className="line-clamp-2">{guide.thumbLabel}</span>
+    </div>
+  );
+}
+
+function GuideRow({ guide, last }: { guide: GuideItem; last: boolean }) {
+  // 리치 본문/이미지가 있으면 내부 상세로, 없으면 외부 원문으로 바로 연결.
+  const detail = guideHasDetail(guide);
+  const host = hostLabel(guide);
+  const rowClass = cn(
+    'group flex items-center gap-4 px-4 py-3.5 transition-colors',
+    !last && 'border-b border-border',
+    detail ? 'hover:bg-accent-50/40' : 'hover:bg-[#f8fafc]',
+  );
   const inner = (
     <>
-      <div
-        className="h-20 flex items-center justify-center px-3.5 overflow-hidden"
-        style={{ background: guide.thumbBg ?? '#f2f4f6' }}
-      >
-        <span
-          className="text-[13px] font-bold tracking-[-0.02em] truncate max-w-full"
-          style={{ color: guide.thumbColor ?? '#191f28' }}
-        >
-          {guide.thumbLabel}
-        </span>
-      </div>
-      <div className="px-3.5 pt-3 pb-3.5">
-        <span
+      <GuideThumb guide={guide} />
+      <div className="min-w-0 flex-1">
+        <div className="mb-0.5 flex items-center gap-1.5">
+          <span className="rounded bg-ink/[0.05] px-1.5 py-0.5 text-[10px] font-bold tracking-[0.01em] text-ink/45">
+            {guide.source}
+          </span>
+        </div>
+        <h3
           className={cn(
-            'inline-block text-[9.5px] font-bold px-1.5 py-0.5 rounded mb-1.5 tracking-[0.02em]',
-            sourceBadgeClass(guide.sourceType),
+            'truncate text-[14.5px] font-bold tracking-[-0.01em] transition-colors',
+            detail && 'group-hover:text-accent',
           )}
         >
-          {guide.source}
-        </span>
-        <h3 className="text-[13.5px] font-bold tracking-[-0.02em] leading-[1.35] mb-1 line-clamp-2 break-keep group-hover:text-accent transition-colors">
           {guide.title}
         </h3>
-        <p className="text-xs text-ink/60 leading-relaxed mb-2 line-clamp-2 break-keep">
-          {guide.description}
-        </p>
-        {guide.linkLabel && (
-          <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-accent">
-            {guide.linkLabel}
-            <ArrowRight className="h-3 w-3" />
-          </span>
+        {guide.description && (
+          <p className="mt-0.5 truncate text-[12.5px] text-ink/50">{guide.description}</p>
         )}
       </div>
+      {detail ? (
+        <span className="flex shrink-0 items-center gap-1 rounded-full bg-accent-50 px-2.5 py-1 text-[12px] font-semibold text-accent">
+          가이드 읽기
+          <ArrowRight className="h-3.5 w-3.5" />
+        </span>
+      ) : (
+        <span className="flex shrink-0 items-center gap-1 text-[12px] font-medium text-ink/40">
+          <span className="hidden sm:inline">{host}</span>
+          <ExternalLink className="h-3.5 w-3.5" />
+        </span>
+      )}
     </>
   );
 
   return detail ? (
-    <Link href={`/guides/${guide.slug}`} className={cardClass}>
+    <Link href={`/guides/${guide.slug}`} className={rowClass}>
       {inner}
     </Link>
   ) : (
-    <a href={guide.url} target="_blank" rel="noopener noreferrer" className={cardClass}>
+    <a href={guide.url} target="_blank" rel="noopener noreferrer" className={rowClass}>
       {inner}
     </a>
   );

@@ -17,6 +17,7 @@ type ToolGuideRow = {
     source?: string;
     sourceType?: string;
     thumbLabel?: string;
+    thumbImage?: string;
     thumbBg?: string;
     thumbColor?: string;
     linkLabel?: string;
@@ -48,6 +49,7 @@ function mapGuideRow(r: ToolGuideRow): GuideItem {
     source: b.source ?? '공식 문서',
     sourceType: asSourceType(b.sourceType),
     thumbLabel: b.thumbLabel ?? r.name,
+    thumbImage: b.thumbImage,
     thumbBg: b.thumbBg,
     thumbColor: b.thumbColor,
     linkLabel: b.linkLabel,
