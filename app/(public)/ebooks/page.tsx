@@ -120,20 +120,22 @@ export default async function EbooksPage() {
           <div className="container-wide flex flex-wrap items-center justify-between gap-6 py-7">
             <div>
               <span className="mb-2 inline-block rounded-full bg-white/20 px-3 py-1 text-[11px] font-bold backdrop-blur">
-                무료 배포 중
+                {featured.body?.comingSoon ? '준비 중' : '무료 배포 중'}
               </span>
               <h2 className="text-[22px] font-extrabold tracking-[-0.03em] break-keep md:text-[26px]">
                 {featured.title}
               </h2>
               <p className="mt-1 text-sm text-white/70 break-keep">
-                {featured.body?.subtitle ?? '이메일을 적어주시면 PDF 다운로드 링크를 보내드려요.'}
+                {featured.body?.comingSoon
+                  ? '지금 정성껏 다듬고 있어요. 곧 무료로 공개합니다.'
+                  : featured.body?.subtitle ?? '이메일을 적어주시면 PDF 다운로드 링크를 보내드려요.'}
               </p>
             </div>
             <Link
               href={`/ebooks/${featured.slug}`}
               className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[10px] bg-white px-7 py-3 text-[15px] font-bold text-ink transition-colors hover:bg-muted"
             >
-              무료로 받기 <ArrowRight className="h-4 w-4" />
+              {featured.body?.comingSoon ? '자세히 보기' : '무료로 받기'} <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>

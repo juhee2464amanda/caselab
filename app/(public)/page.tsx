@@ -7,6 +7,7 @@ import { VoteCompact } from '@/components/home/VoteCompact';
 import { SuggestInline } from '@/components/home/SuggestInline';
 import { Editable } from '@/components/admin/Editable';
 import { listPublishedContents, listFeaturedContents } from '@/lib/data/contents';
+import { listProducts } from '@/lib/data/products';
 import { getSiteOverrides, pick } from '@/lib/data/site-content';
 import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
 
@@ -75,7 +76,7 @@ async function listToolStats() {
 }
 
 export default async function HomePage() {
-  const [curatedRaw, cases, trends, topics, popular, toolStats, trendCount, overrides] =
+  const [curatedRaw, cases, trends, topics, popular, toolStats, trendCount, overrides, products] =
     await Promise.all([
       listFeaturedContents(5),
       listPublishedContents({ track: 'case', limit: 4 }),
@@ -95,7 +96,12 @@ export default async function HomePage() {
           })()
         : Promise.resolve(0),
       getSiteOverrides(),
+      listProducts(),
     ]);
+
+  // 홈 배너 — 대표 ebook(무료 우선)이 판매 준비중이면 '준비 중' 배너로 대체
+  const featuredBook = products.find((b) => b.price === 0) ?? products[0];
+  const bannerComingSoon = featuredBook?.body?.comingSoon === true;
 
   // 히어로 — 원본 contents 는 그대로 두고 홈 표시값만 오버라이드 (home.hero.<slug>.*)
   const curated = curatedRaw.map((it) => ({
@@ -188,8 +194,9 @@ export default async function HomePage() {
       {/* ① Hero Carousel */}
       <HeroCarousel items={curated} />
 
-      {/* ② 무료 전자책 배너 */}
+      {/* ② 무료 전자책 배너 (준비중이면 '준비 중' 배너로 대체) */}
       <FreeBookBanner
+        comingSoon={bannerComingSoon}
         tag={pick(overrides, 'home.banner.tag', '무료 배포 중')}
         title={pick(overrides, 'home.banner.title', 'AI, 누구나 쉽게 시작할 수 있도록')}
         desc={pick(

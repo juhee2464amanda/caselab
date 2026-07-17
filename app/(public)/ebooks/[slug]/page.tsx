@@ -122,10 +122,14 @@ export default async function EbookDetailPage({
         <div className="flex-1">
           <span
             className={`mb-3 inline-block rounded-md px-3 py-1 text-xs font-bold ${
-              free ? 'bg-emerald-50 text-emerald-600' : 'bg-accent-50 text-accent'
+              comingSoon
+                ? 'bg-ink/10 text-ink/50'
+                : free
+                  ? 'bg-emerald-50 text-emerald-600'
+                  : 'bg-accent-50 text-accent'
             }`}
           >
-            {free ? '무료 배포' : 'EBOOK'}
+            {comingSoon ? '준비 중' : free ? '무료 배포' : 'EBOOK'}
           </span>
           <h1 className="text-[26px] font-extrabold leading-[1.3] tracking-[-0.03em] break-keep md:text-[30px]">
             {book.title}
