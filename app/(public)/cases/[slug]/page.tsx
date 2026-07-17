@@ -65,10 +65,10 @@ export default async function CaseDetailPage({
       <DeepReadTracker contentId={content.id} />
       <DwellTracker contentId={content.id} />
       <ScrollTracker contentId={content.id} />
-      <div className="mx-auto max-w-[1200px] px-6 flex gap-0">
+      <div className="mx-auto max-w-[1440px] px-6 flex gap-0">
         <LeftToc />
 
-        <div className="flex-1 min-w-0 max-w-[720px] mx-auto xl:px-10">
+        <div className="flex-1 min-w-0 max-w-[960px] mx-auto xl:px-10">
           <nav className="pt-6">
             <Link
               href="/cases"
