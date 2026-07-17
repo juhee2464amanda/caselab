@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Star } from 'lucide-react';
 import { getProductBySlug } from '@/lib/data/products';
 import { ProductViewTracker } from '@/components/analytics/ProductViewTracker';
 import { DwellTracker } from '@/components/analytics/DwellTracker';
@@ -14,22 +13,6 @@ import { EbookActions } from '@/components/ebook/EbookActions';
 import type { ProductRow } from '@/types/product';
 
 export const revalidate = 60;
-
-/** 별점 ★ 표시 (amber) */
-function Stars({ rating, className = 'h-[18px] w-[18px]' }: { rating: number; className?: string }) {
-  return (
-    <span className="inline-flex items-center gap-0.5 text-amber-400">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <Star
-          key={i}
-          className={className}
-          fill={i <= Math.round(rating) ? 'currentColor' : 'none'}
-          strokeWidth={i <= Math.round(rating) ? 0 : 1.5}
-        />
-      ))}
-    </span>
-  );
-}
 
 /** 3D 북커버 (mockup .book-3d 정합) — 썸네일 있으면 이미지, 없으면 그라데이션 커버 */
 function BookCover({ book }: { book: ProductRow }) {
@@ -138,16 +121,6 @@ export default async function EbookDetailPage({
             <p className="mt-2 text-[15px] text-ink/60 break-keep">{body.subtitle}</p>
           )}
 
-          {body.rating != null && (
-            <div className="mt-5 flex items-center gap-2">
-              <Stars rating={body.rating} />
-              <span className="text-base font-extrabold">{body.rating.toFixed(1)}</span>
-              {body.reviewCount != null && (
-                <span className="text-[13px] text-ink/40">({body.reviewCount}개 리뷰)</span>
-              )}
-            </div>
-          )}
-
           <dl className="my-6 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 border-y border-border py-4 text-sm">
             {meta.map((m) => (
               <div key={m.label} className="contents">
@@ -242,15 +215,9 @@ export default async function EbookDetailPage({
           </section>
         )}
 
-        {/* 리뷰 — DB 배선 (구매자만 작성, 실제 리뷰 없으면 seed 표시) */}
+        {/* 리뷰 — DB 배선 (구매자만 작성, 실제 리뷰만 표시) */}
         <section id="reviews" className="scroll-mt-[120px] border-b border-border py-10">
-          <EbookReviews
-            productId={book.id}
-            seedRating={body.rating}
-            seedCount={body.reviewCount}
-            seedDist={body.ratingDist}
-            seedReviews={body.reviews}
-          />
+          <EbookReviews productId={book.id} />
         </section>
 
         {/* 하단 구독 CTA */}

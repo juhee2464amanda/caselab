@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { cn, formatDate } from '@/lib/utils';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { track } from '@/lib/analytics/track';
-import type { EbookRatingBucket, EbookReview } from '@/types/product';
 
 interface DbReview {
   id: string;
@@ -19,11 +18,6 @@ interface DbReview {
 
 interface Props {
   productId: string;
-  /** 실제 리뷰가 0건일 때 보여줄 seed(목업/사회적 증거) */
-  seedRating?: number;
-  seedCount?: number;
-  seedDist?: EbookRatingBucket[];
-  seedReviews?: EbookReview[];
 }
 
 // 작성자 표시는 public_profiles 뷰(안전 컬럼만) 경유 — profiles 직접 select는 본인+admin으로 제한됨(0023)
@@ -48,9 +42,9 @@ function Stars({ rating, className = 'h-[18px] w-[18px]' }: { rating: number; cl
 /**
  * ebook 리뷰 섹션 (요약 + 작성폼 + 목록) — mockup ebook-free.html .review-* 정합 + DB 배선.
  * 작성: 로그인 + 구매자(무료 다운로드 포함)만. 1인 1리뷰(수정/삭제). RLS가 구매 게이트 강제.
- * 실제 리뷰가 0건이면 seed(목업) 요약·목록을 표시.
+ * 실제 리뷰만 표시 — 0건이면 요약 숨기고 빈 상태 문구.
  */
-export function EbookReviews({ productId, seedRating, seedCount, seedDist, seedReviews }: Props) {
+export function EbookReviews({ productId }: Props) {
   const supabase = createSupabaseBrowserClient();
   const [reviews, setReviews] = useState<DbReview[]>([]);
   const [user, setUser] = useState<{ id: string } | null>(null);
@@ -100,7 +94,7 @@ export function EbookReviews({ productId, seedRating, seedCount, seedDist, seedR
     }
   }, [mine]);
 
-  // 실제 리뷰 기준 요약(평균·개수·분포). 0건이면 seed로 폴백.
+  // 실제 리뷰 기준 요약(평균·개수·분포). 0건이면 요약 숨김.
   const summary = useMemo(() => {
     if (reviews.length > 0) {
       const counts = [5, 4, 3, 2, 1].map((score) => ({
@@ -108,15 +102,10 @@ export function EbookReviews({ productId, seedRating, seedCount, seedDist, seedR
         count: reviews.filter((r) => r.rating === score).length,
       }));
       const avg = reviews.reduce((a, r) => a + r.rating, 0) / reviews.length;
-      return { rating: avg, count: reviews.length, dist: counts, fromDb: true };
+      return { rating: avg, count: reviews.length, dist: counts };
     }
-    return {
-      rating: seedRating ?? null,
-      count: seedCount ?? null,
-      dist: seedDist ?? [],
-      fromDb: false,
-    };
-  }, [reviews, seedRating, seedCount, seedDist]);
+    return { rating: null, count: null, dist: [] as { score: number; count: number }[] };
+  }, [reviews]);
 
   const distMax = summary.dist.reduce((m, d) => Math.max(m, d.count), 0) || 1;
   const canWrite = !!user && purchased;
@@ -273,7 +262,7 @@ export function EbookReviews({ productId, seedRating, seedCount, seedDist, seedR
         </div>
       </div>
 
-      {/* 목록 — 실제 리뷰 우선, 없으면 seed(사회적 증거) */}
+      {/* 목록 — 실제 리뷰만 */}
       {reviews.length > 0 ? (
         <div>
           {reviews.map((r) => (
@@ -290,22 +279,6 @@ export function EbookReviews({ productId, seedRating, seedCount, seedDist, seedR
               </div>
               <Stars rating={r.rating} className="h-3.5 w-3.5" />
               <p className="mt-1.5 text-sm leading-relaxed text-ink/80 break-keep whitespace-pre-wrap">{r.body}</p>
-            </div>
-          ))}
-        </div>
-      ) : seedReviews && seedReviews.length > 0 ? (
-        <div>
-          {seedReviews.map((r, i) => (
-            <div key={i} className="border-b border-border py-5 last:border-b-0">
-              <div className="mb-2 flex items-center gap-2.5">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-[13px] font-bold text-ink/50">
-                  {r.author.slice(0, 1)}
-                </span>
-                <span className="text-sm font-semibold">{r.author}</span>
-                {r.date && <span className="ml-auto text-xs text-ink/40">{r.date}</span>}
-              </div>
-              <Stars rating={r.rating} className="h-3.5 w-3.5" />
-              <p className="mt-1.5 text-sm leading-relaxed text-ink/80 break-keep">{r.text}</p>
             </div>
           ))}
         </div>

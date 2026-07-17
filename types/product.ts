@@ -16,19 +16,6 @@ export interface EbookWhoItem {
   title: string;
   desc: string;
 }
-export interface EbookReview {
-  author: string;
-  rating: number;
-  text: string;
-  /** 작성일 (예: "2026.05.20") — 선택 */
-  date?: string;
-}
-export interface EbookRatingBucket {
-  /** 별점 (5~1) */
-  score: number;
-  /** 해당 별점 개수 */
-  count: number;
-}
 export interface EbookBody {
   /** 커버 부제 */
   subtitle?: string;
@@ -38,12 +25,6 @@ export interface EbookBody {
   author?: string;
   /** 상세 이미지 (ecommerce 풀폭 긴 이미지) — admin 등록 */
   detailImages?: string[];
-  /** 평점 (예: 4.8) */
-  rating?: number;
-  /** 리뷰 수 (예: 127) */
-  reviewCount?: number;
-  /** 별점 분포 막대 (5~1) */
-  ratingDist?: EbookRatingBucket[];
   /** 포맷 (예: "PDF + 전자책 뷰어") */
   format?: string;
   /** 분량 (예: "45분 분량 (약 80페이지)") */
@@ -60,8 +41,6 @@ export interface EbookBody {
   toc?: EbookTocItem[];
   /** 이런 분에게 드립니다 */
   whoFor?: EbookWhoItem[];
-  /** 샘플 리뷰 */
-  reviews?: EbookReview[];
   /** 판매 준비중 — 구매/주문 버튼을 '판매 준비 중'(비활성)으로 표시하고 주문 페이지 접근 차단 */
   comingSoon?: boolean;
 }
