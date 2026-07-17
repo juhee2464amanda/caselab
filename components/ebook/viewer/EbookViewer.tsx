@@ -96,6 +96,9 @@ export function EbookViewer({
   const [memoText, setMemoText] = useState('');
   /** 하이라이트 📝 클릭 시 메모 열람 팝오버 */
   const [viewNote, setViewNote] = useState<{ id: string; anchor: { x: number; y: number } } | null>(null);
+  /** 페이지 네비게이터 입력값 (편집 중에만 사용, 미편집 시 현재 페이지 표시) */
+  const [pageInput, setPageInput] = useState('');
+  const [editingPage, setEditingPage] = useState(false);
 
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const pageRef = useRef(page);
@@ -248,6 +251,15 @@ export function EbookViewer({
     setPanel(null);
   }, []);
 
+  // 페이지 네비게이터 — 입력값을 검증해 이동 (범위 밖은 클램프)
+  const commitPageInput = useCallback(() => {
+    setEditingPage(false);
+    const n = parseInt(pageInput, 10);
+    if (Number.isFinite(n) && numPagesRef.current > 0) {
+      setPage(Math.min(Math.max(1, n), numPagesRef.current));
+    }
+  }, [pageInput]);
+
   const currentBookmark = bookmarks.find((b) => b.page === page);
 
   const toggleBookmark = useCallback(async () => {
@@ -353,6 +365,41 @@ export function EbookViewer({
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <h1 className="min-w-0 flex-1 truncate text-sm font-medium select-none">{title}</h1>
+
+        {/* 페이지 네비게이터 — 현재/전체 표시 + 숫자 입력 이동 */}
+        <div
+          className={`flex items-center gap-1 rounded-full border px-1 py-0.5 text-sm tabular-nums select-none ${
+            dark ? 'border-neutral-600 bg-neutral-700/70' : 'border-black/10 bg-muted'
+          }`}
+          title="페이지 번호를 입력해 이동"
+        >
+          <input
+            type="text"
+            inputMode="numeric"
+            aria-label="이동할 페이지 번호"
+            value={editingPage ? pageInput : numPages > 0 ? String(page) : '–'}
+            disabled={numPages === 0}
+            onFocus={(e) => {
+              setEditingPage(true);
+              setPageInput(String(page));
+              e.currentTarget.select();
+            }}
+            onChange={(e) => setPageInput(e.target.value.replace(/[^0-9]/g, ''))}
+            onBlur={commitPageInput}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') e.currentTarget.blur();
+              if (e.key === 'Escape') {
+                setEditingPage(false);
+                e.currentTarget.blur();
+              }
+            }}
+            className={`w-9 rounded-full bg-transparent text-center outline-none focus:ring-2 focus:ring-accent-500 ${
+              dark ? 'text-neutral-100' : 'text-ink'
+            }`}
+          />
+          <span className={dark ? 'text-neutral-400' : 'text-ink/50'}>/ {numPages || '–'}</span>
+        </div>
+
         <button
           type="button"
           aria-label={currentBookmark ? '북마크 해제' : '이 페이지 북마크'}
