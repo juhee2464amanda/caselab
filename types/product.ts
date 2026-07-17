@@ -62,6 +62,8 @@ export interface EbookBody {
   whoFor?: EbookWhoItem[];
   /** 샘플 리뷰 */
   reviews?: EbookReview[];
+  /** 판매 준비중 — 구매/주문 버튼을 '판매 준비 중'(비활성)으로 표시하고 주문 페이지 접근 차단 */
+  comingSoon?: boolean;
 }
 
 export interface ProductRow {

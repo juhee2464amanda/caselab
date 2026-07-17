@@ -82,6 +82,7 @@ export default async function EbookDetailPage({
 
   const body = book.body ?? {};
   const free = book.price === 0;
+  const comingSoon = body.comingSoon === true;
   const orderHref = `/ebooks/${slug}/order`;
   const cta = free ? '무료로 받기' : '주문하기';
 
@@ -160,18 +161,29 @@ export default async function EbookDetailPage({
           </div>
 
           <div className="mb-4 flex gap-2.5">
-            <Link
-              href={orderHref}
-              className="flex flex-1 items-center justify-center rounded-[10px] bg-accent px-4 py-4 text-base font-bold tracking-[-0.02em] text-white transition-colors hover:bg-accent-700"
-            >
-              {cta}
-            </Link>
+            {comingSoon ? (
+              <span
+                aria-disabled="true"
+                className="flex flex-1 cursor-not-allowed items-center justify-center rounded-[10px] bg-muted px-4 py-4 text-base font-bold tracking-[-0.02em] text-ink/40"
+              >
+                판매 준비 중
+              </span>
+            ) : (
+              <Link
+                href={orderHref}
+                className="flex flex-1 items-center justify-center rounded-[10px] bg-accent px-4 py-4 text-base font-bold tracking-[-0.02em] text-white transition-colors hover:bg-accent-700"
+              >
+                {cta}
+              </Link>
+            )}
             <EbookActions productId={book.id} />
           </div>
           <p className="text-center text-xs text-ink/40 break-keep">
-            {free
-              ? '로그인 후 마이페이지에서 PDF 다운로드 및 뷰어로 읽을 수 있습니다.'
-              : '결제 후 마이페이지에서 PDF 다운로드 및 뷰어로 읽을 수 있습니다.'}
+            {comingSoon
+              ? '이 전자책은 현재 준비 중이라 판매를 잠시 멈췄어요. 곧 다시 만나요.'
+              : free
+                ? '로그인 후 마이페이지에서 PDF 다운로드 및 뷰어로 읽을 수 있습니다.'
+                : '결제 후 마이페이지에서 PDF 다운로드 및 뷰어로 읽을 수 있습니다.'}
           </p>
         </div>
       </div>

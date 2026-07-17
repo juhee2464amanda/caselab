@@ -12,6 +12,11 @@ export default async function OrderPage({
   const book = await getProductBySlug(slug);
   if (!book) notFound();
 
+  // 판매 준비중 — 상세 페이지 버튼이 비활성이지만, 직접 URL 접근도 차단
+  if (book.body?.comingSoon === true) {
+    redirect(`/ebooks/${slug}`);
+  }
+
   // 로그인 필수 — 비로그인 시 로그인 후 이 주문서로 복귀
   let defaults = { name: '', email: '' };
   let alreadySubscribed = false;
