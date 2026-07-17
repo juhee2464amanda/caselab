@@ -36,21 +36,25 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
     },
   });
 
-  const { data: { user } } = await supabase.auth.getUser();
-  const pathname = request.nextUrl.pathname;
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    const pathname = request.nextUrl.pathname;
 
-  // 로그인 유저 onboarded 강제
-  if (user && !isPublicPath(pathname) && pathname !== '/onboarding') {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('onboarded')
-      .eq('id', user.id)
-      .maybeSingle();
-    if (profile && !profile.onboarded) {
-      const redirect = request.nextUrl.clone();
-      redirect.pathname = '/onboarding';
-      return NextResponse.redirect(redirect);
+    // 로그인 유저 onboarded 강제
+    if (user && !isPublicPath(pathname) && pathname !== '/onboarding') {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('onboarded')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (profile && !profile.onboarded) {
+        const redirect = request.nextUrl.clone();
+        redirect.pathname = '/onboarding';
+        return NextResponse.redirect(redirect);
+      }
     }
+  } catch {
+    // Supabase 일시 장애가 사이트 전체 500으로 번지지 않도록 가드 없이 통과
   }
 
   return response;
