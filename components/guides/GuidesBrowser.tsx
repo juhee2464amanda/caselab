@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { resolveGuideLogo } from '@/lib/data/guide-logos';
 import {
   GUIDE_CATEGORIES,
   GUIDE_TAB_LABELS,
@@ -138,6 +139,15 @@ function GuideThumb({ guide }: { guide: GuideItem }) {
       <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-border bg-[#f2f4f6]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={guide.thumbImage} alt="" loading="lazy" className="h-full w-full object-cover" />
+      </div>
+    );
+  }
+  const logo = resolveGuideLogo(guide);
+  if (logo) {
+    return (
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-white p-1.5">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={logo} alt="" loading="lazy" className="h-full w-full rounded-lg object-contain" />
       </div>
     );
   }
