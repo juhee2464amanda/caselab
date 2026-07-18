@@ -1,6 +1,8 @@
 import { HeroCarousel } from '@/components/layout/HeroCarousel';
 import { FreeBookBanner } from '@/components/home/FreeBookBanner';
 import { CasesSwipe } from '@/components/home/CasesSwipe';
+import { CategoryChips } from '@/components/home/CategoryChips';
+import { LatestFeed } from '@/components/home/LatestFeed';
 import { PopularSidebar } from '@/components/home/PopularSidebar';
 import { SeriesGrid } from '@/components/home/SeriesGrid';
 import { VoteCompact } from '@/components/home/VoteCompact';
@@ -76,11 +78,13 @@ async function listToolStats() {
 }
 
 export default async function HomePage() {
-  const [curatedRaw, cases, trends, topics, popular, toolStats, trendCount, overrides, products] =
+  const [curatedRaw, cases, trends, latest, topics, popular, toolStats, trendCount, overrides, products] =
     await Promise.all([
       listFeaturedContents(5),
       listPublishedContents({ track: 'case', limit: 4 }),
       listPublishedContents({ track: 'trend', limit: 4 }),
+      // 모바일 통합 피드 — 케이스·트렌드 혼합 최신순, 더보기 노출분까지 한 번에
+      listPublishedContents({ limit: 24 }),
       listTopics(),
       listPopular(),
       listToolStats(),
@@ -189,6 +193,22 @@ export default async function HomePage() {
       : 'AI 트렌드',
   }));
 
+  // 모바일 통합 피드 — 케이스·트렌드 혼합 최신순 카드
+  const feedItems = latest.map((c) => ({
+    id: c.id,
+    href: `/${c.track === 'case' ? 'cases' : 'trends'}/${c.slug}`,
+    title: c.title,
+    summary: c.summary,
+    thumbnail_url: c.thumbnail_url,
+    badge:
+      c.track === 'trend'
+        ? 'AI 트렌드'
+        : c.job_tags?.[0]
+        ? JOB_LABEL[c.job_tags[0]] ?? '실전 케이스'
+        : '실전 케이스',
+    readMin: c.read_min,
+  }));
+
   return (
     // flex-col + order — 모바일에선 무료 ebook 배너를 맨 아래로 내린다(데스크톱은 원래 2번째 유지).
     <div className="flex flex-col">
@@ -199,6 +219,9 @@ export default async function HomePage() {
         value={pick(overrides, 'home.strip.text', '일잘러의 검증된 AI 큐레이션')}
         className="bg-ink text-center text-[12px] md:text-[13px] font-medium tracking-tight text-white/90 py-2 px-4"
       />
+
+      {/* ⓪-1 카테고리 칩 — 모바일 전용, GNB 아래 sticky */}
+      <CategoryChips />
 
       {/* ① Hero Carousel */}
       <HeroCarousel items={curated} />
@@ -218,8 +241,24 @@ export default async function HomePage() {
         />
       </div>
 
-      {/* ③ 실전케이스 + Popular 사이드바 (연회색) — 모바일에선 메인배너 바로 아래 */}
-      <section className="py-10 md:py-14 bg-user-subtle order-1 md:order-none">
+      {/* ③-m 최신 콘텐츠 통합 피드 — 모바일 전용 (데스크톱은 아래 ③ 실전케이스 섹션 유지) */}
+      <section className="md:hidden py-8 bg-user-subtle order-1">
+        <div className="px-6">
+          <Editable
+            as="h2"
+            k="home.section.feed.title"
+            value={pick(overrides, 'home.section.feed.title', '최신 콘텐츠')}
+            className="text-[22px] font-extrabold tracking-tight"
+          />
+          <LatestFeed items={feedItems} />
+          <div className="mt-8">
+            <PopularSidebar items={popularItems} />
+          </div>
+        </div>
+      </section>
+
+      {/* ③ 실전케이스 + Popular 사이드바 (연회색) — 모바일에선 ③-m 통합 피드로 대체 */}
+      <section className="hidden md:block py-10 md:py-14 bg-user-subtle">
         <div className="mx-auto max-w-[1100px] px-6">
           <div className="flex flex-col lg:flex-row gap-0 lg:gap-12">
             <div className="flex-1 min-w-0">
