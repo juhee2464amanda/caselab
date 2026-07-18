@@ -267,8 +267,10 @@ export default async function HomePage() {
       {/* ⓪-1 카테고리 칩 — 모바일 전용, GNB 아래 sticky */}
       <CategoryChips />
 
-      {/* ① Hero Carousel */}
-      <HeroCarousel items={curated} />
+      {/* ① Hero Carousel — 모바일에선 연회색 밴드로 피드와 다른 영역임을 구분 (타이틀 없음) */}
+      <div className="bg-user-subtle md:bg-transparent">
+        <HeroCarousel items={curated} />
+      </div>
 
       {/* ② 무료 전자책 배너 (준비중이면 '준비 중' 배너로 대체) — 모바일에선 하단(이런 거 다뤄주세요 바로 위), 데스크톱 원위치 */}
       <div className="order-4 md:order-none">
@@ -285,8 +287,9 @@ export default async function HomePage() {
         />
       </div>
 
-      {/* ③-m 최신 콘텐츠 통합 피드 — 모바일 전용 (데스크톱은 아래 ③ 실전케이스 섹션 유지) */}
-      <section className="md:hidden py-8 bg-user-subtle order-1">
+      {/* ③-m 최신 콘텐츠 통합 피드 — 모바일 전용 (데스크톱은 아래 ③ 실전케이스 섹션 유지)
+          히어로에서 이어지는 대형 카드 피드가 쭉 내려간다 — 인기글·자료실 없이 콘텐츠만 */}
+      <section className="md:hidden py-6 order-1">
         <div className="px-6">
           <Editable
             as="h2"
@@ -295,9 +298,6 @@ export default async function HomePage() {
             className="text-[22px] font-extrabold tracking-tight"
           />
           <LatestFeed items={feedItems} />
-          <div className="mt-8">
-            <PopularSidebar items={popularItems} />
-          </div>
         </div>
       </section>
 
@@ -330,8 +330,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ④ 일잘러의 AI 자료실 (4 series) — 모바일에선 실전케이스 아래 */}
-      <section className="py-10 md:py-14 order-2 md:order-none">
+      {/* ④ 일잘러의 AI 자료실 (4 series) — 모바일 숨김(카테고리 칩으로 진입), 데스크톱 유지 */}
+      <section className="hidden md:block py-10 md:py-14">
         <div className="mx-auto max-w-[1100px] px-6">
           <div className="flex items-center justify-between">
             <h2 className="text-[22px] md:text-[26px] font-extrabold tracking-tight">

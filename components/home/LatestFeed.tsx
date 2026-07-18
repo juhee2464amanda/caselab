@@ -4,10 +4,11 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 /**
- * 최신 콘텐츠 세로 피드 — 모바일 전용 (케이스·트렌드 혼합, 최신순)
+ * 최신 콘텐츠 세로 피드 — 모바일 전용 (케이스·트렌드·도구·프롬프트 혼합, 최신순)
  *
- * 텍스트 좌 + 썸네일 우 가로형 카드, 초기 N개 + '더보기' 버튼 점진 노출.
- * 전체 목록은 서버에서 한 번에 내려받고 클라이언트에서 개수만 늘린다(추가 fetch 없음).
+ * 히어로와 같은 카드 문법(텍스트 위 · 풀폭 썸네일 아래)의 대형 카드가 쭉 내려가는 구조.
+ * 초기 N개 + '더보기' 버튼 점진 노출 — 전체 목록은 서버에서 한 번에 내려받고
+ * 클라이언트에서 개수만 늘린다(추가 fetch 없음).
  */
 
 export interface FeedItem {
@@ -42,28 +43,27 @@ export function LatestFeed({
 
   return (
     <>
-      <ul className="mt-2 divide-y divide-muted">
+      <ul className="mt-1">
         {visible.map((it) => (
           <li key={it.id}>
-            <Link href={it.href} className="group flex items-start gap-4 py-4">
-              <div className="flex-1 min-w-0">
-                <span className="text-[11px] font-bold text-accent bg-accent/10 px-1.5 py-0.5 rounded">
-                  {it.badge}
-                </span>
-                <h3 className="mt-1.5 text-[15px] font-bold leading-snug tracking-tight line-clamp-2 keepall group-hover:text-accent transition-colors">
-                  {it.title}
-                </h3>
-                {it.summary && (
-                  <p className="mt-1 text-[13px] text-ink/60 leading-snug line-clamp-2 keepall">
-                    {it.summary}
-                  </p>
-                )}
-                {it.readMin != null && (
-                  <div className="mt-1.5 text-[11px] text-ink/40">{it.readMin}분 읽기</div>
-                )}
-              </div>
+            <Link href={it.href} className="group block py-5">
+              <span className="text-[11px] font-bold text-accent bg-accent/10 px-1.5 py-0.5 rounded">
+                {it.badge}
+              </span>
+              <h3 className="mt-2 text-[18px] font-bold leading-snug tracking-tight line-clamp-2 keepall group-hover:text-accent transition-colors">
+                {it.title}
+              </h3>
+              {it.summary && (
+                <p className="mt-1 text-[14px] text-ink/60 leading-snug line-clamp-2 keepall">
+                  {it.summary}
+                </p>
+              )}
+              {it.readMin != null && (
+                <div className="mt-1.5 text-[11px] text-ink/40">{it.readMin}분 읽기</div>
+              )}
               {it.thumbnail_url ? (
-                <div className="relative w-[104px] aspect-[4/3] shrink-0 overflow-hidden rounded-lg bg-muted">
+                // 히어로 모바일 썸네일과 같은 2:1 비율 — 더 낮고 가볍게, 카드 문법 통일
+                <div className="relative mt-3 aspect-[2/1] w-full overflow-hidden rounded-xl bg-muted">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={it.thumbnail_url}
@@ -73,7 +73,7 @@ export function LatestFeed({
                   />
                 </div>
               ) : it.thumbEmoji ? (
-                <div className="flex w-[104px] aspect-[4/3] shrink-0 items-center justify-center rounded-lg bg-muted text-[32px]">
+                <div className="mt-3 flex aspect-[2/1] w-full items-center justify-center rounded-xl bg-muted text-[44px]">
                   {it.thumbEmoji}
                 </div>
               ) : null}

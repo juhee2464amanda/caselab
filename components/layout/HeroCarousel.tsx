@@ -173,7 +173,8 @@ export function HeroCarousel({ items }: Props) {
   }
 
   return (
-    <section className="bg-white border-b border-border">
+    // 모바일은 홈의 '인기 콘텐츠' 연회색 밴드 안에 놓이므로 배경을 래퍼에 위임
+    <section className="bg-transparent md:bg-white border-b border-border">
       <div className="mx-auto max-w-[1100px] px-6 relative">
         <div
           className="overflow-hidden touch-pan-y"
@@ -213,7 +214,7 @@ export function HeroCarousel({ items }: Props) {
                         content_track: it.track,
                       });
                     }}
-                    className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-12 py-7 md:py-14 md:pb-7"
+                    className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-12 py-7 md:pt-14 md:pb-7"
                   >
                     <div className="flex-1 min-w-0">
                       <span className="inline-block text-[11px] font-bold text-accent bg-accent/10 px-2.5 py-[3px] rounded mb-3.5 tracking-tight">
