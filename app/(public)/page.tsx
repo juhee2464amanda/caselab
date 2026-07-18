@@ -60,6 +60,32 @@ async function listPopular() {
   return data ?? [];
 }
 
+// 모바일 통합 피드용 tools 콘텐츠 — 자료 타입(tool/prompt) 최신순.
+// listTools/listPrompts는 각 목록 페이지용 매핑이라, 피드에 필요한 필드만 직접 조회한다.
+type FeedToolRow = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  thumbnail_url: string | null;
+  thumbnail_emoji: string | null;
+  category: 'tool' | 'prompt';
+  created_at: string;
+};
+
+async function listFeedTools(): Promise<FeedToolRow[]> {
+  if (!isSupabaseConfigured()) return [];
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase
+    .from('tools')
+    .select('id, slug, name, description, thumbnail_url, thumbnail_emoji, category, created_at')
+    .eq('status', 'published')
+    .in('category', ['tool', 'prompt'])
+    .order('created_at', { ascending: false })
+    .limit(24);
+  return (data ?? []) as FeedToolRow[];
+}
+
 async function listToolStats() {
   if (!isSupabaseConfigured()) {
     return { tool: 0, prompt: 0, guide: 0 };
@@ -78,13 +104,14 @@ async function listToolStats() {
 }
 
 export default async function HomePage() {
-  const [curatedRaw, cases, trends, latest, topics, popular, toolStats, trendCount, overrides, products] =
+  const [curatedRaw, cases, trends, latest, feedTools, topics, popular, toolStats, trendCount, overrides, products] =
     await Promise.all([
       listFeaturedContents(5),
       listPublishedContents({ track: 'case', limit: 4 }),
       listPublishedContents({ track: 'trend', limit: 4 }),
       // 모바일 통합 피드 — 케이스·트렌드 혼합 최신순, 더보기 노출분까지 한 번에
       listPublishedContents({ limit: 24 }),
+      listFeedTools(),
       listTopics(),
       listPopular(),
       listToolStats(),
@@ -193,21 +220,38 @@ export default async function HomePage() {
       : 'AI 트렌드',
   }));
 
-  // 모바일 통합 피드 — 케이스·트렌드 혼합 최신순 카드
-  const feedItems = latest.map((c) => ({
-    id: c.id,
-    href: `/${c.track === 'case' ? 'cases' : 'trends'}/${c.slug}`,
-    title: c.title,
-    summary: c.summary,
-    thumbnail_url: c.thumbnail_url,
-    badge:
-      c.track === 'trend'
-        ? 'AI 트렌드'
-        : c.job_tags?.[0]
-        ? JOB_LABEL[c.job_tags[0]] ?? '실전 케이스'
-        : '실전 케이스',
-    readMin: c.read_min,
-  }));
+  // 모바일 통합 피드 — 케이스·트렌드(contents) + 도구·프롬프트(tools) 병합 최신순 카드
+  const feedItems = [
+    ...latest.map((c) => ({
+      id: c.id,
+      href: `/${c.track === 'case' ? 'cases' : 'trends'}/${c.slug}`,
+      title: c.title,
+      summary: c.summary,
+      thumbnail_url: c.thumbnail_url,
+      badge:
+        c.track === 'trend'
+          ? 'AI 트렌드'
+          : c.job_tags?.[0]
+          ? JOB_LABEL[c.job_tags[0]] ?? '실전 케이스'
+          : '실전 케이스',
+      readMin: c.read_min,
+      date: c.published_at ?? c.created_at,
+    })),
+    ...feedTools.map((t) => ({
+      id: t.id,
+      href: `/${t.category === 'prompt' ? 'prompts' : 'tools'}/${t.slug}`,
+      title: t.name,
+      summary: t.description,
+      thumbnail_url: t.thumbnail_url,
+      thumbEmoji: t.thumbnail_emoji,
+      badge: t.category === 'prompt' ? '프롬프트' : 'AI 도구',
+      readMin: null,
+      date: t.created_at,
+    })),
+  ]
+    .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))
+    .slice(0, 24)
+    .map(({ date: _date, ...item }) => item);
 
   return (
     // flex-col + order — 모바일에선 무료 ebook 배너를 맨 아래로 내린다(데스크톱은 원래 2번째 유지).

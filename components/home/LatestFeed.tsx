@@ -16,8 +16,11 @@ export interface FeedItem {
   title: string;
   summary: string | null;
   thumbnail_url: string | null;
-  badge: string; // 한글 라벨 (기획/마케팅/AI 트렌드/...)
-  readMin: number;
+  /** 썸네일 없을 때 placeholder emoji (tools 콘텐츠) */
+  thumbEmoji?: string | null;
+  badge: string; // 한글 라벨 (기획/마케팅/AI 트렌드/AI 도구/프롬프트/...)
+  /** contents만 읽기시간 보유 — tools 콘텐츠는 없음 */
+  readMin?: number | null;
 }
 
 const STEP = 6;
@@ -55,9 +58,11 @@ export function LatestFeed({
                     {it.summary}
                   </p>
                 )}
-                <div className="mt-1.5 text-[11px] text-ink/40">{it.readMin}분 읽기</div>
+                {it.readMin != null && (
+                  <div className="mt-1.5 text-[11px] text-ink/40">{it.readMin}분 읽기</div>
+                )}
               </div>
-              {it.thumbnail_url && (
+              {it.thumbnail_url ? (
                 <div className="relative w-[104px] aspect-[4/3] shrink-0 overflow-hidden rounded-lg bg-muted">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -67,7 +72,11 @@ export function LatestFeed({
                     className="h-full w-full object-cover"
                   />
                 </div>
-              )}
+              ) : it.thumbEmoji ? (
+                <div className="flex w-[104px] aspect-[4/3] shrink-0 items-center justify-center rounded-lg bg-muted text-[32px]">
+                  {it.thumbEmoji}
+                </div>
+              ) : null}
             </Link>
           </li>
         ))}
