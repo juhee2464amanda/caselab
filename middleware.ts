@@ -1,8 +1,13 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 
 export async function middleware(request: NextRequest) {
-  return updateSession(request);
+  try {
+    return await updateSession(request);
+  } catch {
+    // 미들웨어 예외가 사이트 전체 500(MIDDLEWARE_INVOCATION_FAILED)으로 번지지 않도록 통과
+    return NextResponse.next();
+  }
 }
 
 export const config = {
