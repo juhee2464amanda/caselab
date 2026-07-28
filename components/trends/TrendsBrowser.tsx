@@ -88,7 +88,7 @@ export function TrendsBrowser({ items }: { items: ContentRow[] }) {
                       {it.summary}
                     </p>
                   )}
-                  <TimeBadge readMin={it.read_min} applyMin={it.apply_min} />
+                  <TimeBadge readMin={it.read_min} />
                 </div>
                 {it.thumbnail_url ? (
                   <img

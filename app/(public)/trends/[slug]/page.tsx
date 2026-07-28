@@ -83,7 +83,6 @@ export default async function TrendDetailPage({
             summary={content.summary}
             jobTags={content.job_tags}
             readMin={content.read_min}
-            applyMin={content.apply_min}
             publishedAt={content.published_at}
           />
 
