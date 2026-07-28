@@ -12,7 +12,8 @@ export function ContentHeader({
   summary: string | null;
   jobTags: JobTag[];
   readMin: number;
-  applyMin: number;
+  /** 생략하면 적용 시간을 표시하지 않는다 (트렌드 상세). */
+  applyMin?: number;
   publishedAt: string | null;
 }) {
   const primaryJob = jobTags[0];
@@ -42,7 +43,7 @@ export function ContentHeader({
       <div className="flex flex-wrap gap-3 text-[13px] text-ink/40 pb-6 border-b border-border">
         {dateStr && <span>{dateStr}</span>}
         <span>읽는데 {readMin}분</span>
-        <span>적용 {applyMin}분</span>
+        {applyMin != null && applyMin > 0 && <span>적용 {applyMin}분</span>}
       </div>
     </header>
   );

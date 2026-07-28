@@ -44,7 +44,7 @@ export default async function SearchPage({
               <h3 className="font-semibold mt-0.5">{it.title}</h3>
               {it.summary && <p className="text-sm text-ink/70 mt-1 line-clamp-2">{it.summary}</p>}
               <div className="mt-2 flex gap-3 items-center">
-                <TimeBadge readMin={it.read_min} applyMin={it.apply_min} />
+                <TimeBadge readMin={it.read_min} />
                 <JobTags tags={it.job_tags} />
               </div>
             </Link>
@@ -61,7 +61,7 @@ async function search(q: string) {
   const escaped = q.replace(/%/g, '\\%').replace(/_/g, '\\_');
   const { data } = await supabase
     .from('contents')
-    .select('id, slug, track, title, summary, read_min, apply_min, job_tags')
+    .select('id, slug, track, title, summary, read_min, job_tags')
     .eq('status', 'published')
     .or(`title.ilike.%${escaped}%,summary.ilike.%${escaped}%`)
     .order('published_at', { ascending: false })
@@ -73,7 +73,6 @@ async function search(q: string) {
     title: string;
     summary: string | null;
     read_min: number;
-    apply_min: number;
     job_tags: import('@/types/content').JobTag[];
   }>;
 }
