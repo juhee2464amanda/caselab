@@ -67,7 +67,11 @@ export function TrendsBrowser({ items }: { items: ContentRow[] }) {
             <li key={it.id}>
               <Link
                 href={`/trends/${it.slug}`}
-                className="group flex gap-5 py-6 border-b border-border items-start first:pt-0"
+                className={cn(
+                  'group flex gap-5 py-6 border-b border-border items-start',
+                  // 각 Link는 자기 <li>의 first-child라 first: 변형이 전부 걸린다 → 인덱스로 판단
+                  i === 0 && 'pt-0',
+                )}
               >
                 <div className="flex-1 min-w-0">
                   {it.published_at && (
