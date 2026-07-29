@@ -21,7 +21,7 @@ const CATEGORIES: Category[] = [
   {
     href: '/trends',
     label: 'AI 트렌드',
-    description: '요즘 떠오르는 AI 트렌드',
+    description: '요즘 떠오르는 AI 트렌드 한눈에 보기',
     icon: TrendingUp,
   },
   {
