@@ -11,6 +11,7 @@ import { ContentShareSection } from '@/components/content/ContentShareSection';
 import { CommentThread } from '@/components/content/CommentThread';
 import { ExploreOtherContent } from '@/components/content/ExploreOtherContent';
 import { RecommendSidebar } from '@/components/content/RecommendSidebar';
+import { RichSections } from '@/components/content/RichSections';
 import { ToolToc } from '@/components/tools/ToolToc';
 import { DeepReadTracker } from '@/components/analytics/DeepReadTracker';
 import { DwellTracker } from '@/components/analytics/DwellTracker';
@@ -154,6 +155,9 @@ export default async function TrendDetailPage({
                 </div>
               </section>
             )}
+
+            {/* 추가 리치 섹션 — 운영자가 넣은 이미지·링크·갤러리 등 (출처 앞) */}
+            <RichSections sections={body.sections} keyPrefix="trend-section" contentId={content.id} />
 
             {/* 출처·더 보기 */}
             {body.sources && body.sources.length > 0 && (

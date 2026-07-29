@@ -296,6 +296,8 @@ export const TrendBodySchema = z.object({
   soWhat: z.array(BlockSchema).optional(),
   /** 출처·더 보기 */
   sources: z.array(z.object({ label: z.string(), url: z.string() })).optional(),
+  /** 자유 리치 섹션 — 고정 6섹션 뒤·'출처·더 보기' 앞에 순서대로 렌더 (이미지·링크·갤러리 등) */
+  sections: z.array(RichSectionSchema).optional(),
   /** 고정 섹션 소제목 오버라이드 (키=섹션키, 예: what·why). 비면 기본 문구. */
   headings: z.record(z.string(), z.string()).optional(),
 });
