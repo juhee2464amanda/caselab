@@ -21,3 +21,9 @@ supabase/.temp/
 
 # pdfjs worker (postinstall이 pdfjs-dist에서 복사)
 /public/pdf.worker.min.mjs
+
+# Claude Code — 이 머신에만 해당하는 것만 제외한다.
+# settings.local.json: 로컬 권한 허용목록 (공유용은 settings.json → 커밋 대상)
+# worktrees/: git worktree 사본, node_modules 포함해 수백 MB
+.claude/settings.local.json
+.claude/worktrees/
