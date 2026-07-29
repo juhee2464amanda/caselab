@@ -64,6 +64,14 @@ export function MobileNav({ open, onClose, nav, onSubscribe, isLoggedIn, onLogou
               {n.label}
             </Link>
           ))}
+          {/* 이런 거 다뤄주세요 — 모바일은 홈 하단 대신 이 드로어(ebook 밑)에서 진입 */}
+          <Link
+            href="/topics"
+            onClick={onClose}
+            className="block px-3 py-2.5 rounded-md text-sm font-medium hover:bg-muted"
+          >
+            이런 거 다뤄주세요
+          </Link>
           <hr className="my-3 border-border" />
           {isLoggedIn ? (
             <>

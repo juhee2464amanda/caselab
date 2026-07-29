@@ -6,7 +6,7 @@ import { useState } from 'react';
 /**
  * 최신 콘텐츠 세로 피드 — 모바일 전용 (케이스·트렌드·도구·프롬프트 혼합, 최신순)
  *
- * 히어로와 같은 카드 문법(텍스트 위 · 풀폭 썸네일 아래)의 대형 카드가 쭉 내려가는 구조.
+ * 이미지 우선 카드(썸네일 위 → 라벨 → 제목 → 요약) — Tact 블로그 구조 차용.
  * 초기 N개 + '더보기' 버튼 점진 노출 — 전체 목록은 서버에서 한 번에 내려받고
  * 클라이언트에서 개수만 늘린다(추가 fetch 없음).
  */
@@ -20,6 +20,8 @@ export interface FeedItem {
   /** 썸네일 없을 때 placeholder emoji (tools 콘텐츠) */
   thumbEmoji?: string | null;
   badge: string; // 한글 라벨 (기획/마케팅/AI 트렌드/AI 도구/프롬프트/...)
+  /** 발행/등록일 표시용 (YYYY.MM.DD) */
+  dateLabel: string;
   /** contents만 읽기시간 보유 — tools 콘텐츠는 없음 */
   readMin?: number | null;
 }
@@ -43,27 +45,26 @@ export function LatestFeed({
 
   return (
     <>
-      <ul className="mt-1">
+      {/* Tact 모바일 프레임 — 단일 컬럼, 카드 간격 40px */}
+      <ul className="mt-4 space-y-10">
         {visible.map((it) => (
           <li key={it.id}>
-            <Link href={it.href} className="group block py-5">
-              <span className="text-[11px] font-bold text-accent bg-accent/10 px-1.5 py-0.5 rounded">
+            <Link href={it.href} className="group block">
+              {/* 히어로와 동일 구조 — ① 라벨 → ② 제목 → ③ 요약 → ④ 이미지 → ⑤ 메타 */}
+              <span className="inline-block text-[11px] font-bold text-accent bg-accent/10 px-1.5 py-0.5 rounded">
                 {it.badge}
               </span>
-              <h3 className="mt-2 text-[18px] font-bold leading-snug tracking-tight line-clamp-2 keepall group-hover:text-accent transition-colors">
+              <h3 className="mt-2.5 text-[24px] font-extrabold leading-[1.2] tracking-tight line-clamp-2 keepall group-hover:text-accent transition-colors">
                 {it.title}
               </h3>
               {it.summary && (
-                <p className="mt-1 text-[14px] text-ink/60 leading-snug line-clamp-2 keepall">
+                <p className="mt-2 text-[15px] text-ink/60 leading-normal line-clamp-2 keepall">
                   {it.summary}
                 </p>
               )}
-              {it.readMin != null && (
-                <div className="mt-1.5 text-[11px] text-ink/40">{it.readMin}분 읽기</div>
-              )}
+              {/* ④ 이미지 — 각진(정사각) 모서리, 20:11. 썸네일 없으면 이모지 타일 폴백 */}
               {it.thumbnail_url ? (
-                // 히어로 모바일 썸네일과 같은 2:1 비율 — 더 낮고 가볍게, 카드 문법 통일
-                <div className="relative mt-3 aspect-[2/1] w-full overflow-hidden rounded-xl bg-muted">
+                <div className="relative mt-4 aspect-[20/11] w-full overflow-hidden bg-muted">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={it.thumbnail_url}
@@ -73,10 +74,15 @@ export function LatestFeed({
                   />
                 </div>
               ) : it.thumbEmoji ? (
-                <div className="mt-3 flex aspect-[2/1] w-full items-center justify-center rounded-xl bg-muted text-[44px]">
+                <div className="mt-4 flex aspect-[20/11] w-full items-center justify-center bg-muted text-[48px]">
                   {it.thumbEmoji}
                 </div>
               ) : null}
+              {/* ⑤ 메타 — 이미지 아래, 날짜 · 읽기시간(있고 1분 이상일 때만) */}
+              <div className="mt-3 text-[13px] text-ink/40">
+                {it.dateLabel}
+                {it.readMin ? ` · ${it.readMin} min${it.readMin === 1 ? '' : 's'} read` : ''}
+              </div>
             </Link>
           </li>
         ))}

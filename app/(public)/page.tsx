@@ -1,7 +1,6 @@
 import { HeroCarousel } from '@/components/layout/HeroCarousel';
 import { FreeBookBanner } from '@/components/home/FreeBookBanner';
 import { CasesSwipe } from '@/components/home/CasesSwipe';
-import { CategoryChips } from '@/components/home/CategoryChips';
 import { LatestFeed } from '@/components/home/LatestFeed';
 import { PopularSidebar } from '@/components/home/PopularSidebar';
 import { SeriesGrid } from '@/components/home/SeriesGrid';
@@ -220,9 +219,14 @@ export default async function HomePage() {
       : 'AI 트렌드',
   }));
 
+  // 룰: 메인배너 1번(히어로 첫 슬라이드) 콘텐츠는 최신 피드에서 제외 → 피드 1번과 겹치지 않게
+  const heroTopSlug = curatedRaw[0]?.slug;
+
   // 모바일 통합 피드 — 케이스·트렌드(contents) + 도구·프롬프트(tools) 병합 최신순 카드
   const feedItems = [
-    ...latest.map((c) => ({
+    ...latest
+      .filter((c) => c.slug !== heroTopSlug)
+      .map((c) => ({
       id: c.id,
       href: `/${c.track === 'case' ? 'cases' : 'trends'}/${c.slug}`,
       title: c.title,
@@ -237,7 +241,9 @@ export default async function HomePage() {
       readMin: c.read_min,
       date: c.published_at ?? c.created_at,
     })),
-    ...feedTools.map((t) => ({
+    ...feedTools
+      .filter((t) => t.slug !== heroTopSlug)
+      .map((t) => ({
       id: t.id,
       href: `/${t.category === 'prompt' ? 'prompts' : 'tools'}/${t.slug}`,
       title: t.name,
@@ -251,29 +257,35 @@ export default async function HomePage() {
   ]
     .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))
     .slice(0, 24)
-    .map(({ date: _date, ...item }) => item);
+    // ISO 문자열 앞 10자(YYYY-MM-DD)를 점 구분으로 — 서버에서 확정해 하이드레이션 불일치 방지
+    .map(({ date, ...item }) => ({
+      ...item,
+      dateLabel: (date ?? '').slice(0, 10).replace(/-/g, '.'),
+    }));
 
   return (
     // flex-col + order — 모바일에선 무료 ebook 배너를 맨 아래로 내린다(데스크톱은 원래 2번째 유지).
     <div className="flex flex-col">
-      {/* ⓪ 브랜드 띠배너 — 검은 얇은 띠 */}
+      {/* ⓪ 브랜드 띠배너 — 검은 얇은 띠 (2줄 채널 소개) */}
       <Editable
         as="div"
         k="home.strip.text"
-        value={pick(overrides, 'home.strip.text', '일잘러의 검증된 AI 큐레이션')}
-        className="bg-ink text-center text-[12px] md:text-[13px] font-medium tracking-tight text-white/90 py-2 px-4"
+        maxLines={2}
+        value={pick(
+          overrides,
+          'home.strip.text',
+          '매일 쏟아지는 AI, 뭐부터 봐야 할지 막막할 때\n검증된 케이스·도구·프롬프트만 골라 정리해요',
+        )}
+        className="bg-ink text-center text-[14px] md:text-[15px] font-medium leading-[1.65] tracking-tight text-white/90 py-3 px-4"
       />
-
-      {/* ⓪-1 카테고리 칩 — 모바일 전용, GNB 아래 sticky */}
-      <CategoryChips />
 
       {/* ① Hero Carousel — 모바일에선 연회색 밴드로 피드와 다른 영역임을 구분 (타이틀 없음) */}
       <div className="bg-user-subtle md:bg-transparent">
         <HeroCarousel items={curated} />
       </div>
 
-      {/* ② 무료 전자책 배너 (준비중이면 '준비 중' 배너로 대체) — 모바일에선 하단(이런 거 다뤄주세요 바로 위), 데스크톱 원위치 */}
-      <div className="order-4 md:order-none">
+      {/* ② 무료 전자책 배너 (준비중이면 '준비 중' 배너로 대체) — ebook 준비중이라 모바일 숨김, 데스크톱 원위치 */}
+      <div className="hidden md:block order-4 md:order-none">
         <FreeBookBanner
           comingSoon={bannerComingSoon}
           tag={pick(overrides, 'home.banner.tag', '무료 배포 중')}
@@ -351,8 +363,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ⑤ 이런 거 다뤄주세요 (연회색) — 모바일에선 맨 아래 */}
-      <section className="py-10 md:py-14 bg-user-subtle order-5 md:order-none">
+      {/* ⑤ 이런 거 다뤄주세요 (연회색) — 모바일은 햄버거 드로어로 진입(숨김), 데스크톱은 유지 */}
+      <section className="hidden md:block py-10 md:py-14 bg-user-subtle">
         <div className="mx-auto max-w-[1100px] px-6">
           <Editable
             as="h2"

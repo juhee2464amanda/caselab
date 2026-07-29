@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode, type TouchEvent as ReactTouchEvent } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import type { HeroItem } from '@/types/content';
 import { track } from '@/lib/analytics/track';
 import { Editable } from '@/components/admin/Editable';
@@ -57,7 +57,7 @@ function HeroThumb({
   overlay?: ReactNode;
 }) {
   return (
-    <div className="relative w-full md:w-[400px] aspect-[2/1] md:aspect-[5/3] rounded-2xl overflow-hidden bg-muted shrink-0">
+    <div className="relative w-full md:w-[400px] aspect-[2/1] md:aspect-[5/3] rounded-none md:rounded-2xl overflow-hidden bg-muted shrink-0">
       <EditableImage
         k={imgKey}
         src={src}
@@ -217,7 +217,12 @@ export function HeroCarousel({ items }: Props) {
                     className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-12 py-7 md:pt-14 md:pb-7"
                   >
                     <div className="flex-1 min-w-0">
-                      <span className="inline-block text-[11px] font-bold text-accent bg-accent/10 px-2.5 py-[3px] rounded mb-3.5 tracking-tight">
+                      {/* 에디터 추천 — 채널의 큐레이션 정체성을 상단에서 노출 (Tact 'Featured' 차용) */}
+                      <div className="flex items-center gap-1 mb-2 text-[11px] font-bold text-accent tracking-tight">
+                        <Sparkles className="h-3 w-3" strokeWidth={2.2} />
+                        에디터 추천
+                      </div>
+                      <span className="inline-block text-[11px] font-bold text-ink/50 bg-ink/[0.05] px-2.5 py-[3px] rounded mb-3.5 tracking-tight">
                         {eye}
                       </span>
                       {/* 2줄 고정 높이 — 제목이 1줄이어도 아래 요소(요약·메타·화살표) 위치가 슬라이드마다 흔들리지 않도록 */}
@@ -238,9 +243,15 @@ export function HeroCarousel({ items }: Props) {
                         maxLength={90}
                         className="text-[15px] md:text-base text-ink/60 leading-[1.6] mb-3 max-w-md keepall line-clamp-2 whitespace-pre-line md:min-h-[51px]"
                       />
-                      {/* 메타 — 값 유무와 무관하게 고정 높이 확보 */}
-                      <div className="text-[13px] text-ink/50 flex items-center gap-1 h-5">
-                        {typeof it.read_min === 'number' && <span>읽는데 {it.read_min}분</span>}
+                      {/* 메타 — 데스크톱은 텍스트 컬럼에 유지(고정 높이 확보). 모바일은 이미지 아래로 이동 */}
+                      <div className="hidden md:flex text-[13px] text-ink/50 items-center gap-2 h-5">
+                        {it.date && <span>{it.date.slice(0, 10).replace(/-/g, '.')}</span>}
+                        {typeof it.read_min === 'number' && (
+                          <span>
+                            {it.date && '· '}
+                            {it.read_min} min{it.read_min === 1 ? '' : 's'} read
+                          </span>
+                        )}
                       </div>
                       {/* 화살표 — 데스크톱 전용. 모바일은 스와이프 + 하단 dots */}
                       {renderArrows('hidden md:flex gap-2 mt-4')}
@@ -263,6 +274,15 @@ export function HeroCarousel({ items }: Props) {
                         ) : null
                       }
                     />
+                    {/* 모바일 전용 메타 — 이미지 아래 (피드 카드와 동일 위치) */}
+                    {(it.date || typeof it.read_min === 'number') && (
+                      <div className="md:hidden mt-2.5 text-[13px] text-ink/50">
+                        {it.date && it.date.slice(0, 10).replace(/-/g, '.')}
+                        {it.date && typeof it.read_min === 'number' && ' · '}
+                        {typeof it.read_min === 'number' &&
+                          `${it.read_min} min${it.read_min === 1 ? '' : 's'} read`}
+                      </div>
+                    )}
                   </Link>
                 </div>
               );
