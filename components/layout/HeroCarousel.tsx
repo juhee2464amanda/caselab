@@ -249,7 +249,7 @@ export function HeroCarousel({ items }: Props) {
                         {typeof it.read_min === 'number' && (
                           <span>
                             {it.date && '· '}
-                            {it.read_min} min{it.read_min === 1 ? '' : 's'} read
+                            읽기 {it.read_min}분
                           </span>
                         )}
                       </div>
@@ -279,8 +279,7 @@ export function HeroCarousel({ items }: Props) {
                       <div className="md:hidden mt-2.5 text-[13px] text-ink/50">
                         {it.date && it.date.slice(0, 10).replace(/-/g, '.')}
                         {it.date && typeof it.read_min === 'number' && ' · '}
-                        {typeof it.read_min === 'number' &&
-                          `${it.read_min} min${it.read_min === 1 ? '' : 's'} read`}
+                        {typeof it.read_min === 'number' && `읽기 ${it.read_min}분`}
                       </div>
                     )}
                   </Link>

@@ -81,7 +81,7 @@ export function LatestFeed({
               {/* ⑤ 메타 — 이미지 아래, 날짜 · 읽기시간(있고 1분 이상일 때만) */}
               <div className="mt-3 text-[13px] text-ink/40">
                 {it.dateLabel}
-                {it.readMin ? ` · ${it.readMin} min${it.readMin === 1 ? '' : 's'} read` : ''}
+                {it.readMin ? ` · 읽기 ${it.readMin}분` : ''}
               </div>
             </Link>
           </li>
