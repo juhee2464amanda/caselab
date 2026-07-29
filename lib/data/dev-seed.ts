@@ -787,7 +787,7 @@ export const toolSeed: Tool[] = [
           href: '/cases/competitor-analysis',
           tag: '실전 케이스 · 마케팅',
           title: '경쟁사 분석 3시간 → 30분, 도구 3개 묶음 케이스',
-          meta: '읽는데 6분 · Snipit · Proby · ScreenFlow',
+          meta: '읽기 6분 · Snipit · Proby · ScreenFlow',
         },
       ],
     },

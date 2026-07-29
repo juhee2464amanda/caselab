@@ -7,6 +7,7 @@ import { Search, User, Menu, ChevronDown } from 'lucide-react';
 import { MegaMenu } from './MegaMenu';
 import { MobileNav } from './MobileNav';
 import { SubscribeModal } from './SubscribeModal';
+import { SearchOverlay } from './SearchOverlay';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { cn } from '@/lib/utils';
@@ -35,6 +36,7 @@ export function GNB() {
   const [megaOpen, setMegaOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [subscribeOpen, setSubscribeOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
@@ -86,7 +88,7 @@ export function GNB() {
           'sticky top-0 z-40 w-full bg-white border-b border-border'
         )}
       >
-        <div className="mx-auto max-w-[1100px] px-6 flex h-14 items-center justify-between gap-4">
+        <div className="mx-auto max-w-[1100px] px-4 sm:px-6 flex h-14 items-center justify-between gap-2.5 sm:gap-4">
           {/* 로고 + sub message */}
           <div className="flex items-center gap-3">
             <Link
@@ -153,7 +155,7 @@ export function GNB() {
                 <button
                   type="button"
                   onClick={() => setUserMenuOpen((v) => !v)}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-md text-ink/60 hover:bg-muted transition-colors overflow-hidden"
+                  className="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-md text-ink/60 hover:bg-muted transition-colors overflow-hidden"
                   aria-label="내 메뉴"
                   aria-haspopup="menu"
                   aria-expanded={userMenuOpen}
@@ -205,24 +207,25 @@ export function GNB() {
             ) : (
               <Link
                 href="/login"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-md text-ink/60 hover:bg-muted transition-colors"
+                className="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-md text-ink/60 hover:bg-muted transition-colors"
                 aria-label="로그인"
               >
                 <User className="h-5 w-5" strokeWidth={1.8} />
               </Link>
             )}
-            <Link
-              href="/search"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md text-ink/60 hover:bg-muted transition-colors"
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              className="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-md text-ink/60 hover:bg-muted transition-colors"
               aria-label="검색"
             >
               <Search className="h-5 w-5" strokeWidth={1.8} />
-            </Link>
+            </button>
 
             {/* 모바일 햄버거 */}
             <button
               type="button"
-              className="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted"
+              className="md:hidden inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-md hover:bg-muted"
               onClick={() => setMobileOpen(true)}
               aria-label="메뉴 열기"
             >
@@ -241,6 +244,7 @@ export function GNB() {
         onLogout={logout}
       />
       <SubscribeModal open={subscribeOpen} onOpenChange={setSubscribeOpen} />
+      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
 }

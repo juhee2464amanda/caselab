@@ -1,6 +1,7 @@
 import { HeroCarousel } from '@/components/layout/HeroCarousel';
 import { FreeBookBanner } from '@/components/home/FreeBookBanner';
-import { CategoryTabsList } from '@/components/home/CategoryTabsList';
+import { CasesSwipe } from '@/components/home/CasesSwipe';
+import { LatestFeed } from '@/components/home/LatestFeed';
 import { PopularSidebar } from '@/components/home/PopularSidebar';
 import { SeriesGrid } from '@/components/home/SeriesGrid';
 import { VoteCompact } from '@/components/home/VoteCompact';
@@ -58,6 +59,32 @@ async function listPopular() {
   return data ?? [];
 }
 
+// 모바일 통합 피드용 tools 콘텐츠 — 자료 타입(tool/prompt) 최신순.
+// listTools/listPrompts는 각 목록 페이지용 매핑이라, 피드에 필요한 필드만 직접 조회한다.
+type FeedToolRow = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  thumbnail_url: string | null;
+  thumbnail_emoji: string | null;
+  category: 'tool' | 'prompt';
+  created_at: string;
+};
+
+async function listFeedTools(): Promise<FeedToolRow[]> {
+  if (!isSupabaseConfigured()) return [];
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase
+    .from('tools')
+    .select('id, slug, name, description, thumbnail_url, thumbnail_emoji, category, created_at')
+    .eq('status', 'published')
+    .in('category', ['tool', 'prompt'])
+    .order('created_at', { ascending: false })
+    .limit(24);
+  return (data ?? []) as FeedToolRow[];
+}
+
 async function listToolStats() {
   if (!isSupabaseConfigured()) {
     return { tool: 0, prompt: 0, guide: 0 };
@@ -76,11 +103,14 @@ async function listToolStats() {
 }
 
 export default async function HomePage() {
-  const [curatedRaw, cases, trends, topics, popular, toolStats, trendCount, overrides, products] =
+  const [curatedRaw, cases, trends, latest, feedTools, topics, popular, toolStats, trendCount, overrides, products] =
     await Promise.all([
       listFeaturedContents(5),
       listPublishedContents({ track: 'case', limit: 4 }),
       listPublishedContents({ track: 'trend', limit: 4 }),
+      // 모바일 통합 피드 — 케이스·트렌드 혼합 최신순, 더보기 노출분까지 한 번에
+      listPublishedContents({ limit: 24 }),
+      listFeedTools(),
       listTopics(),
       listPopular(),
       listToolStats(),
@@ -189,26 +219,102 @@ export default async function HomePage() {
       : 'AI 트렌드',
   }));
 
-  return (
-    <>
-      {/* ① Hero Carousel */}
-      <HeroCarousel items={curated} />
+  // 룰: 메인배너 1번(히어로 첫 슬라이드) 콘텐츠는 최신 피드에서 제외 → 피드 1번과 겹치지 않게
+  const heroTopSlug = curatedRaw[0]?.slug;
 
-      {/* ② 무료 전자책 배너 (준비중이면 '준비 중' 배너로 대체) */}
-      <FreeBookBanner
-        comingSoon={bannerComingSoon}
-        tag={pick(overrides, 'home.banner.tag', '무료 배포 중')}
-        title={pick(overrides, 'home.banner.title', 'AI, 누구나 쉽게 시작할 수 있도록')}
-        desc={pick(
+  // 모바일 통합 피드 — 케이스·트렌드(contents) + 도구·프롬프트(tools) 병합 최신순 카드
+  const feedItems = [
+    ...latest
+      .filter((c) => c.slug !== heroTopSlug)
+      .map((c) => ({
+      id: c.id,
+      href: `/${c.track === 'case' ? 'cases' : 'trends'}/${c.slug}`,
+      title: c.title,
+      summary: c.summary,
+      thumbnail_url: c.thumbnail_url,
+      badge:
+        c.track === 'trend'
+          ? 'AI 트렌드'
+          : c.job_tags?.[0]
+          ? JOB_LABEL[c.job_tags[0]] ?? '실전 케이스'
+          : '실전 케이스',
+      readMin: c.read_min,
+      date: c.published_at ?? c.created_at,
+    })),
+    ...feedTools
+      .filter((t) => t.slug !== heroTopSlug)
+      .map((t) => ({
+      id: t.id,
+      href: `/${t.category === 'prompt' ? 'prompts' : 'tools'}/${t.slug}`,
+      title: t.name,
+      summary: t.description,
+      thumbnail_url: t.thumbnail_url,
+      thumbEmoji: t.thumbnail_emoji,
+      badge: t.category === 'prompt' ? '프롬프트' : 'AI 도구',
+      readMin: null,
+      date: t.created_at,
+    })),
+  ]
+    .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))
+    .slice(0, 24)
+    // ISO 문자열 앞 10자(YYYY-MM-DD)를 점 구분으로 — 서버에서 확정해 하이드레이션 불일치 방지
+    .map(({ date, ...item }) => ({
+      ...item,
+      dateLabel: (date ?? '').slice(0, 10).replace(/-/g, '.'),
+    }));
+
+  return (
+    // flex-col + order — 모바일에선 무료 ebook 배너를 맨 아래로 내린다(데스크톱은 원래 2번째 유지).
+    <div className="flex flex-col">
+      {/* ⓪ 브랜드 띠배너 — 검은 얇은 띠 (2줄 채널 소개) */}
+      <Editable
+        as="div"
+        k="home.strip.text"
+        maxLines={2}
+        value={pick(
           overrides,
-          'home.banner.desc',
-          '첫 번째 ebook을 무료로 드립니다. 다운로드 후 바로 읽어보세요.',
+          'home.strip.text',
+          '매일 쏟아지는 AI, 뭐부터 봐야 할지 막막할 때\n검증된 케이스·도구·프롬프트만 골라 정리해요',
         )}
-        cta={pick(overrides, 'home.banner.cta', '무료로 받기 →')}
+        className="bg-ink text-center text-[14px] md:text-[15px] font-medium leading-[1.65] tracking-tight text-white/90 py-3 px-4"
       />
 
-      {/* ③ 실전케이스 + Popular 사이드바 (연회색) */}
-      <section className="py-10 md:py-14 bg-user-subtle">
+      {/* ① Hero Carousel — 모바일에선 연회색 밴드로 피드와 다른 영역임을 구분 (타이틀 없음) */}
+      <div className="bg-user-subtle md:bg-transparent">
+        <HeroCarousel items={curated} />
+      </div>
+
+      {/* ② 무료 전자책 배너 (준비중이면 '준비 중' 배너로 대체) — ebook 준비중이라 모바일 숨김, 데스크톱 원위치 */}
+      <div className="hidden md:block order-4 md:order-none">
+        <FreeBookBanner
+          comingSoon={bannerComingSoon}
+          tag={pick(overrides, 'home.banner.tag', '무료 배포 중')}
+          title={pick(overrides, 'home.banner.title', 'AI, 누구나 쉽게 시작할 수 있도록')}
+          desc={pick(
+            overrides,
+            'home.banner.desc',
+            '첫 번째 ebook을 무료로 드립니다. 다운로드 후 바로 읽어보세요.',
+          )}
+          cta={pick(overrides, 'home.banner.cta', '무료로 받기 →')}
+        />
+      </div>
+
+      {/* ③-m 최신 콘텐츠 통합 피드 — 모바일 전용 (데스크톱은 아래 ③ 실전케이스 섹션 유지)
+          히어로에서 이어지는 대형 카드 피드가 쭉 내려간다 — 인기글·자료실 없이 콘텐츠만 */}
+      <section className="md:hidden py-6 order-1">
+        <div className="px-6">
+          <Editable
+            as="h2"
+            k="home.section.feed.title"
+            value={pick(overrides, 'home.section.feed.title', '최신 콘텐츠')}
+            className="text-[22px] font-extrabold tracking-tight"
+          />
+          <LatestFeed items={feedItems} />
+        </div>
+      </section>
+
+      {/* ③ 실전케이스 + Popular 사이드바 (연회색) — 모바일에선 ③-m 통합 피드로 대체 */}
+      <section className="hidden md:block py-10 md:py-14 bg-user-subtle">
         <div className="mx-auto max-w-[1100px] px-6">
           <div className="flex flex-col lg:flex-row gap-0 lg:gap-12">
             <div className="flex-1 min-w-0">
@@ -226,7 +332,7 @@ export default async function HomePage() {
                   전체 보기
                 </a>
               </div>
-              <CategoryTabsList items={articleItems} />
+              <CasesSwipe items={articleItems} />
             </div>
 
             <aside className="w-full lg:w-[280px] lg:pt-12 shrink-0">
@@ -236,8 +342,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ④ 일잘러의 AI 자료실 (4 series) */}
-      <section className="py-10 md:py-14">
+      {/* ④ 일잘러의 AI 자료실 (4 series) — 모바일 숨김(카테고리 칩으로 진입), 데스크톱 유지 */}
+      <section className="hidden md:block py-10 md:py-14">
         <div className="mx-auto max-w-[1100px] px-6">
           <div className="flex items-center justify-between">
             <h2 className="text-[22px] md:text-[26px] font-extrabold tracking-tight">
@@ -257,8 +363,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ⑤ 이런 거 다뤄주세요 (연회색) */}
-      <section className="py-10 md:py-14 bg-user-subtle">
+      {/* ⑤ 이런 거 다뤄주세요 (연회색) — 모바일은 햄버거 드로어로 진입(숨김), 데스크톱은 유지 */}
+      <section className="hidden md:block py-10 md:py-14 bg-user-subtle">
         <div className="mx-auto max-w-[1100px] px-6">
           <Editable
             as="h2"
@@ -270,6 +376,6 @@ export default async function HomePage() {
           <SuggestInline />
         </div>
       </section>
-    </>
+    </div>
   );
 }

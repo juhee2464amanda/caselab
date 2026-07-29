@@ -42,7 +42,7 @@ export function ContentHeader({
       )}
       <div className="flex flex-wrap gap-3 text-[13px] text-ink/40 pb-6 border-b border-border">
         {dateStr && <span>{dateStr}</span>}
-        <span>읽는데 {readMin}분</span>
+        <span>읽기 {readMin}분</span>
         {applyMin != null && applyMin > 0 && <span>적용 {applyMin}분</span>}
       </div>
     </header>

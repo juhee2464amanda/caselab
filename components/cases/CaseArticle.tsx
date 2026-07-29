@@ -30,7 +30,7 @@ export function CaseArticle({ item }: { item: ContentRow }) {
           </p>
         )}
         <div className="text-[13px] text-ink/40">
-          읽는데 {item.read_min}분 · 적용 {item.apply_min}분
+          읽기 {item.read_min}분 · 적용 {item.apply_min}분
         </div>
       </div>
       <div className="w-[100px] h-[72px] sm:w-[160px] sm:h-[110px] rounded-md sm:rounded-lg overflow-hidden flex-shrink-0 bg-muted">

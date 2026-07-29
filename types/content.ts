@@ -349,6 +349,8 @@ export interface HeroItem {
   thumbnail_url: string | null;
   read_min: number | null;
   job_tags: JobTag[];
+  /** 등록/발행일 (ISO) — 없으면 null */
+  date: string | null;
 }
 
 // ───────────────────────────────────────────────────────────

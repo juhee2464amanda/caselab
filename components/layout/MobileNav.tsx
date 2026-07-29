@@ -27,7 +27,7 @@ export function MobileNav({ open, onClose, nav, onSubscribe, isLoggedIn, onLogou
         aria-hidden
       />
       <aside className={cn(
-        'absolute right-0 top-0 h-full w-72 bg-white shadow-elevated transition-transform',
+        'absolute right-0 top-0 h-full w-[80vw] max-w-xs bg-white shadow-elevated transition-transform',
         open ? 'translate-x-0' : 'translate-x-full'
       )}>
         <header className="flex items-center justify-between p-4 border-b border-border">
@@ -64,6 +64,14 @@ export function MobileNav({ open, onClose, nav, onSubscribe, isLoggedIn, onLogou
               {n.label}
             </Link>
           ))}
+          {/* 이런 거 다뤄주세요 — 모바일은 홈 하단 대신 이 드로어(ebook 밑)에서 진입 */}
+          <Link
+            href="/topics"
+            onClick={onClose}
+            className="block px-3 py-2.5 rounded-md text-sm font-medium hover:bg-muted"
+          >
+            이런 거 다뤄주세요
+          </Link>
           <hr className="my-3 border-border" />
           {isLoggedIn ? (
             <>

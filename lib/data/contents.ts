@@ -45,10 +45,11 @@ export async function listPublishedContents(opts: ListOpts = {}): Promise<Conten
 type FeaturedContentJoin = {
   slug: string; track: 'case' | 'trend'; title: string; summary: string | null;
   thumbnail_url: string | null; read_min: number; job_tags: JobTag[] | null; status: string;
+  published_at: string | null; created_at: string | null;
 };
 type FeaturedToolJoin = {
   slug: string; category: string; name: string; description: string | null;
-  thumbnail_url: string | null; status: string;
+  thumbnail_url: string | null; status: string; created_at: string | null;
 };
 type FeaturedJoinRow = {
   slot: number; content_id: string | null; tool_id: string | null;
@@ -60,8 +61,9 @@ const TOOL_TRACK: Record<string, HeroItem['track']> = { tool: 'tool', prompt: 'p
 function heroFromContent(c: {
   slug: string; track: 'case' | 'trend'; title: string; summary: string | null;
   thumbnail_url: string | null; read_min: number; job_tags: JobTag[] | null;
+  published_at?: string | null; created_at?: string | null;
 }): HeroItem {
-  return { slug: c.slug, title: c.title, summary: c.summary, track: c.track, thumbnail_url: c.thumbnail_url, read_min: c.read_min, job_tags: c.job_tags ?? [] };
+  return { slug: c.slug, title: c.title, summary: c.summary, track: c.track, thumbnail_url: c.thumbnail_url, read_min: c.read_min, job_tags: c.job_tags ?? [], date: c.published_at ?? c.created_at ?? null };
 }
 
 /**
@@ -88,8 +90,8 @@ export async function listFeaturedContents(limit = 5): Promise<HeroItem[]> {
     .from('featured_contents')
     .select(
       `slot, content_id, tool_id,
-       contents:content_id(slug, track, title, summary, thumbnail_url, read_min, job_tags, status),
-       tools:tool_id(slug, category, name, description, thumbnail_url, status)`,
+       contents:content_id(slug, track, title, summary, thumbnail_url, read_min, job_tags, status, published_at, created_at),
+       tools:tool_id(slug, category, name, description, thumbnail_url, status, created_at)`,
     )
     .eq('slot_type', 'hero')
     .eq('active', true)
@@ -106,7 +108,7 @@ export async function listFeaturedContents(limit = 5): Promise<HeroItem[]> {
       if (r.contents && r.contents.status === 'published') return heroFromContent(r.contents);
       if (r.tools && r.tools.status === 'published') {
         const t = r.tools;
-        return { slug: t.slug, title: t.name, summary: t.description, track: TOOL_TRACK[t.category] ?? 'tool', thumbnail_url: t.thumbnail_url, read_min: null, job_tags: [] };
+        return { slug: t.slug, title: t.name, summary: t.description, track: TOOL_TRACK[t.category] ?? 'tool', thumbnail_url: t.thumbnail_url, read_min: null, job_tags: [], date: t.created_at ?? null };
       }
       return null;
     })

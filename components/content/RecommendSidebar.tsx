@@ -36,7 +36,7 @@ export function RecommendSidebar({ items }: { items: ContentRow[] }) {
                   />
                 </div>
               )}
-              <div className="text-[11px] text-ink/40">읽는데 {it.read_min}분</div>
+              <div className="text-[11px] text-ink/40">읽기 {it.read_min}분</div>
             </TrackedCtaLink>
           ))}
         </div>
