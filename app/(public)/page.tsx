@@ -185,7 +185,7 @@ export default async function HomePage() {
       k: 'home.series.trends',
       href: '/trends',
       name: pick(overrides, 'home.series.trends.name', 'AI 트렌드'),
-      desc: pick(overrides, 'home.series.trends.desc', '요즘 떠오르는 AI 트렌드 정리'),
+      desc: pick(overrides, 'home.series.trends.desc', '요즘 떠오르는 AI 트렌드 한눈에 보기'),
       thumb: pick(
         overrides,
         'home.series.trends.thumb',

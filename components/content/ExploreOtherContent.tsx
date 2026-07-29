@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 const CATEGORIES = [
   { href: '/cases', icon: '📝', name: 'AI 실전케이스', desc: '써봤더니 이랬습니다' },
-  { href: '/trends', icon: '📈', name: 'AI 트렌드', desc: '새로 나온 것, 실무자 눈으로' },
+  { href: '/trends', icon: '📈', name: 'AI 트렌드', desc: '요즘 떠오르는 AI 트렌드 한눈에 보기' },
   { href: '/tools', icon: '🔧', name: '쓸만한 AI 도구', desc: '이 일엔 이런 도구가 있더라' },
   { href: '/prompts', icon: '📋', name: '바로 쓰는 프롬프트', desc: '복사해서 바로 쓰세요' },
   { href: '/guides', icon: '📘', name: '공식 가이드', desc: '공식 문서 핵심 정리' },
