@@ -24,6 +24,10 @@ export interface PromptItem {
   description?: string;
   /** 리스트 카드·히어로 썸네일 (tools.thumbnail_url). 없으면 브랜드 플레이스홀더 폴백 */
   thumbnailUrl?: string | null;
+  /** 썸네일 없을 때 모바일 피드 카드의 이모지 타일 (tools.thumbnail_emoji) */
+  thumbnailEmoji?: string | null;
+  /** 등록일 ISO (tools.created_at) — 모바일 피드 카드 날짜 표기용 */
+  createdAt?: string | null;
   /** 복사 대상 프롬프트 본문 (body.prompt) */
   prompt: string;
   /** 사고하기/만들기/검증하기/다듬기 (body.promptCategory) */

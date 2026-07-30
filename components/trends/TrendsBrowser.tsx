@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { TimeBadge } from '@/components/content/TimeBadge';
+import { FeedCardList, feedDateLabel, type FeedItem } from '@/components/content/FeedCard';
 import { cn } from '@/lib/utils';
 import type { ContentRow } from '@/types/content';
 
@@ -36,6 +37,22 @@ export function TrendsBrowser({ items }: { items: ContentRow[] }) {
     });
   }, [items, period]);
 
+  // 모바일 피드 카드 — 홈 '최신 콘텐츠'와 동일 포맷 (데스크톱은 아래 가로 행 목록 유지)
+  const feedItems: FeedItem[] = useMemo(
+    () =>
+      visible.map((it) => ({
+        id: it.id,
+        href: `/trends/${it.slug}`,
+        title: it.title,
+        summary: it.summary,
+        thumbnail_url: it.thumbnail_url,
+        badge: 'AI 트렌드',
+        dateLabel: feedDateLabel(it.published_at ?? it.created_at),
+        readMin: it.read_min,
+      })),
+    [visible],
+  );
+
   return (
     <div className="mx-auto max-w-[1100px] px-6 py-10 pb-20">
       {/* 기간 필터 */}
@@ -62,7 +79,9 @@ export function TrendsBrowser({ items }: { items: ContentRow[] }) {
           {items.length === 0 ? '첫 트렌드 글을 곧 발행할게요.' : '해당 기간의 글이 없어요.'}
         </div>
       ) : (
-        <ul>
+        <>
+        <FeedCardList items={feedItems} className="md:hidden" />
+        <ul className="hidden md:block">
           {visible.map((it, i) => (
             <li key={it.id}>
               <Link
@@ -104,6 +123,7 @@ export function TrendsBrowser({ items }: { items: ContentRow[] }) {
             </li>
           ))}
         </ul>
+        </>
       )}
     </div>
   );
