@@ -5,6 +5,7 @@ import { Check, Sparkles, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { stripInlineMd } from '@/lib/inline-md';
 import { TrackedCtaLink } from '@/components/analytics/TrackedCtaLink';
+import { FeedCardList, feedDateLabel, type FeedItem } from '@/components/content/FeedCard';
 import {
   PROMPT_CATEGORIES,
   PROMPT_CATEGORY_LABELS,
@@ -42,6 +43,23 @@ export function PromptsBrowser({ prompts }: { prompts: PromptItem[] }) {
     active === 'all'
       ? prompts.filter((p) => p.pickOrder == null)
       : prompts.filter((p) => p.category === active);
+
+  // 모바일 피드 카드 — 홈 '최신 콘텐츠'와 동일 포맷 (데스크톱은 아래 가로 행 목록 유지)
+  const feedItems: FeedItem[] = listItems.map((p) => ({
+    id: p.id,
+    href: `/prompts/${p.slug}`,
+    title: p.title,
+    summary: p.description ? stripInlineMd(p.description) : null,
+    thumbnail_url: p.thumbnailUrl ?? null,
+    thumbEmoji: p.thumbnailEmoji ?? '✍️',
+    badge: PROMPT_CATEGORY_LABELS[p.category],
+    dateLabel: feedDateLabel(p.createdAt),
+    // 데스크톱 PromptCard와 같은 cta_click 트래킹 유지
+    track: {
+      label: 'prompt_card',
+      meta: { prompt_id: p.id, slug: p.slug, category: p.category, band: 'list' },
+    },
+  }));
 
   const filterRows: { key: Filter; label: string }[] = [
     { key: 'all', label: '전체' },
@@ -81,7 +99,14 @@ export function PromptsBrowser({ prompts }: { prompts: PromptItem[] }) {
             조건에 맞는 프롬프트가 아직 없어요.
           </div>
         ) : (
-          listItems.map((p) => <PromptCard key={p.id} prompt={p} />)
+          <>
+            <FeedCardList items={feedItems} className="md:hidden" />
+            <div className="hidden md:block">
+              {listItems.map((p) => (
+                <PromptCard key={p.id} prompt={p} />
+              ))}
+            </div>
+          </>
         )}
       </div>
 

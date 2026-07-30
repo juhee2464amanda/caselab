@@ -2,7 +2,8 @@ import { listPublishedContents } from '@/lib/data/contents';
 import { CategoryHero } from '@/components/cases/CategoryHero';
 import { CaseArticle } from '@/components/cases/CaseArticle';
 import { JobFilterSidebar } from '@/components/cases/JobFilterSidebar';
-import { JOB_TAGS, type JobTag } from '@/types/content';
+import { FeedCardList, feedDateLabel, type FeedItem } from '@/components/content/FeedCard';
+import { JOB_TAGS, JOB_LABELS, type JobTag } from '@/types/content';
 
 export const revalidate = 60;
 
@@ -38,6 +39,18 @@ export default async function CasesPage({
     }
   }
 
+  // 모바일 피드 카드 — 홈 '최신 콘텐츠'와 동일 포맷 (데스크톱은 아래 가로 행 목록 유지)
+  const feedItems: FeedItem[] = items.map((it) => ({
+    id: it.id,
+    href: `/cases/${it.slug}`,
+    title: it.title,
+    summary: it.summary,
+    thumbnail_url: it.thumbnail_url,
+    badge: it.job_tags[0] ? JOB_LABELS[it.job_tags[0]] ?? '실전 케이스' : '실전 케이스',
+    dateLabel: feedDateLabel(it.published_at ?? it.created_at),
+    readMin: it.read_min,
+  }));
+
   return (
     <>
       <CategoryHero
@@ -51,11 +64,14 @@ export default async function CasesPage({
               조건에 맞는 콘텐츠가 아직 없어요.
             </div>
           ) : (
-            <div>
-              {items.map((it) => (
-                <CaseArticle key={it.id} item={it} />
-              ))}
-            </div>
+            <>
+              <FeedCardList items={feedItems} className="md:hidden" />
+              <div className="hidden md:block">
+                {items.map((it) => (
+                  <CaseArticle key={it.id} item={it} />
+                ))}
+              </div>
+            </>
           )}
         </main>
         <JobFilterSidebar activeJob={activeJob} counts={counts} />
