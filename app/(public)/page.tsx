@@ -266,7 +266,8 @@ export default async function HomePage() {
   return (
     // flex-col + order — 모바일에선 무료 ebook 배너를 맨 아래로 내린다(데스크톱은 원래 2번째 유지).
     <div className="flex flex-col">
-      {/* ⓪ 브랜드 띠배너 — 검은 얇은 띠 (2줄 채널 소개) */}
+      {/* ⓪ 브랜드 띠배너 — 검은 얇은 띠 (2줄 채널 소개)
+          모바일 전용: 데스크톱은 GNB 로고 옆 태그라인이 같은 역할을 하므로 숨긴다 */}
       <Editable
         as="div"
         k="home.strip.text"
@@ -276,7 +277,7 @@ export default async function HomePage() {
           'home.strip.text',
           '매일 쏟아지는 AI, 뭐부터 봐야 할지 막막할 때\n검증된 케이스·도구·프롬프트만 골라 정리해요',
         )}
-        className="bg-ink text-center text-[14px] md:text-[15px] font-medium leading-[1.65] tracking-tight text-white/90 py-3 px-4"
+        className="md:hidden bg-ink text-center text-[14px] font-medium leading-[1.65] tracking-tight text-white/90 py-3 px-4"
       />
 
       {/* ① Hero Carousel — 모바일에선 연회색 밴드로 피드와 다른 영역임을 구분 (타이틀 없음) */}
