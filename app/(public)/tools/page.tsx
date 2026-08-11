@@ -1,4 +1,5 @@
 import { listTools } from '@/lib/data/tools';
+import { stripInlineMd } from '@/lib/inline-md';
 import { CategoryHero } from '@/components/cases/CategoryHero';
 import { ToolCategoryTabs } from '@/components/tools/ToolCategoryTabs';
 import { ToolCard } from '@/components/tools/ToolCard';
@@ -26,7 +27,7 @@ export default async function ToolsPage({
     id: t.id,
     href: `/tools/${t.slug}`,
     title: t.name,
-    summary: t.description,
+    summary: t.description ? stripInlineMd(t.description) : null,
     thumbnail_url: t.thumbnail_url,
     thumbEmoji: t.thumbnail_emoji ?? '🛠️',
     badge: TOOL_CATEGORY_LABELS[t.category],
