@@ -1,8 +1,9 @@
 import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
-import type { ContentRow, HeroItem, JobTag } from '@/types/content';
+import type { CaseCategory, ContentRow, HeroItem, JobTag } from '@/types/content';
 import { caseSeed, applyCaseFilters } from './dev-seed';
 
-const PUBLIC_FIELDS = 'id, slug, track, title, summary, body, job_tags, persona_coverage, read_min, apply_min, status, curated, thumbnail_url, author_quote, view_count, published_at, created_at, updated_at';
+// category = 케이스 성격 분류(워크플로/자동화/제작기) join. left join이라 미분류·트렌드 행도 유지된다.
+const PUBLIC_FIELDS = 'id, slug, track, title, summary, body, job_tags, persona_coverage, read_min, apply_min, status, curated, thumbnail_url, author_quote, view_count, published_at, created_at, updated_at, category:categories!contents_category_id_fkey(slug, label)';
 
 const IS_DEV = process.env.NODE_ENV === 'development';
 
@@ -12,6 +13,7 @@ type ListOpts = {
   curated?: boolean;
   job?: string;
   timeCap?: number;
+  cat?: CaseCategory;
 };
 
 function devFallback(opts: ListOpts): ContentRow[] {
@@ -24,11 +26,13 @@ export async function listPublishedContents(opts: ListOpts = {}): Promise<Conten
   const supabase = await createSupabaseServerClient();
   let query = supabase
     .from('contents')
-    .select(PUBLIC_FIELDS)
+    // 분류 필터 시에만 !inner로 승격 — join 행(slug) 조건이 부모 행을 거르게 한다 (listTools와 동일 방식)
+    .select(opts.cat ? PUBLIC_FIELDS.replace('_fkey(', '_fkey!inner(') : PUBLIC_FIELDS)
     .eq('status', 'published')
     .order('published_at', { ascending: false });
   if (opts.track) query = query.eq('track', opts.track);
   if (opts.curated) query = query.eq('curated', true);
+  if (opts.cat) query = query.eq('category.slug', opts.cat);
   if (opts.job) query = query.contains('job_tags', [opts.job]);
   if (opts.timeCap) query = query.lte('read_min', opts.timeCap);
   if (opts.limit) query = query.limit(opts.limit);

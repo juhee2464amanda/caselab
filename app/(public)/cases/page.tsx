@@ -1,24 +1,28 @@
 import { listPublishedContents } from '@/lib/data/contents';
 import { CategoryHero } from '@/components/cases/CategoryHero';
 import { CaseArticle } from '@/components/cases/CaseArticle';
+import { CaseCategoryTabs } from '@/components/cases/CaseCategoryTabs';
 import { JobFilterSidebar } from '@/components/cases/JobFilterSidebar';
 import { FeedCardList, feedDateLabel, type FeedItem } from '@/components/content/FeedCard';
-import { JOB_TAGS, JOB_LABELS, type JobTag } from '@/types/content';
+import { CASE_CATEGORIES, JOB_TAGS, JOB_LABELS, type CaseCategory, type JobTag } from '@/types/content';
 
 export const revalidate = 60;
 
 export default async function CasesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ job?: string }>;
+  searchParams: Promise<{ job?: string; cat?: string }>;
 }) {
-  const { job: rawJob } = await searchParams;
+  const { job: rawJob, cat: rawCat } = await searchParams;
   const activeJob = (JOB_TAGS as readonly string[]).includes(rawJob ?? '')
     ? (rawJob as JobTag)
     : undefined;
+  const activeCat = (CASE_CATEGORIES as readonly string[]).includes(rawCat ?? '')
+    ? (rawCat as CaseCategory)
+    : undefined;
 
   const [items, allCases] = await Promise.all([
-    listPublishedContents({ track: 'case', job: activeJob }),
+    listPublishedContents({ track: 'case', job: activeJob, cat: activeCat }),
     listPublishedContents({ track: 'case' }),
   ]);
 
@@ -46,7 +50,8 @@ export default async function CasesPage({
     title: it.title,
     summary: it.summary,
     thumbnail_url: it.thumbnail_url,
-    badge: it.job_tags[0] ? JOB_LABELS[it.job_tags[0]] ?? '실전 케이스' : '실전 케이스',
+    // 배지 = 성격 분류 우선 (모바일은 사이드바가 없어 카드가 유일한 분류 노출면) — 미분류는 직무 폴백
+    badge: it.category?.label ?? (it.job_tags[0] ? JOB_LABELS[it.job_tags[0]] ?? '실전 케이스' : '실전 케이스'),
     dateLabel: feedDateLabel(it.published_at ?? it.created_at),
     readMin: it.read_min,
   }));
@@ -59,6 +64,7 @@ export default async function CasesPage({
       />
       <div className="mx-auto max-w-[1100px] px-6 py-10 pb-20 flex gap-12">
         <main className="flex-1 min-w-0">
+          <CaseCategoryTabs activeCat={activeCat} activeJob={activeJob} />
           {items.length === 0 ? (
             <div className="card p-10 text-center text-ink/40">
               조건에 맞는 콘텐츠가 아직 없어요.
@@ -74,7 +80,7 @@ export default async function CasesPage({
             </>
           )}
         </main>
-        <JobFilterSidebar activeJob={activeJob} counts={counts} />
+        <JobFilterSidebar activeJob={activeJob} activeCat={activeCat} counts={counts} />
       </div>
     </>
   );

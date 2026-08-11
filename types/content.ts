@@ -337,6 +337,8 @@ export interface ContentRow {
   published_at: string | null;
   created_at: string;
   updated_at: string;
+  /** 케이스 성격 분류 join (categories via category_id) — 미분류·트렌드는 null */
+  category?: { slug: CaseCategory; label: string } | null;
 }
 
 // 홈 히어로 캐러셀 아이템 — 콘텐츠(케이스/트렌드) + 도구/프롬프트/가이드 공통 표현.
@@ -352,6 +354,19 @@ export interface HeroItem {
   /** 등록/발행일 (ISO) — 없으면 null */
   date: string | null;
 }
+
+// ───────────────────────────────────────────────────────────
+// 케이스 성격 분류 — "독자가 가져가는 것" 기준 3종.
+// slug/label은 categories(type='content_subcategory', parent_track='case')
+// 마이그레이션 1026 seed와 정확히 일치 (tools의 TOOL_CATEGORIES 패턴).
+// ───────────────────────────────────────────────────────────
+export const CASE_CATEGORIES = ['workflow', 'automation', 'build'] as const;
+export type CaseCategory = (typeof CASE_CATEGORIES)[number];
+export const CASE_CATEGORY_LABELS: Record<CaseCategory, string> = {
+  workflow: '워크플로',
+  automation: '자동화',
+  build: '제작기',
+};
 
 // ───────────────────────────────────────────────────────────
 // 직무 한글 라벨
