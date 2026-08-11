@@ -10,6 +10,7 @@ import { Editable } from '@/components/admin/Editable';
 import { listPublishedContents, listFeaturedContents } from '@/lib/data/contents';
 import { listProducts } from '@/lib/data/products';
 import { getSiteOverrides, pick } from '@/lib/data/site-content';
+import { stripInlineMd } from '@/lib/inline-md';
 import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
 
 /**
@@ -247,7 +248,7 @@ export default async function HomePage() {
       id: t.id,
       href: `/${t.category === 'prompt' ? 'prompts' : 'tools'}/${t.slug}`,
       title: t.name,
-      summary: t.description,
+      summary: t.description ? stripInlineMd(t.description) : null,
       thumbnail_url: t.thumbnail_url,
       thumbEmoji: t.thumbnail_emoji,
       badge: t.category === 'prompt' ? '프롬프트' : 'AI 도구',
