@@ -27,7 +27,7 @@ export default async function ToolsPage({
     id: t.id,
     href: `/tools/${t.slug}`,
     title: t.name,
-    summary: stripInlineMd(t.description),
+    summary: t.description ? stripInlineMd(t.description) : null,
     thumbnail_url: t.thumbnail_url,
     thumbEmoji: t.thumbnail_emoji ?? '🛠️',
     badge: TOOL_CATEGORY_LABELS[t.category],

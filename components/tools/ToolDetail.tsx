@@ -59,7 +59,7 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
             {tool.name}
           </h1>
           <p className="text-base text-ink/60 leading-relaxed max-w-[520px] break-keep">
-            {renderInline(tool.description)}
+            {renderInline(tool.description ?? '')}
           </p>
           <div className="flex flex-wrap gap-2 mt-1">
             {tool.pricing_label && (
@@ -239,7 +239,7 @@ export function ToolDetail({ tool, related }: { tool: Tool; related: Tool[] }) {
                 </div>
                 <div className="min-w-0">
                   <div className="text-sm font-extrabold tracking-[-0.02em]">{r.name}</div>
-                  <div className="text-xs text-ink/50 mt-0.5 line-clamp-1">{stripInlineMd(r.description)}</div>
+                  <div className="text-xs text-ink/50 mt-0.5 line-clamp-1">{stripInlineMd(r.description ?? '')}</div>
                 </div>
               </Link>
             ))}

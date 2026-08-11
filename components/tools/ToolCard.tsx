@@ -38,7 +38,7 @@ export function ToolCard({ tool }: { tool: Tool }) {
           </div>
         </div>
         <p className="text-[13.5px] text-ink/60 leading-[1.55] mb-3.5 line-clamp-3 break-keep">
-          {stripInlineMd(tool.description)}
+          {stripInlineMd(tool.description ?? '')}
         </p>
         <div className="flex gap-1.5 flex-wrap">
           {tool.pricing_label && (
