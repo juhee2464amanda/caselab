@@ -1,16 +1,16 @@
 import { HeroCarousel } from '@/components/layout/HeroCarousel';
 import { FreeBookBanner } from '@/components/home/FreeBookBanner';
-import { CasesSwipe } from '@/components/home/CasesSwipe';
 import { LatestFeed } from '@/components/home/LatestFeed';
-import { PopularSidebar } from '@/components/home/PopularSidebar';
+import { LatestGrid } from '@/components/home/LatestGrid';
+import { PopularBar } from '@/components/home/PopularBar';
 import { SeriesGrid } from '@/components/home/SeriesGrid';
 import { VoteCompact } from '@/components/home/VoteCompact';
 import { SuggestInline } from '@/components/home/SuggestInline';
 import { Editable } from '@/components/admin/Editable';
+import { getLatestItems, withoutHeroTop } from '@/lib/home/latest-items';
 import { listPublishedContents, listFeaturedContents } from '@/lib/data/contents';
 import { listProducts } from '@/lib/data/products';
 import { getSiteOverrides, pick } from '@/lib/data/site-content';
-import { stripInlineMd } from '@/lib/inline-md';
 import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
 
 /**
@@ -19,22 +19,14 @@ import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase
  * 섹션 구성 (mockup 정합):
  *   1. HeroCarousel (수동 슬라이드 + 좌우 arrow)
  *   2. FreeBookBanner (무료 전자책 그라데이션)
- *   3. AI 실전케이스 + Popular 사이드바 (band-alt 연회색)
+ *   3. 지금 많이 보는 글(가로 바) + 최신 콘텐츠 그리드 (band-alt 연회색)
+ *      — 2026-08-11 개편. 이전엔 'AI 실전케이스 가로 스와이프 + Popular 사이드바'
  *   4. 일잘러의 AI 자료실 (4 series cards)
  *   5. 이런 거 다뤄주세요 (vote compact + suggest)
  *   (Footer는 layout.tsx)
  */
 
 export const revalidate = 60;
-
-const JOB_LABEL: Record<string, string> = {
-  planning: '기획',
-  marketing: '마케팅',
-  sales: '영업',
-  solo: '1인사업',
-  strategy: '전략',
-  analysis: '데이터/분석',
-};
 
 async function listTopics() {
   if (!isSupabaseConfigured()) return [];
@@ -60,32 +52,6 @@ async function listPopular() {
   return data ?? [];
 }
 
-// 모바일 통합 피드용 tools 콘텐츠 — 자료 타입(tool/prompt) 최신순.
-// listTools/listPrompts는 각 목록 페이지용 매핑이라, 피드에 필요한 필드만 직접 조회한다.
-type FeedToolRow = {
-  id: string;
-  slug: string;
-  name: string;
-  description: string | null;
-  thumbnail_url: string | null;
-  thumbnail_emoji: string | null;
-  category: 'tool' | 'prompt';
-  created_at: string;
-};
-
-async function listFeedTools(): Promise<FeedToolRow[]> {
-  if (!isSupabaseConfigured()) return [];
-  const supabase = await createSupabaseServerClient();
-  const { data } = await supabase
-    .from('tools')
-    .select('id, slug, name, description, thumbnail_url, thumbnail_emoji, category, created_at')
-    .eq('status', 'published')
-    .in('category', ['tool', 'prompt'])
-    .order('created_at', { ascending: false })
-    .limit(24);
-  return (data ?? []) as FeedToolRow[];
-}
-
 async function listToolStats() {
   if (!isSupabaseConfigured()) {
     return { tool: 0, prompt: 0, guide: 0 };
@@ -104,14 +70,12 @@ async function listToolStats() {
 }
 
 export default async function HomePage() {
-  const [curatedRaw, cases, trends, latest, feedTools, topics, popular, toolStats, trendCount, overrides, products] =
+  const [curatedRaw, trends, latestAll, topics, popular, toolStats, trendCount, overrides, products] =
     await Promise.all([
       listFeaturedContents(5),
-      listPublishedContents({ track: 'case', limit: 4 }),
       listPublishedContents({ track: 'trend', limit: 4 }),
-      // 모바일 통합 피드 — 케이스·트렌드 혼합 최신순, 더보기 노출분까지 한 번에
-      listPublishedContents({ limit: 24 }),
-      listFeedTools(),
+      // 최신 콘텐츠 — 케이스·트렌드 + 도구·프롬프트 병합 최신순 (모바일 피드 '더보기' 분까지 한 번에)
+      getLatestItems({ limit: 24 }),
       listTopics(),
       listPopular(),
       listToolStats(),
@@ -198,71 +162,18 @@ export default async function HomePage() {
     },
   ];
 
-  // 실전 케이스 리스트 → CategoryTabsList 항목
-  const articleItems = cases.map((c) => ({
-    id: c.id,
-    href: `/cases/${c.slug}`,
-    title: c.title,
-    summary: c.summary,
-    thumbnail_url: c.thumbnail_url,
-    category: c.job_tags?.[0] ? JOB_LABEL[c.job_tags[0]] ?? '기획' : '기획',
-  }));
-
-  // Popular Top 5 → PopularSidebar 항목
+  // Popular Top 5 → PopularBar 항목
+  // 라벨은 대분류(실전 케이스 / AI 트렌드)로 — 케이스만 직무 라벨(1인사업 등)을 쓰면
+  // 한 영역 안에서 혼자 층위가 달라 보인다. 직무 라벨은 /cases 목록에서만.
   const popularItems = popular.map((p, i) => ({
     rank: i + 1,
     href: `/${p.track === 'case' ? 'cases' : 'trends'}/${p.slug}`,
     title: p.title,
-    category: p.job_tags?.[0]
-      ? JOB_LABEL[p.job_tags[0]] ?? (p.track === 'case' ? '실전 케이스' : 'AI 트렌드')
-      : p.track === 'case'
-      ? '실전 케이스'
-      : 'AI 트렌드',
+    category: p.track === 'case' ? '실전 케이스' : 'AI 트렌드',
   }));
 
-  // 룰: 메인배너 1번(히어로 첫 슬라이드) 콘텐츠는 최신 피드에서 제외 → 피드 1번과 겹치지 않게
-  const heroTopSlug = curatedRaw[0]?.slug;
-
-  // 모바일 통합 피드 — 케이스·트렌드(contents) + 도구·프롬프트(tools) 병합 최신순 카드
-  const feedItems = [
-    ...latest
-      .filter((c) => c.slug !== heroTopSlug)
-      .map((c) => ({
-      id: c.id,
-      href: `/${c.track === 'case' ? 'cases' : 'trends'}/${c.slug}`,
-      title: c.title,
-      summary: c.summary,
-      thumbnail_url: c.thumbnail_url,
-      badge:
-        c.track === 'trend'
-          ? 'AI 트렌드'
-          : c.job_tags?.[0]
-          ? JOB_LABEL[c.job_tags[0]] ?? '실전 케이스'
-          : '실전 케이스',
-      readMin: c.read_min,
-      date: c.published_at ?? c.created_at,
-    })),
-    ...feedTools
-      .filter((t) => t.slug !== heroTopSlug)
-      .map((t) => ({
-      id: t.id,
-      href: `/${t.category === 'prompt' ? 'prompts' : 'tools'}/${t.slug}`,
-      title: t.name,
-      summary: t.description ? stripInlineMd(t.description) : null,
-      thumbnail_url: t.thumbnail_url,
-      thumbEmoji: t.thumbnail_emoji,
-      badge: t.category === 'prompt' ? '프롬프트' : 'AI 도구',
-      readMin: null,
-      date: t.created_at,
-    })),
-  ]
-    .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))
-    .slice(0, 24)
-    // ISO 문자열 앞 10자(YYYY-MM-DD)를 점 구분으로 — 서버에서 확정해 하이드레이션 불일치 방지
-    .map(({ date, ...item }) => ({
-      ...item,
-      dateLabel: (date ?? '').slice(0, 10).replace(/-/g, '.'),
-    }));
+  // 룰: 메인배너 1번(히어로 첫 슬라이드) 콘텐츠는 최신 목록에서 제외 → 바로 아래에서 또 만나지 않게
+  const latest = withoutHeroTop(latestAll, curatedRaw[0]?.slug);
 
   return (
     // flex-col + order — 모바일에선 무료 ebook 배너를 맨 아래로 내린다(데스크톱은 원래 2번째 유지).
@@ -310,36 +221,27 @@ export default async function HomePage() {
             value={pick(overrides, 'home.section.feed.title', '최신 콘텐츠')}
             className="text-[22px] font-extrabold tracking-tight"
           />
-          <LatestFeed items={feedItems} />
+          <LatestFeed items={latest} />
         </div>
       </section>
 
-      {/* ③ 실전케이스 + Popular 사이드바 (연회색) — 모바일에선 ③-m 통합 피드로 대체 */}
+      {/* ③ 인기 바 → 최신 콘텐츠 그리드 (연회색) — 모바일에선 ③-m 통합 피드로 대체
+          히어로(큐레이션) → 인기(검증된 것) → 최신(새로 온 것) 순서.
+          예전엔 '실전케이스 가로 스와이프 + 인기 사이드바'였는데,
+          케이스 트랙만 보여줘 나머지 발행분이 홈에서 안 보였고 가로 스와이프는 마우스로 잘 안 밀린다. */}
       <section className="hidden md:block py-10 md:py-14 bg-user-subtle">
         <div className="mx-auto max-w-[1100px] px-6">
-          <div className="flex flex-col lg:flex-row gap-0 lg:gap-12">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between">
-                <Editable
-                  as="h2"
-                  k="home.section.cases.title"
-                  value={pick(overrides, 'home.section.cases.title', 'AI 실전케이스')}
-                  className="text-[22px] md:text-[26px] font-extrabold tracking-tight"
-                />
-                <a
-                  href="/cases"
-                  className="text-[13px] font-medium text-accent hover:underline underline-offset-[3px]"
-                >
-                  전체 보기
-                </a>
-              </div>
-              <CasesSwipe items={articleItems} />
-            </div>
+          <PopularBar items={popularItems} />
 
-            <aside className="w-full lg:w-[280px] lg:pt-12 shrink-0">
-              <PopularSidebar items={popularItems} />
-            </aside>
+          <div className="mt-9 flex items-center justify-between">
+            <Editable
+              as="h2"
+              k="home.section.latest.title"
+              value={pick(overrides, 'home.section.latest.title', '최신 콘텐츠')}
+              className="text-[22px] md:text-[26px] font-extrabold tracking-tight"
+            />
           </div>
+          <LatestGrid items={latest} rows={2} />
         </div>
       </section>
 
