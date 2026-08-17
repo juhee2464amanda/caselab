@@ -10,7 +10,7 @@ export default async function PromptsPage() {
     <>
       <CategoryHero
         title="바로 쓰는 프롬프트"
-        description="복사 한 번이면 끝. 실무에서 검증된 프롬프트만."
+        description="복사 한 번이면 끝. 출처를 밝혀 일 종류별로 정리했어요."
       />
       <PromptsBrowser prompts={prompts} />
     </>
