@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Tool } from '@/types/tool';
 import { TOOL_CATEGORY_LABELS } from '@/types/tool';
+import { stripInlineMd } from '@/lib/inline-md';
 
 export function ToolCard({ tool }: { tool: Tool }) {
   return (
@@ -37,7 +38,7 @@ export function ToolCard({ tool }: { tool: Tool }) {
           </div>
         </div>
         <p className="text-[13.5px] text-ink/60 leading-[1.55] mb-3.5 line-clamp-3 break-keep">
-          {tool.description}
+          {stripInlineMd(tool.description ?? '')}
         </p>
         <div className="flex gap-1.5 flex-wrap">
           {tool.pricing_label && (

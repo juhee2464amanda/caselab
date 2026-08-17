@@ -1375,11 +1375,13 @@ export function applyCaseFilters(
     timeCap?: number;
     limit?: number;
     curated?: boolean;
+    cat?: string;
   }
 ): ContentRow[] {
   let result = items;
   if (opts.track) result = result.filter((c) => c.track === opts.track);
   if (opts.curated) result = result.filter((c) => c.curated);
+  if (opts.cat) result = result.filter((c) => c.category?.slug === opts.cat);
   if (opts.job) {
     const j = opts.job as JobTag;
     result = result.filter((c) => c.job_tags.includes(j));

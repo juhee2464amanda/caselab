@@ -6,11 +6,21 @@ type Counts = { all: number } & Record<JobTag, number>;
 
 export function JobFilterSidebar({
   activeJob,
+  activeCat,
   counts,
 }: {
   activeJob?: JobTag;
+  /** 케이스 성격 분류 탭과 직교 축 — 직무를 바꿔도 분류 필터를 보존한다 */
+  activeCat?: string;
   counts: Counts;
 }) {
+  const href = (job?: JobTag) => {
+    const qs = new URLSearchParams();
+    if (job) qs.set('job', job);
+    if (activeCat) qs.set('cat', activeCat);
+    const s = qs.toString();
+    return s ? `/cases?${s}` : '/cases';
+  };
   return (
     <aside className="hidden lg:block w-[260px] flex-shrink-0">
       <div className="sticky top-20">
@@ -27,7 +37,7 @@ export function JobFilterSidebar({
         </div>
         <ul className="list-none">
           <FilterItem
-            href="/cases"
+            href={href()}
             label="전체"
             count={counts.all}
             active={!activeJob}
@@ -35,7 +45,7 @@ export function JobFilterSidebar({
           {JOB_TAGS.map((j) => (
             <FilterItem
               key={j}
-              href={`/cases?job=${j}`}
+              href={href(j)}
               label={JOB_LABELS[j]}
               count={counts[j]}
               active={activeJob === j}

@@ -5,11 +5,15 @@
 
 import type { RichSection } from '@/types/content';
 
-export const PROMPT_CATEGORIES = ['think', 'make', 'verify', 'refine'] as const;
+// 순서 = /prompts 필터 탭 순서(작업 흐름 순).
+// admin lib/prompt-body.ts(발행 게이트·AI 초안)와 값이 반드시 같아야 한다 —
+// admin이 여기 없는 키로 발행하면 mapPromptRow가 'think'로 폴백해 잘못 묶인다.
+export const PROMPT_CATEGORIES = ['think', 'organize', 'make', 'verify', 'refine'] as const;
 export type PromptCategory = (typeof PROMPT_CATEGORIES)[number];
 
 export const PROMPT_CATEGORY_LABELS: Record<PromptCategory, string> = {
   think: '사고하기',
+  organize: '정리하기',
   make: '만들기',
   verify: '검증하기',
   refine: '다듬기',
