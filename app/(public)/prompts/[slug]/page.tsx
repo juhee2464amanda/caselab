@@ -16,7 +16,7 @@ export async function generateMetadata({
   const prompt = await getPromptBySlug(decodeURIComponent(slug));
   if (!prompt) return {};
   // DM 공유 미리보기 — 제목/설명이 OG 카드에 노출된다.
-  const description = prompt.description ? stripInlineMd(prompt.description) : '복사 한 번이면 끝. 실무에서 검증된 프롬프트.';
+  const description = prompt.description ? stripInlineMd(prompt.description) : '복사 한 번이면 끝. 출처를 밝힌 프롬프트.';
   return {
     title: `${prompt.title} | 바로 쓰는 프롬프트`,
     description,
