@@ -76,7 +76,7 @@ export default async function LinksPage() {
           rel="noopener noreferrer"
           className="mt-10 inline-flex w-full items-center justify-center gap-2 text-ink/60 hover:text-ink text-sm"
         >
-          <Instagram className="h-4 w-4" /> instagram.com/caselab_ai_
+          <Instagram className="h-4 w-4" /> instagram.com/ai_caselab
         </a>
       </div>
     </div>
