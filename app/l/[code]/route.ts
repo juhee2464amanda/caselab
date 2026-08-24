@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 /**
  * 마케팅 숏링크 리다이렉트.
  *
- * ManyChat DM 등에 넣는 /l/{code} 링크의 클릭을 서버측에서 link_clicks에
+ * 리틀리 자동DM 등에 넣는 /l/{code} 링크의 클릭을 서버측에서 link_clicks에
  * 적재한 뒤 UTM 파라미터가 붙은 full_url로 302 리다이렉트한다.
  * 인스타 인앱 브라우저에서 GA4가 유실되어도 클릭 자체는 100% 집계된다.
  * (도착 페이지의 UtmCapture가 GA4/events 2차 집계를 이어받는다)
