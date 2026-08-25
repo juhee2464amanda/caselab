@@ -188,7 +188,7 @@ export default async function HomePage() {
           'home.strip.text',
           '매일 쏟아지는 AI, 뭐부터 봐야 할지 막막할 때\n검증된 케이스·도구·프롬프트만 골라 정리해요',
         )}
-        className="bg-ink text-center text-[14px] md:text-[15px] font-medium leading-[1.65] tracking-tight text-white/90 py-3 px-4"
+        className="bg-ink text-center text-[13px] md:text-[15px] font-medium leading-[1.6] tracking-tight text-white/90 py-2.5 md:py-3 px-4"
       />
 
       {/* ① Hero Carousel — 모바일에선 연회색 밴드로 피드와 다른 영역임을 구분 (타이틀 없음) */}

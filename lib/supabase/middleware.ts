@@ -23,6 +23,13 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
   // Supabase 미설정 — 정적 페이지만 통과
   if (!url || !key) return response;
 
+  // 비로그인(auth 쿠키 없음) — Supabase Auth 왕복 없이 즉시 통과.
+  // 익명 방문자의 모든 페이지 이동에서 네트워크 왕복을 제거한다 (모바일 체감속도 핵심).
+  const hasAuthCookie = request.cookies
+    .getAll()
+    .some((c) => c.name.startsWith('sb-') && c.name.includes('-auth-token'));
+  if (!hasAuthCookie) return response;
+
   const supabase = createServerClient(url, key, {
     cookies: {
       getAll: () => request.cookies.getAll(),
@@ -40,17 +47,22 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
     const { data: { user } } = await supabase.auth.getUser();
     const pathname = request.nextUrl.pathname;
 
-    // 로그인 유저 onboarded 강제
+    // 로그인 유저 onboarded 강제 — 확인 결과는 쿠키에 캐시해 매 이동마다 DB 조회하지 않는다
     if (user && !isPublicPath(pathname) && pathname !== '/onboarding') {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('onboarded')
-        .eq('id', user.id)
-        .maybeSingle();
-      if (profile && !profile.onboarded) {
-        const redirect = request.nextUrl.clone();
-        redirect.pathname = '/onboarding';
-        return NextResponse.redirect(redirect);
+      if (request.cookies.get('cl-onboarded')?.value !== '1') {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('onboarded')
+          .eq('id', user.id)
+          .maybeSingle();
+        if (profile && !profile.onboarded) {
+          const redirect = request.nextUrl.clone();
+          redirect.pathname = '/onboarding';
+          return NextResponse.redirect(redirect);
+        }
+        if (profile?.onboarded) {
+          response.cookies.set('cl-onboarded', '1', { path: '/', maxAge: 60 * 60 * 24 * 30 });
+        }
       }
     }
   } catch {
