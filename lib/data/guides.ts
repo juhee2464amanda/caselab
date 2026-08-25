@@ -1,4 +1,4 @@
-import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
+import { createSupabaseAnonClient, isSupabaseConfigured } from '@/lib/supabase/server';
 import type { GuideItem, GuideCategory, GuideSourceType } from '@/types/guide';
 import type { RichSection } from '@/types/content';
 import { GUIDE_CATEGORIES } from '@/types/guide';
@@ -61,7 +61,7 @@ function mapGuideRow(r: ToolGuideRow): GuideItem {
 
 export async function listGuides(): Promise<GuideItem[]> {
   if (!isSupabaseConfigured()) return IS_DEV ? guideSeed : [];
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAnonClient();
   const { data, error } = await supabase
     .from('tools')
     .select('id, slug, name, description, url, body')
@@ -79,7 +79,7 @@ export async function listGuides(): Promise<GuideItem[]> {
 export async function getGuideBySlug(slug: string): Promise<GuideItem | null> {
   const devHit = () => (IS_DEV ? guideSeed.find((g) => g.slug === slug) ?? null : null);
   if (!isSupabaseConfigured()) return devHit();
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAnonClient();
   const { data, error } = await supabase
     .from('tools')
     .select('id, slug, name, description, url, body')

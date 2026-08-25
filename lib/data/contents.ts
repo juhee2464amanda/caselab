@@ -1,4 +1,4 @@
-import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
+import { createSupabaseAnonClient, isSupabaseConfigured } from '@/lib/supabase/server';
 import type { CaseCategory, ContentRow, HeroItem, JobTag } from '@/types/content';
 import { caseSeed, applyCaseFilters } from './dev-seed';
 
@@ -23,7 +23,7 @@ function devFallback(opts: ListOpts): ContentRow[] {
 
 export async function listPublishedContents(opts: ListOpts = {}): Promise<ContentRow[]> {
   if (!isSupabaseConfigured()) return devFallback(opts);
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAnonClient();
   let query = supabase
     .from('contents')
     // 분류 필터 시에만 !inner로 승격 — join 행(slug) 조건이 부모 행을 거르게 한다 (listTools와 동일 방식)
@@ -88,7 +88,7 @@ async function heroCuratedFallback(limit: number): Promise<HeroItem[]> {
 
 export async function listFeaturedContents(limit = 5): Promise<HeroItem[]> {
   if (!isSupabaseConfigured()) return devFallback({ curated: true, limit }).map(heroFromContent);
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAnonClient();
   const nowIso = new Date().toISOString();
   const { data, error } = await supabase
     .from('featured_contents')
@@ -123,7 +123,7 @@ export async function listFeaturedContents(limit = 5): Promise<HeroItem[]> {
 export async function getContentBySlug(slug: string): Promise<ContentRow | null> {
   const devHit = () => (IS_DEV ? caseSeed.find((c) => c.slug === slug) ?? null : null);
   if (!isSupabaseConfigured()) return devHit();
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAnonClient();
   const { data } = await supabase
     .from('contents')
     .select(PUBLIC_FIELDS)
@@ -137,7 +137,7 @@ export async function listRelated(content: Pick<ContentRow, 'id' | 'job_tags' | 
   const devFallbackRelated = (): ContentRow[] =>
     IS_DEV ? caseSeed.filter((c) => c.id !== content.id).slice(0, limit) : [];
   if (!isSupabaseConfigured()) return devFallbackRelated();
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAnonClient();
   const { data } = await supabase
     .from('contents')
     .select(PUBLIC_FIELDS)

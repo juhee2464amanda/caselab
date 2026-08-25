@@ -1,4 +1,4 @@
-import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
+import { createSupabaseAnonClient, isSupabaseConfigured } from '@/lib/supabase/server';
 import type { Tool, ToolCategory } from '@/types/tool';
 import { toolSeed } from './dev-seed';
 
@@ -39,7 +39,7 @@ function devFallback(opts: ListOpts): Tool[] {
 
 export async function listTools(opts: ListOpts = {}): Promise<Tool[]> {
   if (!isSupabaseConfigured()) return devFallback(opts);
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAnonClient();
   let query = supabase
     .from('tools')
     .select(PUBLIC_FIELDS)
@@ -61,7 +61,7 @@ export async function getToolBySlug(slug: string): Promise<Tool | null> {
   const devHit = () =>
     IS_DEV ? toolSeed.find((t) => t.slug === slug) ?? null : null;
   if (!isSupabaseConfigured()) return devHit();
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAnonClient();
   const { data } = await supabase
     .from('tools')
     .select(DETAIL_FIELDS)

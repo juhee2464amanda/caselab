@@ -1,4 +1,4 @@
-import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
+import { createSupabaseAnonClient, isSupabaseConfigured } from '@/lib/supabase/server';
 import type { ProductRow } from '@/types/product';
 import { productSeed } from './dev-seed';
 
@@ -7,7 +7,7 @@ const FIELDS = 'id, slug, title, description, price, thumbnail_url, body';
 
 export async function listProducts(): Promise<ProductRow[]> {
   if (!isSupabaseConfigured()) return IS_DEV ? productSeed : [];
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAnonClient();
   const { data, error } = await supabase
     .from('products')
     .select(FIELDS)
@@ -24,7 +24,7 @@ export async function listProducts(): Promise<ProductRow[]> {
 export async function getProductBySlug(slug: string): Promise<ProductRow | null> {
   const devHit = () => (IS_DEV ? productSeed.find((p) => p.slug === slug) ?? null : null);
   if (!isSupabaseConfigured()) return devHit();
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAnonClient();
   const { data } = await supabase
     .from('products')
     .select(FIELDS)

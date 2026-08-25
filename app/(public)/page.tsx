@@ -11,7 +11,7 @@ import { getLatestItems, withoutHeroTop } from '@/lib/home/latest-items';
 import { listPublishedContents, listFeaturedContents } from '@/lib/data/contents';
 import { listProducts } from '@/lib/data/products';
 import { getSiteOverrides, pick } from '@/lib/data/site-content';
-import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
+import { createSupabaseAnonClient, isSupabaseConfigured } from '@/lib/supabase/server';
 
 /**
  * 메인 — user mockup index.html 풀 정합 (2026-06-03)
@@ -26,11 +26,12 @@ import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase
  *   (Footer는 layout.tsx)
  */
 
+export const dynamic = "force-static";
 export const revalidate = 60;
 
 async function listTopics() {
   if (!isSupabaseConfigured()) return [];
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAnonClient();
   const { data } = await supabase
     .from('topic_suggestions')
     .select('id, title, vote_count')
@@ -42,7 +43,7 @@ async function listTopics() {
 
 async function listPopular() {
   if (!isSupabaseConfigured()) return [];
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAnonClient();
   const { data } = await supabase
     .from('contents')
     .select('id, slug, title, track, view_count, job_tags')
@@ -56,7 +57,7 @@ async function listToolStats() {
   if (!isSupabaseConfigured()) {
     return { tool: 0, prompt: 0, guide: 0 };
   }
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAnonClient();
   const [tool, prompt, guide] = await Promise.all([
     supabase.from('tools').select('id', { count: 'exact', head: true }).eq('category', 'tool'),
     supabase.from('tools').select('id', { count: 'exact', head: true }).eq('category', 'prompt'),
@@ -81,7 +82,7 @@ export default async function HomePage() {
       listToolStats(),
       isSupabaseConfigured()
         ? (async () => {
-            const supabase = await createSupabaseServerClient();
+            const supabase = createSupabaseAnonClient();
             const { count } = await supabase
               .from('contents')
               .select('id', { count: 'exact', head: true })

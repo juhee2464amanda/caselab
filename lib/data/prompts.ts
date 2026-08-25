@@ -1,4 +1,4 @@
-import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
+import { createSupabaseAnonClient, isSupabaseConfigured } from '@/lib/supabase/server';
 import type { PromptItem, PromptCategory } from '@/types/prompt';
 import type { RichSection } from '@/types/content';
 import { PROMPT_CATEGORIES } from '@/types/prompt';
@@ -51,7 +51,7 @@ function mapPromptRow(r: ToolPromptRow): PromptItem {
 
 export async function listPrompts(): Promise<PromptItem[]> {
   if (!isSupabaseConfigured()) return IS_DEV ? promptSeed : [];
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAnonClient();
   const { data, error } = await supabase
     .from('tools')
     .select('id, slug, name, description, thumbnail_url, thumbnail_emoji, created_at, pick_order, body')
@@ -70,7 +70,7 @@ export async function getPromptBySlug(slug: string): Promise<PromptItem | null> 
   const devHit = () =>
     IS_DEV ? promptSeed.find((p) => p.slug === slug) ?? null : null;
   if (!isSupabaseConfigured()) return devHit();
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAnonClient();
   const { data, error } = await supabase
     .from('tools')
     .select('id, slug, name, description, thumbnail_url, thumbnail_emoji, created_at, pick_order, body')
