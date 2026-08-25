@@ -1,4 +1,4 @@
-import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
+import { createSupabaseAnonClient, isSupabaseConfigured } from '@/lib/supabase/server';
 
 /**
  * 홈페이지 오버라이드 로드 — site_content 전량을 key→value 맵으로.
@@ -9,7 +9,7 @@ import { createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase
 export async function getSiteOverrides(): Promise<Map<string, string>> {
   if (!isSupabaseConfigured()) return new Map();
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabaseAnonClient();
     const { data } = await supabase.from('site_content').select('key, value');
     return new Map((data ?? []).map((r) => [r.key as string, r.value as string]));
   } catch {
