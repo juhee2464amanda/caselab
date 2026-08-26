@@ -134,24 +134,39 @@ export async function track(
   // — 로그인 기반 판별이 못 보는 세션 없는 운영자 트래픽을 origin/플래그로 보강.
   const excludedContext = isExcludedContext();
 
-  // 1) events 테이블 적재 (anon RLS 허용, 익명 사용자도 적재 가능)
+  // 1) events 적재 — /api/events로 sendBeacon 전송.
+  //    supabase-js 직접 INSERT는 페이지 이탈 시 fetch가 중단돼 유실됐다
+  //    (인앱 브라우저 DM 유입 도착 pv 0건 실측, 2026-08-26). sendBeacon은
+  //    이탈 후에도 전송이 보장된다. 미지원 환경은 fetch keepalive 폴백.
   //    관리자 세션·내부 컨텍스트는 스킵 — 운영자 확인 작업이 KPI를 오염시키지 않도록 (§18.21)
   if (!internal && !excludedContext) {
     try {
-      const supabase = createSupabaseBrowserClient();
       const { content_id, product_id, ...rest } = merged as {
         content_id?: string;
         product_id?: string;
       } & Record<string, unknown>;
-      const row: Record<string, unknown> = {
+      const payload = JSON.stringify({
         event_type: DB_EVENT_NAME[eventType],
         content_id: content_id ?? null,
+        product_id: product_id ?? null,
         user_id: userId,
         metadata: rest,
-      };
-      // product_id는 값이 있을 때만 포함 (0011 미적용 환경에서 일반 이벤트 insert 실패 방지)
-      if (product_id) row.product_id = product_id;
-      await supabase.from('events').insert(row);
+      });
+      let sent = false;
+      if (typeof navigator !== 'undefined' && 'sendBeacon' in navigator) {
+        sent = navigator.sendBeacon(
+          '/api/events',
+          new Blob([payload], { type: 'application/json' })
+        );
+      }
+      if (!sent) {
+        void fetch('/api/events', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload,
+          keepalive: true,
+        }).catch(() => {});
+      }
     } catch {
       // silent
     }

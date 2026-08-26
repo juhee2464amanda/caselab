@@ -28,19 +28,53 @@ function uuid(): string {
   });
 }
 
-/** localStorage 영속 익명 ID (없으면 생성). SSR/스토리지 차단 시 undefined. */
-export function getAnonId(): string | undefined {
-  if (typeof window === 'undefined') return undefined;
+const ANON_COOKIE = 'cl_aid';
+const ANON_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1년
+
+function readAnonCookie(): string | undefined {
   try {
-    let id = window.localStorage.getItem(ANON_KEY);
-    if (!id) {
-      id = uuid();
-      window.localStorage.setItem(ANON_KEY, id);
-    }
-    return id;
+    const m = document.cookie.match(
+      new RegExp(`(?:^|; )${ANON_COOKIE}=([^;]+)`)
+    );
+    return m?.[1] || undefined;
   } catch {
     return undefined;
   }
+}
+
+function writeAnonCookie(id: string): void {
+  try {
+    document.cookie = `${ANON_COOKIE}=${id}; path=/; max-age=${ANON_COOKIE_MAX_AGE}; SameSite=Lax`;
+  } catch {
+    // 무시 — localStorage만으로 동작
+  }
+}
+
+/**
+ * 영속 익명 ID (없으면 생성). SSR/스토리지 차단 시 undefined.
+ * 쿠키 우선, localStorage 폴백 — 인앱 브라우저(인스타 등)가 localStorage를
+ * 초기화해도 쿠키는 살아남는 경우가 많아, 같은 방문자가 매번 새 UV로
+ * 잡히는 부풀림을 줄인다. 양쪽에 같은 값을 써서 동기화한다.
+ */
+export function getAnonId(): string | undefined {
+  if (typeof window === 'undefined') return undefined;
+  const fromCookie = readAnonCookie();
+  let fromStorage: string | null = null;
+  try {
+    fromStorage = window.localStorage.getItem(ANON_KEY);
+  } catch {
+    // 사생활 모드 등 — 쿠키만 사용
+  }
+  const id = fromCookie ?? fromStorage ?? uuid();
+  if (fromCookie !== id) writeAnonCookie(id);
+  if (fromStorage !== id) {
+    try {
+      window.localStorage.setItem(ANON_KEY, id);
+    } catch {
+      // 무시
+    }
+  }
+  return id;
 }
 
 /**
