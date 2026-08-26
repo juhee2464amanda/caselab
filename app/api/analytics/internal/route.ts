@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic';
  */
 
 const DEFAULT_ADMIN_EMAILS =
-  'caselab.kr@gmail.com,juhee2464@gmail.com,amandajuhee@gmail.com';
+  'caselab.kr@gmail.com,juhee2464@gmail.com,amandajuhee@gmail.com,ju2464@naver.com';
 
 function adminEmails(): string[] {
   return (process.env.ADMIN_EMAILS ?? DEFAULT_ADMIN_EMAILS)
